@@ -37,8 +37,6 @@ class _TotoHomeState extends State<TotoHome> {
   final TextEditingController awayCtrl = TextEditingController();
 
   bool _isLoading = false;
-  String? _response;
-  bool _isError = false;
 
   bool get isValid =>
       homeCtrl.text.trim().isNotEmpty &&
@@ -59,6 +57,9 @@ class _TotoHomeState extends State<TotoHome> {
     setState(() {
       _isLoading = true;
     });
+
+    String responseText;
+    bool isError;
 
     try {
       final uri = AppConfig.isHttps
@@ -84,26 +85,35 @@ class _TotoHomeState extends State<TotoHome> {
       if (!mounted) return;
 
       if (response.statusCode == 200) {
-        setState(() {
-          _response = response.body;
-          _isError = false;
-          _isLoading = false;
-        });
+        responseText = response.body;
+        isError = false;
       } else {
-        setState(() {
-          _response = 'Server returned status ${response.statusCode}.\n\nBody:\n${response.body}';
-          _isError = true;
-          _isLoading = false;
-        });
+        responseText = 'Server returned status ${response.statusCode}.\n\nBody:\n${response.body}';
+        isError = true;
       }
     } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _response = 'Failed to contact server:\n$e';
-        _isError = true;
-        _isLoading = false;
-      });
+      responseText = 'Failed to contact server:\n$e';
+      isError = true;
     }
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (!mounted) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ResultsPage(
+          homeTeam: home,
+          awayTeam: away,
+          response: responseText,
+          isError: isError,
+        ),
+      ),
+    );
   }
 
   @override
@@ -175,35 +185,140 @@ class _TotoHomeState extends State<TotoHome> {
               )
                   : const Text("GO"),
             ),
-            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-            // Response Display Area
-            if (_response != null)
-              Expanded(
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: _isError ? Colors.red.shade50 : Colors.green.shade50,
-                    border: Border.all(
-                      color: _isError ? Colors.red : Colors.green,
-                      width: 2,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
+class ResultsPage extends StatelessWidget {
+  final String homeTeam;
+  final String awayTeam;
+  final String response;
+  final bool isError;
+
+  const ResultsPage({
+    super.key,
+    required this.homeTeam,
+    required this.awayTeam,
+    required this.response,
+    required this.isError,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: [
+            const Text('Results'),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppConfig.environment == Environment.prod
+                    ? Colors.green
+                    : Colors.orange,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                AppConfig.environment == Environment.prod ? 'PROD' : 'LOCAL',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+        automaticallyImplyLeading: false,
+      ),
+      body: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              border: Border(
+                bottom: BorderSide(color: Colors.blue.shade200, width: 2),
+              ),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  homeTeam,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
-                  child: SingleChildScrollView(
-                    child: Text(
-                      _response!,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: _isError ? Colors.red.shade900 : Colors.black87,
-                      ),
-                    ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'VS',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  awayTeam,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              color: isError ? Colors.red.shade50 : Colors.white,
+              child: SingleChildScrollView(
+                child: Text(
+                  response,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isError ? Colors.red.shade900 : Colors.black87,
                   ),
                 ),
               ),
-          ],
-        ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text(
+                'New Game',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
