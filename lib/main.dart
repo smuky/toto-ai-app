@@ -18,7 +18,7 @@ class TotoAIApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Toto AI',
+      title: 'Toto AI ',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const TotoHome(),
     );
