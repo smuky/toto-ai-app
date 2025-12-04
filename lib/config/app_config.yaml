@@ -1,0 +1,18 @@
+# Application Configuration
+# Similar to Spring Boot application.yaml
+
+# Local environment configuration
+local:
+  api:
+    base-url: "10.0.2.2:8080"
+    use-https: false
+    endpoints:
+      calculate-odds: "/calculation/calculate-europe-odds"
+
+# Production environment configuration
+prod:
+  api:
+    base-url: "toto-ai-backend.onrender.com"
+    use-https: true
+    endpoints:
+      calculate-odds: "/calculation/calculate-europe-odds"

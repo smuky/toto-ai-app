@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'config/environment.dart';
 
-void main() => runApp(const TotoAIApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Set environment here: Environment.local or Environment.prod
+  // This will load configuration from lib/config/app_config.yaml
+  await AppConfig.initialize(Environment.prod);
+  
+  runApp(const TotoAIApp());
+}
 
 class TotoAIApp extends StatelessWidget {
   const TotoAIApp({super.key});
@@ -52,15 +61,23 @@ class _TotoHomeState extends State<TotoHome> {
     });
 
     try {
-      // IMPORTANT: use 10.0.2.2 instead of localhost when calling from Android emulator
-      final uri = Uri.http(
-        '10.0.2.2:8080',
-        '/calculation/calculate-europe-odds',
-        {
-          'home-team': home,
-          'away-team': away,
-        },
-      );
+      final uri = AppConfig.isHttps
+          ? Uri.https(
+              AppConfig.apiBaseUrl,
+              AppConfig.apiPath,
+              {
+                'home-team': home,
+                'away-team': away,
+              },
+            )
+          : Uri.http(
+              AppConfig.apiBaseUrl,
+              AppConfig.apiPath,
+              {
+                'home-team': home,
+                'away-team': away,
+              },
+            );
 
       final response = await http.get(uri);
 
@@ -93,7 +110,29 @@ class _TotoHomeState extends State<TotoHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Toto AI'),
+        title: Row(
+          children: [
+            const Text('Toto AI'),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppConfig.environment == Environment.prod
+                    ? Colors.green
+                    : Colors.orange,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                AppConfig.environment == Environment.prod ? 'PROD' : 'LOCAL',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
