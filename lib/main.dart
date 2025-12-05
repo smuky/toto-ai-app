@@ -133,7 +133,7 @@ class _TotoHomeState extends State<TotoHome> {
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
-                AppConfig.environment == Environment.prod ? 'PROD' : 'LOCAL',
+                AppConfig.environment == Environment.prod ? 'LIVE' : 'LOCAL',
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -223,7 +223,7 @@ class ResultsPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
-                AppConfig.environment == Environment.prod ? 'PROD' : 'LOCAL',
+                AppConfig.environment == Environment.prod ? 'LIVE' : 'LOCAL',
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
