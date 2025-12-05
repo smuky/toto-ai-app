@@ -172,18 +172,52 @@ class _TotoHomeState extends State<TotoHome> {
             const SizedBox(height: 32),
 
             // GO Button
-            ElevatedButton(
-              onPressed: isValid ? _onGoPressed : null,
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: isValid
+                    ? [
+                        BoxShadow(
+                          color: Colors.blue.withAlpha(100),
+                          blurRadius: 20,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                    : [],
               ),
-              child: _isLoading
-                  ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-                  : const Text("GO"),
+              child: ElevatedButton(
+                onPressed: isValid ? _onGoPressed : null,
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 60),
+                  backgroundColor: isValid ? Colors.blue.shade700 : null,
+                  foregroundColor: Colors.white,
+                  elevation: isValid ? 8 : 0,
+                  shadowColor: Colors.blue.shade900,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: Colors.white,
+                  ),
+                )
+                    : const Text(
+                  "GO",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -297,7 +331,7 @@ class ResultsPage extends StatelessWidget {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withAlpha(25),
                   blurRadius: 4,
                   offset: const Offset(0, -2),
                 ),
