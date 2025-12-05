@@ -1,4 +1,4 @@
-package com.example.toto_ai
+package com.muky.toto_ai
 
 import io.flutter.embedding.android.FlutterActivity
 
