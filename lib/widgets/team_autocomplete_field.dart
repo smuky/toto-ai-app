@@ -62,14 +62,7 @@ class TeamAutocompleteField extends StatelessWidget {
                       )
                     : const Icon(Icons.arrow_drop_down))
                 : null,
-            helperText: selectedTeam != null
-                ? selectedTeam!.leagueEnum
-                : (enabled ? 'Start typing to search' : null),
-            helperStyle: TextStyle(
-              color: selectedTeam != null ? Colors.blue.shade700 : Colors.grey,
-              fontWeight:
-                  selectedTeam != null ? FontWeight.w500 : FontWeight.normal,
-            ),
+            helperText: enabled ? 'Start typing to search' : null,
           ),
           onTap: () {
             if (textEditingController.selection ==
@@ -104,13 +97,6 @@ class TeamAutocompleteField extends StatelessWidget {
                   final Team team = options.elementAt(index);
                   return ListTile(
                     title: Text(team.name),
-                    subtitle: Text(
-                      team.leagueEnum,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
                     onTap: () {
                       onSelected(team);
                     },
