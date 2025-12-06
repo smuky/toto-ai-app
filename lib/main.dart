@@ -44,6 +44,7 @@ class _TotoHomeState extends State<TotoHome> {
   bool _isLoadingTeams = true;
   String? _loadError;
   String _selectedLanguage = 'en';
+  String? _selectedLeague;
   
   final Map<String, String> _languageOptions = {
     'en': 'English',
@@ -88,19 +89,98 @@ class _TotoHomeState extends State<TotoHome> {
   }
 
   bool get isValid =>
+      _selectedLeague != null &&
       _selectedHomeTeam != null &&
       _selectedAwayTeam != null &&
       !_isLoading;
 
+  List<String> get _availableLeagues {
+    final leagues = _allTeams.map((team) => team.leagueEnum).toSet().toList();
+    leagues.sort();
+    return leagues;
+  }
+
+  List<Team> get _availableHomeTeams {
+    if (_selectedLeague == null) {
+      return [];
+    }
+    return _allTeams
+        .where((team) => team.leagueEnum == _selectedLeague)
+        .toList();
+  }
+
   List<Team> get _availableAwayTeams {
-    if (_selectedHomeTeam == null) {
+    if (_selectedLeague == null || _selectedHomeTeam == null) {
       return [];
     }
     return _allTeams
         .where((team) =>
-            team.leagueEnum == _selectedHomeTeam!.leagueEnum &&
+            team.leagueEnum == _selectedLeague &&
             team != _selectedHomeTeam)
         .toList();
+  }
+
+  void _showSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.settings, color: Colors.blue),
+              SizedBox(width: 8),
+              Text('Settings'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Response Language',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: DropdownButton<String>(
+                  value: _selectedLanguage,
+                  isExpanded: true,
+                  underline: const SizedBox(),
+                  items: _languageOptions.entries.map((entry) {
+                    return DropdownMenuItem<String>(
+                      value: entry.key,
+                      child: Text(entry.value),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) async {
+                    if (newValue != null) {
+                      setState(() {
+                        _selectedLanguage = newValue;
+                      });
+                      await LanguagePreferenceService.setLanguage(newValue);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _onGoPressed() async {
@@ -200,6 +280,13 @@ class _TotoHomeState extends State<TotoHome> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: _showSettingsDialog,
+            tooltip: 'Settings',
+          ),
+        ],
       ),
       body: _isLoadingTeams
           ? const Center(
@@ -238,48 +325,55 @@ class _TotoHomeState extends State<TotoHome> {
                     ],
                   ),
                 )
-              : Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+              : SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         decoration: BoxDecoration(
                           color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.blue.shade200),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.blue.shade200, width: 2),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.language, color: Colors.blue),
+                            const Icon(Icons.sports_soccer, color: Colors.blue, size: 28),
                             const SizedBox(width: 12),
                             const Text(
-                              'Response Language:',
+                              'League:',
                               style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: DropdownButton<String>(
-                                value: _selectedLanguage,
+                                value: _selectedLeague,
+                                hint: const Text('Select League'),
                                 isExpanded: true,
                                 underline: const SizedBox(),
-                                items: _languageOptions.entries.map((entry) {
+                                items: _availableLeagues.map((league) {
                                   return DropdownMenuItem<String>(
-                                    value: entry.key,
-                                    child: Text(entry.value),
+                                    value: league,
+                                    child: Text(
+                                      league,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
                                   );
                                 }).toList(),
-                                onChanged: (String? newValue) async {
-                                  if (newValue != null) {
-                                    setState(() {
-                                      _selectedLanguage = newValue;
-                                    });
-                                    await LanguagePreferenceService.setLanguage(newValue);
-                                  }
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    _selectedLeague = newValue;
+                                    _selectedHomeTeam = null;
+                                    _selectedAwayTeam = null;
+                                  });
                                 },
                               ),
                             ),
@@ -289,18 +383,15 @@ class _TotoHomeState extends State<TotoHome> {
                       const SizedBox(height: 24),
                       TeamAutocompleteField(
                         label: "Home Team",
-                        availableTeams: _allTeams,
+                        availableTeams: _availableHomeTeams,
                         selectedTeam: _selectedHomeTeam,
                         onTeamSelected: (team) {
                           setState(() {
                             _selectedHomeTeam = team;
-                            if (team == null || 
-                                _selectedAwayTeam == null || 
-                                _selectedAwayTeam!.leagueEnum != team.leagueEnum) {
-                              _selectedAwayTeam = null;
-                            }
+                            _selectedAwayTeam = null;
                           });
                         },
+                        enabled: _selectedLeague != null,
                       ),
                       const SizedBox(height: 16),
                       const Text(
@@ -372,6 +463,7 @@ class _TotoHomeState extends State<TotoHome> {
                     ],
                   ),
                 ),
+              ),
     );
   }
 }
