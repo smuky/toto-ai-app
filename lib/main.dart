@@ -4,6 +4,7 @@ import 'config/environment.dart';
 import 'models/team.dart';
 import 'widgets/team_autocomplete_field.dart';
 import 'services/team_service.dart';
+import 'services/language_preference_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,11 +43,28 @@ class _TotoHomeState extends State<TotoHome> {
   List<Team> _allTeams = [];
   bool _isLoadingTeams = true;
   String? _loadError;
+  String _selectedLanguage = 'en';
+  
+  final Map<String, String> _languageOptions = {
+    'en': 'English',
+    'it': 'Italian',
+    'es': 'Spanish',
+    'de': 'German',
+    'he': 'Hebrew',
+  };
 
   @override
   void initState() {
     super.initState();
     _loadTeams();
+    _loadLanguagePreference();
+  }
+
+  Future<void> _loadLanguagePreference() async {
+    final language = await LanguagePreferenceService.getLanguage();
+    setState(() {
+      _selectedLanguage = language;
+    });
   }
 
   Future<void> _loadTeams() async {
@@ -106,6 +124,7 @@ class _TotoHomeState extends State<TotoHome> {
               {
                 'home-team': home,
                 'away-team': away,
+                'language': _selectedLanguage,
               },
             )
           : Uri.http(
@@ -114,6 +133,7 @@ class _TotoHomeState extends State<TotoHome> {
               {
                 'home-team': home,
                 'away-team': away,
+                'language': _selectedLanguage,
               },
             );
 
@@ -223,6 +243,50 @@ class _TotoHomeState extends State<TotoHome> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.blue.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.language, color: Colors.blue),
+                            const SizedBox(width: 12),
+                            const Text(
+                              'Response Language:',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: DropdownButton<String>(
+                                value: _selectedLanguage,
+                                isExpanded: true,
+                                underline: const SizedBox(),
+                                items: _languageOptions.entries.map((entry) {
+                                  return DropdownMenuItem<String>(
+                                    value: entry.key,
+                                    child: Text(entry.value),
+                                  );
+                                }).toList(),
+                                onChanged: (String? newValue) async {
+                                  if (newValue != null) {
+                                    setState(() {
+                                      _selectedLanguage = newValue;
+                                    });
+                                    await LanguagePreferenceService.setLanguage(newValue);
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
                       TeamAutocompleteField(
                         label: "Home Team",
                         availableTeams: _allTeams,

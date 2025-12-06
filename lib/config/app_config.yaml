@@ -7,7 +7,7 @@ local:
     base-url: "10.0.2.2:8080"
     use-https: false
     endpoints:
-      calculate-odds: "/calculation/calculate-europe-odds"
+      calculate-odds: "/calculation/calculate-odds"
 
 # Production environment configuration
 prod:
@@ -15,4 +15,4 @@ prod:
     base-url: "toto-ai-backend.onrender.com"
     use-https: true
     endpoints:
-      calculate-odds: "/calculation/calculate-europe-odds"
+      calculate-odds: "/calculation/calculate-odds"
