@@ -1,20 +1,21 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/team.dart';
+import '../models/all_teams_response.dart';
 import '../config/environment.dart';
 
 class TeamService {
-  static Future<List<Team>> fetchAllTeams() async {
+  static Future<AllTeamsResponse> fetchAllTeams(String language) async {
     try {
       final uri = AppConfig.isHttps
-          ? Uri.https(AppConfig.apiBaseUrl, '/league/all')
-          : Uri.http(AppConfig.apiBaseUrl, '/league/all');
+          ? Uri.https(AppConfig.apiBaseUrl, '/league/all', {'language': language})
+          : Uri.http(AppConfig.apiBaseUrl, '/league/all', {'language': language});
 
       final response = await http.get(uri);
 
       if (response.statusCode == 200) {
-        final List<dynamic> jsonList = json.decode(response.body);
-        return jsonList.map((json) => Team.fromJson(json)).toList();
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        return AllTeamsResponse.fromJson(jsonResponse);
       } else {
         throw Exception('Failed to load teams: ${response.statusCode}');
       }

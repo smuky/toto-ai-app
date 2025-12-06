@@ -45,6 +45,7 @@ class _TotoHomeState extends State<TotoHome> {
   String? _loadError;
   String _selectedLanguage = 'en';
   String? _selectedLeague;
+  Map<String, String> _leagueTranslations = {};
   
   final Map<String, String> _languageOptions = {
     'en': 'English',
@@ -75,9 +76,10 @@ class _TotoHomeState extends State<TotoHome> {
     });
 
     try {
-      final teams = await TeamService.fetchAllTeams();
+      final response = await TeamService.fetchAllTeams(_selectedLanguage);
       setState(() {
-        _allTeams = teams;
+        _allTeams = response.teams;
+        _leagueTranslations = response.leagueTranslations;
         _isLoadingTeams = false;
       });
     } catch (e) {
@@ -166,6 +168,8 @@ class _TotoHomeState extends State<TotoHome> {
                         _selectedLanguage = newValue;
                       });
                       await LanguagePreferenceService.setLanguage(newValue);
+                      Navigator.of(context).pop();
+                      _loadTeams();
                     }
                   },
                 ),
@@ -357,10 +361,11 @@ class _TotoHomeState extends State<TotoHome> {
                                 isExpanded: true,
                                 underline: const SizedBox(),
                                 items: _availableLeagues.map((league) {
+                                  final translatedName = _leagueTranslations[league] ?? league;
                                   return DropdownMenuItem<String>(
                                     value: league,
                                     child: Text(
-                                      league,
+                                      translatedName,
                                       style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500,
