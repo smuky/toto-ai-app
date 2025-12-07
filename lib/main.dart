@@ -219,7 +219,7 @@ class _TotoHomeState extends State<TotoHome> {
     });
 
     Timer? hapticTimer;
-    hapticTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+    hapticTimer = Timer.periodic(const Duration(milliseconds: 1000), (timer) {
       HapticFeedback.lightImpact();
     });
 
