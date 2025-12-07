@@ -58,6 +58,7 @@ class _TotoHomeState extends State<TotoHome> {
     'es': 'Spanish',
     'de': 'German',
     'he': 'Hebrew',
+    'fr': 'French',
   };
 
   @override
