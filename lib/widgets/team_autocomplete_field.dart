@@ -42,6 +42,8 @@ class TeamAutocompleteField extends StatelessWidget {
       ) {
         if (selectedTeam != null && textEditingController.text.isEmpty) {
           textEditingController.text = selectedTeam!.name;
+        } else if (selectedTeam == null && textEditingController.text.isNotEmpty) {
+          textEditingController.clear();
         }
 
         return TextField(
@@ -51,6 +53,8 @@ class TeamAutocompleteField extends StatelessWidget {
           decoration: InputDecoration(
             labelText: label,
             border: const OutlineInputBorder(),
+            filled: true,
+            fillColor: Colors.white,
             suffixIcon: enabled
                 ? (selectedTeam != null
                     ? IconButton(

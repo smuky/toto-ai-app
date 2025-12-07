@@ -259,77 +259,101 @@ class _TotoHomeState extends State<TotoHome> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            const Text('Toto AI'),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppConfig.environment == Environment.prod
-                    ? Colors.green
-                    : Colors.orange,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                AppConfig.environment == Environment.prod ? 'LIVE' : 'LOCAL',
-                style: const TextStyle(
-                  fontSize: 12,
+    return Container(
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/background.png'),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: Row(
+            children: [
+              Text(
+                'Toto AI',
+                style: TextStyle(
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      offset: const Offset(0, 2),
+                      blurRadius: 4,
+                      color: Colors.black.withOpacity(0.8),
+                    ),
+                  ],
                 ),
               ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppConfig.environment == Environment.prod
+                      ? Colors.green
+                      : Colors.orange,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  AppConfig.environment == Environment.prod ? 'LIVE' : 'LOCAL',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: _showSettingsDialog,
+              tooltip: 'Settings',
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: _showSettingsDialog,
-            tooltip: 'Settings',
-          ),
-        ],
-      ),
-      body: _isLoadingTeams
-          ? const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Loading teams...'),
-                ],
-              ),
-            )
-          : _loadError != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Failed to load teams',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _loadError!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton.icon(
-                        onPressed: _loadTeams,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                )
-              : SingleChildScrollView(
+        body: _isLoadingTeams
+            ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Loading teams...'),
+                  ],
+                ),
+              )
+            : _loadError != null
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Failed to load teams',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _loadError!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton.icon(
+                          onPressed: _loadTeams,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  )
+                : SingleChildScrollView(
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(
@@ -338,21 +362,13 @@ class _TotoHomeState extends State<TotoHome> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.blue.shade200, width: 2),
+                          border: Border.all(color: Colors.grey.shade300, width: 1),
                         ),
                         child: Row(
                           children: [
                             const Icon(Icons.sports_soccer, color: Colors.blue, size: 28),
-                            const SizedBox(width: 12),
-                            const Text(
-                              'League:',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: DropdownButton<String>(
@@ -387,6 +403,7 @@ class _TotoHomeState extends State<TotoHome> {
                       ),
                       const SizedBox(height: 24),
                       TeamAutocompleteField(
+                        key: ValueKey('home_$_selectedLeague'),
                         label: "Home Team",
                         availableTeams: _availableHomeTeams,
                         selectedTeam: _selectedHomeTeam,
@@ -405,6 +422,7 @@ class _TotoHomeState extends State<TotoHome> {
                       ),
                       const SizedBox(height: 16),
                       TeamAutocompleteField(
+                        key: ValueKey('away_${_selectedLeague}_${_selectedHomeTeam?.name}'),
                         label: "Away Team",
                         availableTeams: _availableAwayTeams,
                         selectedTeam: _selectedAwayTeam,
@@ -469,6 +487,7 @@ class _TotoHomeState extends State<TotoHome> {
                   ),
                 ),
               ),
+      ),
     );
   }
 }
