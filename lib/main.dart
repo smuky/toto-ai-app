@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'config/environment.dart';
 import 'models/team.dart';
@@ -11,7 +13,7 @@ void main() async {
   
   // Set environment here: Environment.local or Environment.prod
   // This will load configuration from lib/config/app_config.yaml
-  await AppConfig.initialize(Environment.prod);
+  await AppConfig.initialize(Environment.local);
   
   runApp(const TotoAIApp());
 }
@@ -46,6 +48,9 @@ class _TotoHomeState extends State<TotoHome> {
   String _selectedLanguage = 'en';
   String? _selectedLeague;
   Map<String, String> _leagueTranslations = {};
+  String _aboutText = '';
+  String _selectLeagueText = 'Select League';
+  String _settingsText = 'Settings';
   
   final Map<String, String> _languageOptions = {
     'en': 'English',
@@ -80,6 +85,9 @@ class _TotoHomeState extends State<TotoHome> {
       setState(() {
         _allTeams = response.teams;
         _leagueTranslations = response.leagueTranslations;
+        _aboutText = response.about;
+        _selectLeagueText = response.selectLeague;
+        _settingsText = response.settings;
         _isLoadingTeams = false;
       });
     } catch (e) {
@@ -122,16 +130,47 @@ class _TotoHomeState extends State<TotoHome> {
         .toList();
   }
 
-  void _showSettingsDialog() {
+  void _showAboutDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Row(
             children: [
-              Icon(Icons.settings, color: Colors.blue),
+              Icon(Icons.info_outline, color: Colors.blue),
               SizedBox(width: 8),
-              Text('Settings'),
+              Text('About Toto AI'),
+            ],
+          ),
+          content: Text(
+            _aboutText.isNotEmpty 
+                ? _aboutText 
+                : 'Toto AI is a smart football prediction app powered by advanced analytics and AI.\n\n'
+                  'Get match predictions, win probabilities, and insights to improve your game picks.\n\n'
+                  'Follow top leagues and make more informed decisions — every match, every week.',
+            style: const TextStyle(fontSize: 15, height: 1.5),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              const Icon(Icons.settings, color: Colors.blue),
+              const SizedBox(width: 8),
+              Text(_settingsText),
             ],
           ),
           content: Column(
@@ -174,6 +213,25 @@ class _TotoHomeState extends State<TotoHome> {
                   },
                 ),
               ),
+              const SizedBox(height: 24),
+              const Divider(),
+              const SizedBox(height: 8),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.info_outline, color: Colors.blue),
+                title: const Text(
+                  'About',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showAboutDialog();
+                },
+              ),
             ],
           ),
           actions: [
@@ -195,6 +253,11 @@ class _TotoHomeState extends State<TotoHome> {
 
     setState(() {
       _isLoading = true;
+    });
+
+    Timer? hapticTimer;
+    hapticTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      HapticFeedback.lightImpact();
     });
 
     String responseText;
@@ -237,6 +300,8 @@ class _TotoHomeState extends State<TotoHome> {
       responseText = 'Failed to contact server:\n$e';
       isError = true;
     }
+
+    hapticTimer?.cancel();
 
     setState(() {
       _isLoading = false;
@@ -373,7 +438,7 @@ class _TotoHomeState extends State<TotoHome> {
                             Expanded(
                               child: DropdownButton<String>(
                                 value: _selectedLeague,
-                                hint: const Text('Select League'),
+                                hint: Text(_selectLeagueText),
                                 isExpanded: true,
                                 underline: const SizedBox(),
                                 items: _availableLeagues.map((league) {
