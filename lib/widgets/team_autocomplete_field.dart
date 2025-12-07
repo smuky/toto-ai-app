@@ -50,6 +50,7 @@ class TeamAutocompleteField extends StatelessWidget {
           controller: textEditingController,
           focusNode: focusNode,
           enabled: enabled,
+          readOnly: true,
           decoration: InputDecoration(
             labelText: label,
             border: const OutlineInputBorder(),
