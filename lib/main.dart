@@ -13,7 +13,7 @@ void main() async {
   
   // Set environment here: Environment.local or Environment.prod
   // This will load configuration from lib/config/app_config.yaml
-  await AppConfig.initialize(Environment.prod);
+  await AppConfig.initialize(Environment.local);
   
   runApp(const TotoAIApp());
 }
@@ -281,6 +281,7 @@ class _TotoHomeState extends State<TotoHome> {
           awayTeam: away,
           response: responseText,
           isError: isError,
+          language: _selectedLanguage,
         ),
       ),
     );
@@ -531,6 +532,7 @@ class ResultsPage extends StatelessWidget {
   final String awayTeam;
   final String response;
   final bool isError;
+  final String language;
 
   const ResultsPage({
     super.key,
@@ -538,6 +540,7 @@ class ResultsPage extends StatelessWidget {
     required this.awayTeam,
     required this.response,
     required this.isError,
+    required this.language,
   });
 
   @override
@@ -617,6 +620,8 @@ class ResultsPage extends StatelessWidget {
               child: SingleChildScrollView(
                 child: Text(
                   response,
+                  textAlign: language == 'he' ? TextAlign.right : TextAlign.left,
+                  textDirection: language == 'he' ? TextDirection.rtl : TextDirection.ltr,
                   style: TextStyle(
                     fontSize: 14,
                     color: isError ? Colors.red.shade900 : Colors.black87,
