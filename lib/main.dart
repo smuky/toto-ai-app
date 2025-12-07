@@ -13,7 +13,7 @@ void main() async {
   
   // Set environment here: Environment.local or Environment.prod
   // This will load configuration from lib/config/app_config.yaml
-  await AppConfig.initialize(Environment.local);
+  await AppConfig.initialize(Environment.prod);
   
   runApp(const TotoAIApp());
 }
