@@ -67,7 +67,6 @@ class TeamAutocompleteField extends StatelessWidget {
                       )
                     : const Icon(Icons.arrow_drop_down))
                 : null,
-            helperText: enabled ? 'Start typing to search' : null,
           ),
           onTap: () {
             if (textEditingController.selection ==

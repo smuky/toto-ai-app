@@ -13,7 +13,7 @@ void main() async {
   
   // Set environment here: Environment.local or Environment.prod
   // This will load configuration from lib/config/app_config.yaml
-  await AppConfig.initialize(Environment.local);
+  await AppConfig.initialize(Environment.prod);
   
   runApp(const TotoAIApp());
 }
@@ -84,10 +84,10 @@ class _TotoHomeState extends State<TotoHome> {
       final response = await TeamService.fetchAllTeams(_selectedLanguage);
       setState(() {
         _allTeams = response.teams;
-        _leagueTranslations = response.leagueTranslations;
-        _aboutText = response.about;
-        _selectLeagueText = response.selectLeague;
-        _settingsText = response.settings;
+        _leagueTranslations = response.translations.leagueTranslations;
+        _aboutText = response.translations.about;
+        _selectLeagueText = response.translations.selectLeague;
+        _settingsText = response.translations.settings;
         _isLoadingTeams = false;
       });
     } catch (e) {
@@ -161,85 +161,48 @@ class _TotoHomeState extends State<TotoHome> {
     );
   }
 
-  void _showSettingsDialog() {
+  void _showLanguageMenu() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Row(
+          title: const Row(
             children: [
-              const Icon(Icons.settings, color: Colors.blue),
-              const SizedBox(width: 8),
-              Text(_settingsText),
+              Icon(Icons.language, color: Colors.blue),
+              SizedBox(width: 8),
+              Text('Select Language'),
             ],
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Response Language',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: DropdownButton<String>(
-                  value: _selectedLanguage,
-                  isExpanded: true,
-                  underline: const SizedBox(),
-                  items: _languageOptions.entries.map((entry) {
-                    return DropdownMenuItem<String>(
-                      value: entry.key,
-                      child: Text(entry.value),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) async {
-                    if (newValue != null) {
+            children: _languageOptions.entries.map((entry) {
+              return ListTile(
+                title: Text(entry.value),
+                leading: Radio<String>(
+                  value: entry.key,
+                  groupValue: _selectedLanguage,
+                  onChanged: (String? value) async {
+                    if (value != null) {
                       setState(() {
-                        _selectedLanguage = newValue;
+                        _selectedLanguage = value;
                       });
-                      await LanguagePreferenceService.setLanguage(newValue);
+                      await LanguagePreferenceService.setLanguage(value);
                       Navigator.of(context).pop();
                       _loadTeams();
                     }
                   },
                 ),
-              ),
-              const SizedBox(height: 24),
-              const Divider(),
-              const SizedBox(height: 8),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.info_outline, color: Colors.blue),
-                title: const Text(
-                  'About',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {
+                onTap: () async {
+                  setState(() {
+                    _selectedLanguage = entry.key;
+                  });
+                  await LanguagePreferenceService.setLanguage(entry.key);
                   Navigator.of(context).pop();
-                  _showAboutDialog();
+                  _loadTeams();
                 },
-              ),
-            ],
+              );
+            }).toList(),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
-            ),
-          ],
         );
       },
     );
@@ -375,9 +338,14 @@ class _TotoHomeState extends State<TotoHome> {
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: _showSettingsDialog,
-              tooltip: 'Settings',
+              icon: const Icon(Icons.language),
+              onPressed: _showLanguageMenu,
+              tooltip: 'Language',
+            ),
+            IconButton(
+              icon: const Icon(Icons.info_outline),
+              onPressed: _showAboutDialog,
+              tooltip: 'About',
             ),
           ],
         ),
