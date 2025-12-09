@@ -16,10 +16,11 @@ class PredictionReportWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isRtl = language == 'he';
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0 + bottomPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
