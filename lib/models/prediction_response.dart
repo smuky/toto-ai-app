@@ -12,10 +12,17 @@ class PredictionResponse {
   });
 
   factory PredictionResponse.fromJson(Map<String, dynamic> json) {
+    // Parse probabilities with type conversion to handle both int and string
+    final Map<String, int> parsedProbabilities = {};
+    final probsMap = json['probabilities'] as Map<String, dynamic>;
+    probsMap.forEach((key, value) {
+      parsedProbabilities[key] = value is int ? value : int.parse(value.toString());
+    });
+
     return PredictionResponse(
       matchDetails: MatchDetails.fromJson(json['matchDetails']),
       analysis: PredictionStats.fromJson(json['analysis']),
-      probabilities: Map<String, int>.from(json['probabilities']),
+      probabilities: parsedProbabilities,
       justification: json['justification'],
     );
   }
