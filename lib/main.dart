@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'config/environment.dart';
 import 'models/team.dart';
+import 'models/prediction_response.dart';
 import 'widgets/team_autocomplete_field.dart';
+import 'widgets/prediction_report_widget.dart';
 import 'services/team_service.dart';
 import 'services/language_preference_service.dart';
 
@@ -13,7 +16,7 @@ void main() async {
   
   // Set environment here: Environment.local or Environment.prod
   // This will load configuration from lib/config/app_config.yaml
-  await AppConfig.initialize(Environment.prod);
+  await AppConfig.initialize(Environment.local);
   
   runApp(const TotoAIApp());
 }
@@ -549,6 +552,49 @@ class ResultsPage extends StatelessWidget {
     required this.language,
   });
 
+  Widget _buildResponseContent() {
+    if (isError) {
+      return SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            response,
+            textAlign: language == 'he' ? TextAlign.right : TextAlign.left,
+            textDirection: language == 'he' ? TextDirection.rtl : TextDirection.ltr,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.red.shade900,
+            ),
+          ),
+        ),
+      );
+    }
+
+    try {
+      final jsonData = jsonDecode(response);
+      final prediction = PredictionResponse.fromJson(jsonData);
+      return PredictionReportWidget(
+        prediction: prediction,
+        language: language,
+      );
+    } catch (e) {
+      return SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            response,
+            textAlign: language == 'he' ? TextAlign.right : TextAlign.left,
+            textDirection: language == 'he' ? TextDirection.rtl : TextDirection.ltr,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -631,19 +677,8 @@ class ResultsPage extends StatelessWidget {
           Expanded(
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               color: isError ? Colors.red.shade50 : Colors.white,
-              child: SingleChildScrollView(
-                child: Text(
-                  response,
-                  textAlign: language == 'he' ? TextAlign.right : TextAlign.left,
-                  textDirection: language == 'he' ? TextDirection.rtl : TextDirection.ltr,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: isError ? Colors.red.shade900 : Colors.black87,
-                  ),
-                ),
-              ),
+              child: _buildResponseContent(),
             ),
           ),
           Container(
