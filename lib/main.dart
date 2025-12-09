@@ -146,11 +146,12 @@ class _TotoHomeState extends State<TotoHome> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: const Color(0xFF0F172A).withValues(alpha: 0.9),
           title: const Row(
             children: [
               Icon(Icons.info_outline, color: Colors.blue),
               SizedBox(width: 8),
-              Text('About Toto AI'),
+              Text('About Toto AI', style: TextStyle(color: Colors.white)),
             ],
           ),
           content: Text(
@@ -159,12 +160,12 @@ class _TotoHomeState extends State<TotoHome> {
                 : 'Toto AI is a smart football prediction app powered by advanced analytics and AI.\n\n'
                   'Get match predictions, win probabilities, and insights to improve your game picks.\n\n'
                   'Follow top leagues and make more informed decisions — every match, every week.',
-            style: const TextStyle(fontSize: 15, height: 1.5),
+            style: const TextStyle(fontSize: 15, height: 1.5, color: Colors.white),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
+              child: const Text('Close', style: TextStyle(color: Colors.blue)),
             ),
           ],
         );
@@ -177,18 +178,19 @@ class _TotoHomeState extends State<TotoHome> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: const Color(0xFF0F172A).withValues(alpha: 0.9),
           title: const Row(
             children: [
               Icon(Icons.language, color: Colors.blue),
               SizedBox(width: 8),
-              Text('Select Language'),
+              Text('Select Language', style: TextStyle(color: Colors.white)),
             ],
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: _languageOptions.entries.map((entry) {
               return ListTile(
-                title: Text(entry.value),
+                title: Text(entry.value, style: const TextStyle(color: Colors.white)),
                 leading: Radio<String>(
                   value: entry.key,
                   groupValue: _selectedLanguage,
@@ -349,15 +351,29 @@ class _TotoHomeState extends State<TotoHome> {
             ],
           ),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.language),
-              onPressed: _showLanguageMenu,
-              tooltip: 'Language',
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F172A).withValues(alpha: 0.9),
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.language, color: Colors.white),
+                onPressed: _showLanguageMenu,
+                tooltip: 'Language',
+              ),
             ),
-            IconButton(
-              icon: const Icon(Icons.info_outline),
-              onPressed: _showAboutDialog,
-              tooltip: 'About',
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F172A).withValues(alpha: 0.9),
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.info_outline, color: Colors.white),
+                onPressed: _showAboutDialog,
+                tooltip: 'About',
+              ),
             ),
           ],
         ),
