@@ -3,16 +3,21 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'config/environment.dart';
 import 'models/team.dart';
 import 'models/prediction_response.dart';
 import 'widgets/team_autocomplete_field.dart';
 import 'widgets/prediction_report_widget.dart';
+import 'widgets/banner_ad_widget.dart';
 import 'services/team_service.dart';
 import 'services/language_preference_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Google Mobile Ads
+  await MobileAds.instance.initialize();
   
   // Automatically determine environment from build-time constant
   // Use --dart-define=ENV=prod when building for production
@@ -550,6 +555,9 @@ class _TotoHomeState extends State<TotoHome> {
                   ),
                 ),
               ),
+        bottomNavigationBar: const SafeArea(
+          child: BannerAdWidget(),
+        ),
       ),
     );
   }
