@@ -14,9 +14,12 @@ import 'services/language_preference_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Set environment here: Environment.local or Environment.prod
-  // This will load configuration from lib/config/app_config.yaml
-  await AppConfig.initialize(Environment.local);
+  // Automatically determine environment from build-time constant
+  // Use --dart-define=ENV=prod when building for production
+  const envString = String.fromEnvironment('ENV', defaultValue: 'local');
+  final environment = envString == 'prod' ? Environment.prod : Environment.local;
+  
+  await AppConfig.initialize(environment);
   
   runApp(const TotoAIApp());
 }
