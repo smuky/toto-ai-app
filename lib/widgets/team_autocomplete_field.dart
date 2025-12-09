@@ -51,21 +51,34 @@ class TeamAutocompleteField extends StatelessWidget {
           focusNode: focusNode,
           enabled: enabled,
           readOnly: true,
+          style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
             labelText: label,
-            border: const OutlineInputBorder(),
+            labelStyle: const TextStyle(color: Colors.white),
+            border: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.white),
+            ),
+            enabledBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.white),
+            ),
+            disabledBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.white54),
+            ),
+            focusedBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.white, width: 2),
+            ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: Colors.transparent,
             suffixIcon: enabled
                 ? (selectedTeam != null
                     ? IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: const Icon(Icons.clear, color: Colors.white),
                         onPressed: () {
                           textEditingController.clear();
                           onTeamSelected(null);
                         },
                       )
-                    : const Icon(Icons.arrow_drop_down))
+                    : const Icon(Icons.arrow_drop_down, color: Colors.white))
                 : null,
           ),
           onTap: () {

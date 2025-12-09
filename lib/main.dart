@@ -451,9 +451,11 @@ class _TotoHomeState extends State<TotoHome> {
                         enabled: _selectedLeague != null,
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        "VS",
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      const Center(
+                        child: Text(
+                          "VS",
+                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
                       ),
                       const SizedBox(height: 16),
                       TeamAutocompleteField(
