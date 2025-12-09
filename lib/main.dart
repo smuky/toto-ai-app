@@ -64,8 +64,12 @@ class _TotoHomeState extends State<TotoHome> {
   @override
   void initState() {
     super.initState();
-    _loadTeams();
-    _loadLanguagePreference();
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    await _loadLanguagePreference();
+    await _loadTeams();
   }
 
   Future<void> _loadLanguagePreference() async {
