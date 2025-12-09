@@ -582,37 +582,47 @@ class ResultsPage extends StatelessWidget {
         children: [
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               color: Colors.blue.shade50,
               border: Border(
                 bottom: BorderSide(color: Colors.blue.shade200, width: 2),
               ),
             ),
-            child: Column(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  homeTeam,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                Flexible(
+                  child: Text(
+                    homeTeam,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.right,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  'VS',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey,
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(
+                    'VS',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  awayTeam,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                Flexible(
+                  child: Text(
+                    awayTeam,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.left,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -621,7 +631,7 @@ class ResultsPage extends StatelessWidget {
           Expanded(
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               color: isError ? Colors.red.shade50 : Colors.white,
               child: SingleChildScrollView(
                 child: Text(
@@ -637,7 +647,7 @@ class ResultsPage extends StatelessWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [
@@ -653,7 +663,7 @@ class ResultsPage extends StatelessWidget {
                 Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
+                minimumSize: const Size(double.infinity, 48),
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
               ),
