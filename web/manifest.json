@@ -1,6 +1,6 @@
 {
-    "name": "toto_ai",
-    "short_name": "toto_ai",
+    "name": "AI Football Predictor",
+    "short_name": "AI Football Predictor",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

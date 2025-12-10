@@ -30,7 +30,7 @@ class TotoAIApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Toto AI ',
+      title: 'AI Football Predictor',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const TotoHome(),
     );
@@ -151,15 +151,10 @@ class _TotoHomeState extends State<TotoHome> {
             children: [
               Icon(Icons.info_outline, color: Colors.blue),
               SizedBox(width: 8),
-              Text('About Toto AI', style: TextStyle(color: Colors.white)),
+              Text('About', style: TextStyle(color: Colors.white)),
             ],
           ),
-          content: Text(
-            _aboutText.isNotEmpty 
-                ? _aboutText 
-                : 'Toto AI is a smart football prediction app powered by advanced analytics and AI.\n\n'
-                  'Get match predictions, win probabilities, and insights to improve your game picks.\n\n'
-                  'Follow top leagues and make more informed decisions — every match, every week.',
+          content: Text(_aboutText,
             style: const TextStyle(fontSize: 15, height: 1.5, color: Colors.white),
           ),
           actions: [
@@ -316,7 +311,7 @@ class _TotoHomeState extends State<TotoHome> {
           title: Row(
             children: [
               Text(
-                'Toto AI',
+                'AI Football Predictor',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
