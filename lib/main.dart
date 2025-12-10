@@ -242,7 +242,7 @@ class _TotoHomeState extends State<TotoHome> {
               {
                 'home-team': home,
                 'away-team': away,
-                'language': _selectedLanguage,
+                'language': _selectedLanguage.toUpperCase(),
               },
             )
           : Uri.http(
@@ -251,7 +251,7 @@ class _TotoHomeState extends State<TotoHome> {
               {
                 'home-team': home,
                 'away-team': away,
-                'language': _selectedLanguage,
+                'language': _selectedLanguage.toUpperCase(),
               },
             );
 
