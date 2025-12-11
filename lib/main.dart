@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'config/environment.dart';
+import 'config/language_config.dart';
 import 'models/team.dart';
 import 'models/prediction_response.dart';
 import 'widgets/team_autocomplete_field.dart';
@@ -66,15 +67,6 @@ class _TotoHomeState extends State<TotoHome> {
   String _buildNumber = '';
   BannerAd? _bannerAd;
   bool _isBannerAdLoaded = false;
-  
-  final Map<String, String> _languageOptions = {
-    'en': 'English',
-    'it': 'Italian',
-    'es': 'Spanish',
-    'de': 'German',
-    'he': 'Hebrew',
-    'fr': 'French',
-  };
 
   @override
   void initState() {
@@ -231,7 +223,7 @@ class _TotoHomeState extends State<TotoHome> {
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: _languageOptions.entries.map((entry) {
+            children: LanguageConfig.supportedLanguages.entries.map((entry) {
               return ListTile(
                 title: Text(entry.value, style: const TextStyle(color: Colors.white)),
                 leading: Radio<String>(
