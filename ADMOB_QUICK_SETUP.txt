@@ -1,0 +1,80 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    ADMOB PRODUCTION IDS - QUICK SETUP                        ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Replace these placeholders with your real ca-app-pub IDs:
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 1. ANDROID APP ID                                                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+   File: android/app/build.gradle.kts
+   Line: 68
+   
+   Replace:
+   manifestPlaceholders["admobAppId"] = "YOUR_PRODUCTION_ADMOB_APP_ID"
+   
+   With:
+   manifestPlaceholders["admobAppId"] = "ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX"
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 2. iOS APP ID                                                                │
+└──────────────────────────────────────────────────────────────────────────────┘
+   File: ios/Flutter/Release.xcconfig
+   Line: 3
+   
+   Replace:
+   ADMOB_APP_ID = YOUR_PRODUCTION_IOS_ADMOB_APP_ID
+   
+   With:
+   ADMOB_APP_ID = ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 3. AD UNIT IDs (Banner & Interstitial)                                      │
+└──────────────────────────────────────────────────────────────────────────────┘
+   File: lib/services/admob_service.dart
+   Lines: 6-9
+   
+   Replace:
+   static const String _prodAndroidBannerAdUnitId = 'YOUR_ANDROID_BANNER_AD_UNIT_ID';
+   static const String _prodIosBannerAdUnitId = 'YOUR_IOS_BANNER_AD_UNIT_ID';
+   static const String _prodAndroidInterstitialAdUnitId = 'YOUR_ANDROID_INTERSTITIAL_AD_UNIT_ID';
+   static const String _prodIosInterstitialAdUnitId = 'YOUR_IOS_INTERSTITIAL_AD_UNIT_ID';
+   
+   With:
+   static const String _prodAndroidBannerAdUnitId = 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+   static const String _prodIosBannerAdUnitId = 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+   static const String _prodAndroidInterstitialAdUnitId = 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+   static const String _prodIosInterstitialAdUnitId = 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                              HOW IT WORKS                                    ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+✅ DEBUG MODE (flutter run)
+   → Uses TEST ads automatically
+   → Safe to click during development
+   → No risk of account ban
+
+✅ RELEASE MODE (flutter run --release / flutter build)
+   → Uses PRODUCTION ads (your real IDs)
+   → Shows real ads to users
+   → Generates revenue
+
+⚠️  IMPORTANT: Never click on your own production ads!
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         TESTING CHECKLIST                                    ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+□ Get your AdMob IDs from https://admob.google.com
+□ Replace the 3 locations above with your real IDs
+□ Test in debug mode: flutter run (should show TEST ads)
+□ Test in release mode: flutter run --release (should show REAL ads)
+□ Build for production: flutter build apk --release
+
+
+For detailed instructions, see ADMOB_SETUP.md

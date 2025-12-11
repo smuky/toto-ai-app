@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'config/environment.dart';
 import 'models/team.dart';
 import 'models/prediction_response.dart';
@@ -11,6 +12,7 @@ import 'widgets/team_autocomplete_field.dart';
 import 'widgets/prediction_report_widget.dart';
 import 'services/team_service.dart';
 import 'services/language_preference_service.dart';
+import 'services/admob_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +23,8 @@ void main() async {
   final environment = envString == 'prod' ? Environment.prod : Environment.local;
   
   await AppConfig.initialize(environment);
+  
+  AdMobService.initialize();
   
   runApp(const TotoAIApp());
 }
@@ -60,6 +64,8 @@ class _TotoHomeState extends State<TotoHome> {
   String _settingsText = 'Settings';
   String _appVersion = '';
   String _buildNumber = '';
+  BannerAd? _bannerAd;
+  bool _isBannerAdLoaded = false;
   
   final Map<String, String> _languageOptions = {
     'en': 'English',
@@ -74,6 +80,14 @@ class _TotoHomeState extends State<TotoHome> {
   void initState() {
     super.initState();
     _initializeApp();
+    _loadBannerAd();
+    _loadInterstitialAd();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
   }
 
   Future<void> _initializeApp() async {
@@ -88,6 +102,28 @@ class _TotoHomeState extends State<TotoHome> {
       _appVersion = packageInfo.version;
       _buildNumber = packageInfo.buildNumber;
     });
+  }
+
+  void _loadBannerAd() {
+    _bannerAd = AdMobService.createBannerAd(
+      adSize: AdSize.banner,
+      onAdLoaded: (ad) {
+        setState(() {
+          _isBannerAdLoaded = true;
+        });
+      },
+      onAdFailedToLoad: (ad, error) {
+        ad.dispose();
+      },
+    );
+    _bannerAd?.load();
+  }
+
+  void _loadInterstitialAd() {
+    AdMobService.loadInterstitialAd(
+      onAdLoaded: () {},
+      onAdFailedToLoad: (error) {},
+    );
   }
 
   Future<void> _loadLanguagePreference() async {
@@ -291,6 +327,11 @@ class _TotoHomeState extends State<TotoHome> {
     });
 
     if (!mounted) return;
+
+    if (AdMobService.isInterstitialAdReady) {
+      AdMobService.showInterstitialAd();
+      _loadInterstitialAd();
+    }
 
     Navigator.push(
       context,
@@ -557,6 +598,13 @@ class _TotoHomeState extends State<TotoHome> {
                   ),
                 ),
               ),
+        bottomNavigationBar: _isBannerAdLoaded && _bannerAd != null
+            ? Container(
+                height: _bannerAd!.size.height.toDouble(),
+                color: Colors.transparent,
+                child: AdWidget(ad: _bannerAd!),
+              )
+            : null,
       ),
     );
   }

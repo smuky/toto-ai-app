@@ -38,6 +38,9 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
+        // Test AdMob App ID for debug builds
+        manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
     }
 
     signingConfigs {
@@ -50,10 +53,19 @@ android {
     }
 
     buildTypes {
+        getByName("debug") {
+            // Use test AdMob App ID for debug builds
+            manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
+        }
+        
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             isShrinkResources = false
+            
+            // Use production AdMob App ID for release builds
+            // Replace with your actual AdMob App ID
+            manifestPlaceholders["admobAppId"] = "ca-app-pub-3174197364390991/5036467502"
         }
     }
 }
