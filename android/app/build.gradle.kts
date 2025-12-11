@@ -65,7 +65,7 @@ android {
             
             // Use production AdMob App ID for release builds
             // Replace with your actual AdMob App ID
-            manifestPlaceholders["admobAppId"] = "ca-app-pub-3174197364390991/5036467502"
+            manifestPlaceholders["admobAppId"] = "ca-app-pub-3174197364390991~1671937563"
         }
     }
 }
