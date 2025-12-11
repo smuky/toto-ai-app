@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:package_info_plus/package_info_plus.dart';
 import 'config/environment.dart';
 import 'models/team.dart';
 import 'models/prediction_response.dart';
@@ -57,6 +58,8 @@ class _TotoHomeState extends State<TotoHome> {
   String _aboutText = '';
   String _selectLeagueText = 'Select League';
   String _settingsText = 'Settings';
+  String _appVersion = '';
+  String _buildNumber = '';
   
   final Map<String, String> _languageOptions = {
     'en': 'English',
@@ -75,7 +78,16 @@ class _TotoHomeState extends State<TotoHome> {
 
   Future<void> _initializeApp() async {
     await _loadLanguagePreference();
+    await _loadAppVersion();
     await _loadTeams();
+  }
+
+  Future<void> _loadAppVersion() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    setState(() {
+      _appVersion = packageInfo.version;
+      _buildNumber = packageInfo.buildNumber;
+    });
   }
 
   Future<void> _loadLanguagePreference() async {
@@ -154,7 +166,7 @@ class _TotoHomeState extends State<TotoHome> {
               Text('About', style: TextStyle(color: Colors.white)),
             ],
           ),
-          content: Text(_aboutText,
+          content: Text('$_aboutText\n\nVersion: $_appVersion ($_buildNumber)',
             style: const TextStyle(fontSize: 15, height: 1.5, color: Colors.white),
           ),
           actions: [
