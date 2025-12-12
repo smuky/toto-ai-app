@@ -166,20 +166,24 @@ class _TotoHomeState extends State<TotoHome> {
     if (_selectedLeague == null) {
       return [];
     }
-    return _allTeams
+    final teams = _allTeams
         .where((team) => team.leagueEnum == _selectedLeague)
         .toList();
+    teams.sort((a, b) => a.name.compareTo(b.name));
+    return teams;
   }
 
   List<Team> get _availableAwayTeams {
     if (_selectedLeague == null || _selectedHomeTeam == null) {
       return [];
     }
-    return _allTeams
+    final teams = _allTeams
         .where((team) =>
             team.leagueEnum == _selectedLeague &&
             team != _selectedHomeTeam)
         .toList();
+    teams.sort((a, b) => a.name.compareTo(b.name));
+    return teams;
   }
 
   void _showAboutDialog() {
