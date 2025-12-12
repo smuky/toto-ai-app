@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -261,6 +262,7 @@ class _TotoHomeState extends State<TotoHome> {
     
     final home = _selectedHomeTeam!.name;
     final away = _selectedAwayTeam!.name;
+    final league = _selectedHomeTeam!.leagueEnum;
 
     setState(() {
       _isLoading = true;
@@ -282,6 +284,7 @@ class _TotoHomeState extends State<TotoHome> {
               {
                 'home-team': home,
                 'away-team': away,
+                'league': league,
                 'language': _selectedLanguage.toUpperCase(),
               },
             )
@@ -291,6 +294,7 @@ class _TotoHomeState extends State<TotoHome> {
               {
                 'home-team': home,
                 'away-team': away,
+                'league': league,
                 'language': _selectedLanguage.toUpperCase(),
               },
             );
@@ -320,7 +324,7 @@ class _TotoHomeState extends State<TotoHome> {
 
     if (!mounted) return;
 
-    if (AdMobService.isInterstitialAdReady) {
+    if (kReleaseMode && AdMobService.isInterstitialAdReady) {
       AdMobService.showInterstitialAd();
       _loadInterstitialAd();
     }
