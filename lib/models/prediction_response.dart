@@ -16,7 +16,13 @@ class PredictionResponse {
     final Map<String, int> parsedProbabilities = {};
     final probsMap = json['probabilities'] as Map<String, dynamic>;
     probsMap.forEach((key, value) {
-      parsedProbabilities[key] = value is int ? value : int.parse(value.toString());
+      if (value is int) {
+        parsedProbabilities[key] = value;
+      } else {
+        // Remove % sign if present and parse as int
+        final stringValue = value.toString().replaceAll('%', '').trim();
+        parsedProbabilities[key] = int.parse(stringValue);
+      }
     });
 
     return PredictionResponse(
