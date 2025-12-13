@@ -655,14 +655,53 @@ class ResultsPage extends StatelessWidget {
       return SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Text(
-            response,
-            textAlign: language == 'he' ? TextAlign.right : TextAlign.left,
-            textDirection: language == 'he' ? TextDirection.rtl : TextDirection.ltr,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.black87,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade300),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.error_outline, color: Colors.red.shade700),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Error parsing response: $e',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.red.shade900,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Raw Response:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                response,
+                textAlign: language == 'he' ? TextAlign.right : TextAlign.left,
+                textDirection: language == 'he' ? TextDirection.rtl : TextDirection.ltr,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
           ),
         ),
       );
