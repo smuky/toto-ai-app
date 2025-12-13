@@ -64,6 +64,7 @@ class _TotoHomeState extends State<TotoHome> {
   String _aboutText = '';
   String _selectLeagueText = 'Select League';
   String _settingsText = 'Settings';
+  String _drawText = 'Draw';
   String _appVersion = '';
   String _buildNumber = '';
   BannerAd? _bannerAd;
@@ -140,6 +141,7 @@ class _TotoHomeState extends State<TotoHome> {
         _aboutText = response.translations.about;
         _selectLeagueText = response.translations.selectLeague;
         _settingsText = response.translations.settings;
+        _drawText = response.translations.draw;
         _isLoadingTeams = false;
       });
     } catch (e) {
@@ -342,6 +344,7 @@ class _TotoHomeState extends State<TotoHome> {
           response: responseText,
           isError: isError,
           language: _selectedLanguage,
+          drawText: _drawText,
         ),
       ),
     );
@@ -616,6 +619,7 @@ class ResultsPage extends StatelessWidget {
   final String response;
   final bool isError;
   final String language;
+  final String drawText;
 
   const ResultsPage({
     super.key,
@@ -624,6 +628,7 @@ class ResultsPage extends StatelessWidget {
     required this.response,
     required this.isError,
     required this.language,
+    required this.drawText,
   });
 
   Widget _buildResponseContent() {
@@ -650,6 +655,7 @@ class ResultsPage extends StatelessWidget {
       return PredictionReportWidget(
         prediction: prediction,
         language: language,
+        drawText: drawText,
       );
     } catch (e) {
       return SingleChildScrollView(

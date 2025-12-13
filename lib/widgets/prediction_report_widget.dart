@@ -6,11 +6,13 @@ import '../models/prediction_response.dart';
 class PredictionReportWidget extends StatelessWidget {
   final PredictionResponse prediction;
   final String language;
+  final String drawText;
 
   const PredictionReportWidget({
     super.key,
     required this.prediction,
     this.language = 'en',
+    this.drawText = 'Draw',
   });
 
   @override
@@ -153,6 +155,24 @@ class PredictionReportWidget extends StatelessWidget {
     final draw = prediction.probabilities['X'] ?? 0;
     final awayWin = prediction.probabilities['2'] ?? 0;
 
+    // Determine which team has higher probability for top position
+    final String topTeam;
+    final int topPercentage;
+    final String bottomTeam;
+    final int bottomPercentage;
+
+    if (homeWin >= awayWin) {
+      topTeam = prediction.matchDetails.homeTeam;
+      topPercentage = homeWin;
+      bottomTeam = prediction.matchDetails.awayTeam;
+      bottomPercentage = awayWin;
+    } else {
+      topTeam = prediction.matchDetails.awayTeam;
+      topPercentage = awayWin;
+      bottomTeam = prediction.matchDetails.homeTeam;
+      bottomPercentage = homeWin;
+    }
+
     return Card(
       elevation: 3,
       child: Padding(
@@ -174,11 +194,11 @@ class PredictionReportWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            _buildProbabilityBar(prediction.matchDetails.homeTeam, homeWin, Colors.green),
+            _buildProbabilityBar(topTeam, topPercentage, Colors.green),
             const SizedBox(height: 12),
-            _buildProbabilityBar('Draw', draw, Colors.orange),
+            _buildProbabilityBar(drawText, draw, Colors.orange),
             const SizedBox(height: 12),
-            _buildProbabilityBar(prediction.matchDetails.awayTeam, awayWin, Colors.red),
+            _buildProbabilityBar(bottomTeam, bottomPercentage, Colors.red),
           ],
         ),
       ),

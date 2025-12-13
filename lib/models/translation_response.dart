@@ -4,6 +4,7 @@ class TranslationResponse {
   final String selectLeague;
   final String settings;
   final String about;
+  final String draw;
 
   const TranslationResponse({
     required this.leagueTranslations,
@@ -11,6 +12,7 @@ class TranslationResponse {
     required this.selectLeague,
     required this.settings,
     required this.about,
+    required this.draw,
   });
 
   factory TranslationResponse.fromJson(Map<String, dynamic> json) {
@@ -27,6 +29,7 @@ class TranslationResponse {
       selectLeague: json['selectLeague'] as String? ?? 'Select League',
       settings: json['settings'] as String? ?? 'Settings',
       about: json['about'] as String? ?? '',
+      draw: json['draw'] as String? ?? 'Draw',
     );
   }
 }
