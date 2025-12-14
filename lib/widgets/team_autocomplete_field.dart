@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../models/team.dart';
 
 class TeamAutocompleteField extends StatelessWidget {
@@ -68,6 +69,27 @@ class TeamAutocompleteField extends StatelessWidget {
             ),
             filled: true,
             fillColor: Colors.transparent,
+            prefixIcon: selectedTeam != null
+                ? Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: CachedNetworkImage(
+                      imageUrl: selectedTeam!.logo,
+                      width: 24,
+                      height: 24,
+                      fit: BoxFit.contain,
+                      placeholder: (context, url) => const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      ),
+                      errorWidget: (context, url, error) => const Icon(
+                        Icons.sports_soccer,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                  )
+                : null,
             suffixIcon: enabled
                 ? (selectedTeam != null
                     ? IconButton(
@@ -112,6 +134,21 @@ class TeamAutocompleteField extends StatelessWidget {
                 itemBuilder: (BuildContext context, int index) {
                   final Team team = options.elementAt(index);
                   return ListTile(
+                    leading: CachedNetworkImage(
+                      imageUrl: team.logo,
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.contain,
+                      placeholder: (context, url) => const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      errorWidget: (context, url, error) => const Icon(
+                        Icons.sports_soccer,
+                        size: 40,
+                      ),
+                    ),
                     title: Text(team.name),
                     onTap: () {
                       onSelected(team);
