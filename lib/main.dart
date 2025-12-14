@@ -6,8 +6,10 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'config/environment.dart';
 import 'config/language_config.dart';
+import 'config/league_logos_config.dart';
 import 'models/team.dart';
 import 'models/prediction_response.dart';
 import 'widgets/team_autocomplete_field.dart';
@@ -483,8 +485,31 @@ class _TotoHomeState extends State<TotoHome> {
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.sports_soccer, color: Colors.blue, size: 28),
-                            const SizedBox(width: 12),
+                            if (_selectedLeague != null && LeagueLogosConfig.getLeagueLogo(_selectedLeague!) != null)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 12.0),
+                                child: CachedNetworkImage(
+                                  imageUrl: LeagueLogosConfig.getLeagueLogo(_selectedLeague!)!,
+                                  width: 28,
+                                  height: 28,
+                                  fit: BoxFit.contain,
+                                  placeholder: (context, url) => const SizedBox(
+                                    width: 28,
+                                    height: 28,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  ),
+                                  errorWidget: (context, url, error) => const Icon(
+                                    Icons.sports_soccer,
+                                    color: Colors.blue,
+                                    size: 28,
+                                  ),
+                                ),
+                              )
+                            else
+                              const Padding(
+                                padding: EdgeInsets.only(right: 12.0),
+                                child: Icon(Icons.sports_soccer, color: Colors.blue, size: 28),
+                              ),
                             Expanded(
                               child: DropdownButton<String>(
                                 value: _selectedLeague,

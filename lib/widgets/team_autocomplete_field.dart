@@ -144,10 +144,17 @@ class TeamAutocompleteField extends StatelessWidget {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       ),
-                      errorWidget: (context, url, error) => const Icon(
-                        Icons.sports_soccer,
-                        size: 40,
-                      ),
+                      errorWidget: (context, url, error) {
+                        if (index == 0) {
+                          print('Error loading image for ${team.name}:');
+                          print('URL: $url');
+                          print('Error: $error');
+                        }
+                        return const Icon(
+                          Icons.sports_soccer,
+                          size: 40,
+                        );
+                      },
                     ),
                     title: Text(team.name),
                     onTap: () {
