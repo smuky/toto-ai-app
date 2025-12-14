@@ -146,7 +146,7 @@ class _HomePageState extends State<HomePage> {
     });
 
     try {
-      final response = await TeamService.fetchUpcomingFixtures(leagueEnum, 10);
+      final response = await TeamService.fetchUpcomingFixtures(leagueEnum, 20);
       setState(() {
         _upcomingFixtures = response.fixtures;
         _isLoadingFixtures = false;
@@ -516,9 +516,13 @@ class _HomePageState extends State<HomePage> {
                   _selectedHomeTeam = null;
                   _selectedAwayTeam = null;
                   _leagueTeams = [];
+                  _upcomingFixtures = [];
                 });
                 if (newValue != null) {
                   _loadTeamsForLeague(newValue);
+                  if (_matchMode == 'upcoming') {
+                    _loadUpcomingFixtures(newValue);
+                  }
                 }
               },
             ),
