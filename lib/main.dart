@@ -55,8 +55,8 @@ class _TotoHomeState extends State<TotoHome> {
   Team? _selectedHomeTeam;
   Team? _selectedAwayTeam;
   bool _isLoading = false;
-  List<Team> _allTeams = [];
-  bool _isLoadingTeams = true;
+  List<Team> _leagueTeams = [];
+  bool _isLoadingTeams = false;
   String? _loadError;
   String _selectedLanguage = 'en';
   String? _selectedLeague;
@@ -87,7 +87,7 @@ class _TotoHomeState extends State<TotoHome> {
   Future<void> _initializeApp() async {
     await _loadLanguagePreference();
     await _loadAppVersion();
-    await _loadTeams();
+    await _loadTranslations();
   }
 
   Future<void> _loadAppVersion() async {
@@ -127,21 +127,33 @@ class _TotoHomeState extends State<TotoHome> {
     });
   }
 
-  Future<void> _loadTeams() async {
+  Future<void> _loadTranslations() async {
+    try {
+      final translations = await TeamService.fetchTranslations(_selectedLanguage);
+      setState(() {
+        _leagueTranslations = translations.leagueTranslations;
+        _aboutText = translations.about;
+        _selectLeagueText = translations.selectLeague;
+        _settingsText = translations.settings;
+        _drawText = translations.draw;
+      });
+    } catch (e) {
+      setState(() {
+        _loadError = e.toString();
+      });
+    }
+  }
+
+  Future<void> _loadTeamsForLeague(String leagueEnum) async {
     setState(() {
       _isLoadingTeams = true;
       _loadError = null;
     });
 
     try {
-      final response = await TeamService.fetchAllTeams(_selectedLanguage);
+      final response = await TeamService.fetchLeagueStanding(leagueEnum);
       setState(() {
-        _allTeams = response.teams;
-        _leagueTranslations = response.translations.leagueTranslations;
-        _aboutText = response.translations.about;
-        _selectLeagueText = response.translations.selectLeague;
-        _settingsText = response.translations.settings;
-        _drawText = response.translations.draw;
+        _leagueTeams = response.teams;
         _isLoadingTeams = false;
       });
     } catch (e) {
@@ -159,30 +171,26 @@ class _TotoHomeState extends State<TotoHome> {
       !_isLoading;
 
   List<String> get _availableLeagues {
-    final leagues = _allTeams.map((team) => team.leagueEnum).toSet().toList();
+    final leagues = _leagueTranslations.keys.toList();
     leagues.sort();
     return leagues;
   }
 
   List<Team> get _availableHomeTeams {
-    if (_selectedLeague == null) {
+    if (_selectedLeague == null || _leagueTeams.isEmpty) {
       return [];
     }
-    final teams = _allTeams
-        .where((team) => team.leagueEnum == _selectedLeague)
-        .toList();
+    final teams = List<Team>.from(_leagueTeams);
     teams.sort((a, b) => a.name.compareTo(b.name));
     return teams;
   }
 
   List<Team> get _availableAwayTeams {
-    if (_selectedLeague == null || _selectedHomeTeam == null) {
+    if (_selectedLeague == null || _selectedHomeTeam == null || _leagueTeams.isEmpty) {
       return [];
     }
-    final teams = _allTeams
-        .where((team) =>
-            team.leagueEnum == _selectedLeague &&
-            team != _selectedHomeTeam)
+    final teams = _leagueTeams
+        .where((team) => team != _selectedHomeTeam)
         .toList();
     teams.sort((a, b) => a.name.compareTo(b.name));
     return teams;
@@ -243,7 +251,10 @@ class _TotoHomeState extends State<TotoHome> {
                       });
                       await LanguagePreferenceService.setLanguage(value);
                       Navigator.of(context).pop();
-                      _loadTeams();
+                      _loadTranslations();
+                      if (_selectedLeague != null) {
+                        _loadTeamsForLeague(_selectedLeague!);
+                      }
                     }
                   },
                 ),
@@ -253,7 +264,10 @@ class _TotoHomeState extends State<TotoHome> {
                   });
                   await LanguagePreferenceService.setLanguage(entry.key);
                   Navigator.of(context).pop();
-                  _loadTeams();
+                  _loadTranslations();
+                  if (_selectedLeague != null) {
+                    _loadTeamsForLeague(_selectedLeague!);
+                  }
                 },
               );
             }).toList(),
@@ -428,18 +442,7 @@ class _TotoHomeState extends State<TotoHome> {
             ),
           ],
         ),
-        body: _isLoadingTeams
-            ? const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text('Loading teams...'),
-                  ],
-                ),
-              )
-            : _loadError != null
+        body: _loadError != null && _selectedLeague == null
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -447,7 +450,7 @@ class _TotoHomeState extends State<TotoHome> {
                         const Icon(Icons.error_outline, size: 48, color: Colors.red),
                         const SizedBox(height: 16),
                         Text(
-                          'Failed to load teams',
+                          'Failed to load translations',
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: 8),
@@ -458,7 +461,7 @@ class _TotoHomeState extends State<TotoHome> {
                         ),
                         const SizedBox(height: 24),
                         ElevatedButton.icon(
-                          onPressed: _loadTeams,
+                          onPressed: _loadTranslations,
                           icon: const Icon(Icons.refresh),
                           label: const Text('Retry'),
                         ),
@@ -506,7 +509,11 @@ class _TotoHomeState extends State<TotoHome> {
                                     _selectedLeague = newValue;
                                     _selectedHomeTeam = null;
                                     _selectedAwayTeam = null;
+                                    _leagueTeams = [];
                                   });
+                                  if (newValue != null) {
+                                    _loadTeamsForLeague(newValue);
+                                  }
                                 },
                               ),
                             ),
@@ -514,39 +521,58 @@ class _TotoHomeState extends State<TotoHome> {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      TeamAutocompleteField(
-                        key: ValueKey('home_$_selectedLeague'),
-                        label: "Home Team",
-                        availableTeams: _availableHomeTeams,
-                        selectedTeam: _selectedHomeTeam,
-                        onTeamSelected: (team) {
-                          setState(() {
-                            _selectedHomeTeam = team;
-                            _selectedAwayTeam = null;
-                          });
-                        },
-                        enabled: _selectedLeague != null,
-                      ),
-                      const SizedBox(height: 16),
-                      const Center(
-                        child: Text(
-                          "VS",
-                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                      if (_isLoadingTeams)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(20.0),
+                            child: Column(
+                              children: [
+                                CircularProgressIndicator(),
+                                SizedBox(height: 12),
+                                Text(
+                                  'Loading teams...',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      else
+                        TeamAutocompleteField(
+                          key: ValueKey('home_$_selectedLeague'),
+                          label: "Home Team",
+                          availableTeams: _availableHomeTeams,
+                          selectedTeam: _selectedHomeTeam,
+                          onTeamSelected: (team) {
+                            setState(() {
+                              _selectedHomeTeam = team;
+                              _selectedAwayTeam = null;
+                            });
+                          },
+                          enabled: _selectedLeague != null && !_isLoadingTeams,
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      TeamAutocompleteField(
-                        key: ValueKey('away_${_selectedLeague}_${_selectedHomeTeam?.name}'),
-                        label: "Away Team",
-                        availableTeams: _availableAwayTeams,
-                        selectedTeam: _selectedAwayTeam,
-                        onTeamSelected: (team) {
-                          setState(() {
-                            _selectedAwayTeam = team;
-                          });
-                        },
-                        enabled: _selectedHomeTeam != null,
-                      ),
+                      if (!_isLoadingTeams) ...[
+                        const SizedBox(height: 16),
+                        const Center(
+                          child: Text(
+                            "VS",
+                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TeamAutocompleteField(
+                          key: ValueKey('away_${_selectedLeague}_${_selectedHomeTeam?.name}'),
+                          label: "Away Team",
+                          availableTeams: _availableAwayTeams,
+                          selectedTeam: _selectedAwayTeam,
+                          onTeamSelected: (team) {
+                            setState(() {
+                              _selectedAwayTeam = team;
+                            });
+                          },
+                          enabled: _selectedHomeTeam != null && !_isLoadingTeams,
+                        ),
+                      ],
                       const SizedBox(height: 32),
 
                       // GO Button
