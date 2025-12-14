@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/standing_response.dart';
 import '../models/translation_response.dart';
+import '../models/fixture.dart';
 import '../config/environment.dart';
 
 class TeamService {
@@ -40,6 +41,31 @@ class TeamService {
       }
     } catch (e) {
       throw Exception('Error fetching translations: $e');
+    }
+  }
+
+  static Future<FixturesResponse> fetchUpcomingFixtures(String leagueEnum, int next) async {
+    try {
+      final uri = AppConfig.isHttps
+          ? Uri.https(AppConfig.apiBaseUrl, '/api-football/fixtures/next', {
+              'leagueEnum': leagueEnum,
+              'next': next.toString(),
+            })
+          : Uri.http(AppConfig.apiBaseUrl, '/api-football/fixtures/next', {
+              'leagueEnum': leagueEnum,
+              'next': next.toString(),
+            });
+
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonResponse = json.decode(response.body);
+        return FixturesResponse.fromJson(jsonResponse);
+      } else {
+        throw Exception('Failed to load fixtures: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching fixtures: $e');
     }
   }
 }
