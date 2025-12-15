@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import '../config/environment.dart';
 import '../models/prediction_response.dart';
 import '../models/translation_response.dart';
-import '../services/team_service.dart';
 import '../widgets/prediction_report_widget.dart';
 
-class ResultsPage extends StatefulWidget {
+class ResultsPage extends StatelessWidget {
   final String homeTeam;
   final String awayTeam;
   final String response;
   final bool isError;
   final String language;
+  final TranslationResponse translations;
 
   const ResultsPage({
     super.key,
@@ -20,35 +20,8 @@ class ResultsPage extends StatefulWidget {
     required this.response,
     required this.isError,
     required this.language,
+    required this.translations,
   });
-
-  @override
-  State<ResultsPage> createState() => _ResultsPageState();
-}
-
-class _ResultsPageState extends State<ResultsPage> {
-  TranslationResponse? _translations;
-  bool _isLoadingTranslations = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadTranslations();
-  }
-
-  Future<void> _loadTranslations() async {
-    try {
-      final translations = await TeamService.fetchTranslations(widget.language);
-      setState(() {
-        _translations = translations;
-        _isLoadingTranslations = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoadingTranslations = false;
-      });
-    }
-  
 
   Widget _buildResponseContent() {
     if (isError) {
