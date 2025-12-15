@@ -26,12 +26,12 @@ class TeamAutocompleteField extends StatelessWidget {
           return availableTeams;
         }
         return availableTeams.where((Team team) {
-          return team.name
+          return team.effectiveName
               .toLowerCase()
               .contains(textEditingValue.text.toLowerCase());
         });
       },
-      displayStringForOption: (Team team) => team.name,
+      displayStringForOption: (Team team) => team.effectiveName,
       onSelected: (Team team) {
         onTeamSelected(team);
       },
@@ -42,7 +42,7 @@ class TeamAutocompleteField extends StatelessWidget {
         VoidCallback onFieldSubmitted,
       ) {
         if (selectedTeam != null && textEditingController.text.isEmpty) {
-          textEditingController.text = selectedTeam!.name;
+          textEditingController.text = selectedTeam!.effectiveName;
         } else if (selectedTeam == null && textEditingController.text.isNotEmpty) {
           textEditingController.clear();
         }
@@ -156,7 +156,7 @@ class TeamAutocompleteField extends StatelessWidget {
                         );
                       },
                     ),
-                    title: Text(team.name),
+                    title: Text(team.effectiveName),
                     onTap: () {
                       onSelected(team);
                     },

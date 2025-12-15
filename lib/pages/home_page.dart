@@ -176,7 +176,7 @@ class _HomePageState extends State<HomePage> {
       return [];
     }
     final teams = List<Team>.from(_leagueTeams);
-    teams.sort((a, b) => a.name.compareTo(b.name));
+    teams.sort((a, b) => a.effectiveName.compareTo(b.effectiveName));
     return teams;
   }
 
@@ -187,7 +187,7 @@ class _HomePageState extends State<HomePage> {
     final teams = _leagueTeams
         .where((team) => team != _selectedHomeTeam)
         .toList();
-    teams.sort((a, b) => a.name.compareTo(b.name));
+    teams.sort((a, b) => a.effectiveName.compareTo(b.effectiveName));
     return teams;
   }
 
@@ -575,7 +575,7 @@ class _HomePageState extends State<HomePage> {
         ),
         const SizedBox(height: 16),
         TeamAutocompleteField(
-          key: ValueKey('away_${_selectedLeague}_${_selectedHomeTeam?.name}'),
+          key: ValueKey('away_${_selectedLeague}_${_selectedHomeTeam?.effectiveName}'),
           label: "Away Team",
           availableTeams: _availableAwayTeams,
           selectedTeam: _selectedAwayTeam,
@@ -961,7 +961,7 @@ class _HomePageState extends State<HomePage> {
       _matchMode = 'custom';
       // Find the teams in the league teams list
       _selectedHomeTeam = _leagueTeams.firstWhere(
-        (team) => team.name == fixture.homeTeam,
+        (team) => team.effectiveName == fixture.homeTeam,
         orElse: () => Team(
           id: 0,
           name: fixture.homeTeam,
@@ -970,7 +970,7 @@ class _HomePageState extends State<HomePage> {
         ),
       );
       _selectedAwayTeam = _leagueTeams.firstWhere(
-        (team) => team.name == fixture.awayTeam,
+        (team) => team.effectiveName == fixture.awayTeam,
         orElse: () => Team(
           id: 0,
           name: fixture.awayTeam,

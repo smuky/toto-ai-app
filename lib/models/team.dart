@@ -1,6 +1,7 @@
 class Team {
   final int id;
   final String name;
+  final String? displayName;
   final String logo;
   final String leagueEnum;
   final int rank;
@@ -17,6 +18,7 @@ class Team {
   const Team({
     required this.id,
     required this.name,
+    this.displayName,
     required this.logo,
     required this.leagueEnum,
     this.rank = 0,
@@ -39,6 +41,7 @@ class Team {
     return Team(
       id: teamData['id'] as int,
       name: teamData['name'] as String,
+      displayName: teamData['displayName'] as String?,
       logo: teamData['logo'] as String,
       leagueEnum: leagueEnum,
       rank: json['rank'] as int? ?? 0,
@@ -53,6 +56,8 @@ class Team {
       goalsAgainst: goals['against'] as int? ?? 0,
     );
   }
+
+  String get effectiveName => displayName ?? name;
 
   @override
   bool operator ==(Object other) =>
