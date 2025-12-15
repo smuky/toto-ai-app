@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../models/standing_response.dart';
 import '../models/translation_response.dart';
 import '../models/fixture.dart';
 import '../config/environment.dart';
+import 'api_client.dart';
 
 class TeamService {
   static Future<StandingResponse> fetchLeagueStanding(String leagueEnum) async {
@@ -12,7 +12,7 @@ class TeamService {
           ? Uri.https(AppConfig.apiBaseUrl, '/api-football/standing', {'leagueEnum': leagueEnum})
           : Uri.http(AppConfig.apiBaseUrl, '/api-football/standing', {'leagueEnum': leagueEnum});
 
-      final response = await http.get(uri);
+      final response = await ApiClient.get(uri);
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
@@ -28,10 +28,10 @@ class TeamService {
   static Future<TranslationResponse> fetchTranslations(String language) async {
     try {
       final uri = AppConfig.isHttps
-          ? Uri.https(AppConfig.apiBaseUrl, '/league/translations', {'language': language})
-          : Uri.http(AppConfig.apiBaseUrl, '/league/translations', {'language': language});
+          ? Uri.https(AppConfig.apiBaseUrl, '/league/translations')
+          : Uri.http(AppConfig.apiBaseUrl, '/league/translations');
 
-      final response = await http.get(uri);
+      final response = await ApiClient.get(uri);
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
@@ -56,7 +56,7 @@ class TeamService {
               'next': next.toString(),
             });
 
-      final response = await http.get(uri);
+      final response = await ApiClient.get(uri);
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonResponse = json.decode(response.body);
