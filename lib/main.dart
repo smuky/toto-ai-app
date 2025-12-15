@@ -24,7 +24,7 @@ class TotoAIApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'AI Football Predictor',
+      title: '1X2-AI',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const HomePage(),
     );

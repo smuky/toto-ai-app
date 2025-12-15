@@ -329,7 +329,7 @@ class _HomePageState extends State<HomePage> {
       title: Row(
         children: [
           Text(
-            'AI Football Predictor',
+            '1X2-AI',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
