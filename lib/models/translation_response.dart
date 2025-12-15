@@ -14,6 +14,8 @@ class TranslationResponse {
   final String headToHeadSummary;
   final String keyNewsInjuries;
   final String results;
+  final String customMatch;
+  final String upcomingGames;
 
   const TranslationResponse({
     required this.leagueTranslations,
@@ -31,6 +33,8 @@ class TranslationResponse {
     required this.headToHeadSummary,
     required this.keyNewsInjuries,
     required this.results,
+    required this.customMatch,
+    required this.upcomingGames,
   });
 
   factory TranslationResponse.fromJson(Map<String, dynamic> json) {
@@ -57,6 +61,8 @@ class TranslationResponse {
       headToHeadSummary: json['headToHeadSummary'] as String? ?? 'Head-to-Head Summary',
       keyNewsInjuries: json['keyNewsInjuries'] as String? ?? 'Key News & Injuries',
       results: json['results'] as String? ?? 'Results',
+      customMatch: json['customMatch'] as String? ?? 'Custom Match',
+      upcomingGames: json['upcomingGames'] as String? ?? 'Upcoming Games',
     );
   }
 }

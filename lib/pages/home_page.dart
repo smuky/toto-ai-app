@@ -27,16 +27,18 @@ class _HomePageState extends State<HomePage> {
   bool _isLoadingTeams = false;
   String? _loadError;
   String _selectedLanguage = 'en';
-  String? _selectedLeague;
+  String? _selectedLeague = 'ISRAEL_WINNER';
   TranslationResponse? _translations;
   Map<String, String> _leagueTranslations = {};
   String _aboutText = '';
   String _selectLeagueText = 'Select League';
+  String _customMatchText = 'Custom Match';
+  String _upcomingGamesText = 'Upcoming Games';
   String _appVersion = '';
   String _buildNumber = '';
   BannerAd? _bannerAd;
   bool _isBannerAdLoaded = false;
-  String _matchMode = 'custom'; // 'custom' or 'upcoming'
+  String _matchMode = 'upcoming'; // 'custom' or 'upcoming'
   List<Fixture> _upcomingFixtures = [];
   bool _isLoadingFixtures = false;
 
@@ -58,6 +60,15 @@ class _HomePageState extends State<HomePage> {
     await _loadLanguagePreference();
     await _loadAppVersion();
     await _loadTranslations();
+    
+    // Load initial data based on default state
+    if (_selectedLeague != null) {
+      if (_matchMode == 'upcoming') {
+        await _loadUpcomingFixtures(_selectedLeague!);
+      } else {
+        await _loadTeamsForLeague(_selectedLeague!);
+      }
+    }
   }
 
   Future<void> _loadAppVersion() async {
@@ -105,6 +116,8 @@ class _HomePageState extends State<HomePage> {
         _leagueTranslations = translations.leagueTranslations;
         _aboutText = translations.about;
         _selectLeagueText = translations.selectLeague;
+        _customMatchText = translations.customMatch;
+        _upcomingGamesText = translations.upcomingGames;
       });
     } catch (e) {
       setState(() {
@@ -452,7 +465,7 @@ class _HomePageState extends State<HomePage> {
                       : [],
                 ),
                 child: Text(
-                  'Custom Match',
+                  _customMatchText,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -494,7 +507,7 @@ class _HomePageState extends State<HomePage> {
                       : [],
                 ),
                 child: Text(
-                  'Upcoming Games',
+                  _upcomingGamesText,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
