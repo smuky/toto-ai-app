@@ -1,8 +1,4 @@
-import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -10,13 +6,13 @@ import '../config/environment.dart';
 import '../config/league_logos_config.dart';
 import '../models/team.dart';
 import '../models/fixture.dart';
-import '../widgets/team_autocomplete_field.dart';
 import '../services/team_service.dart';
+import '../widgets/custom_match_widget.dart';
+import '../widgets/upcoming_games_widget.dart';
 import '../services/language_preference_service.dart';
 import '../services/admob_service.dart';
 import '../widgets/about_dialog.dart';
 import '../widgets/language_selector_dialog.dart';
-import 'results_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -26,9 +22,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Team? _selectedHomeTeam;
-  Team? _selectedAwayTeam;
-  bool _isLoading = false;
   List<Team> _leagueTeams = [];
   bool _isLoadingTeams = false;
   String? _loadError;
@@ -159,36 +152,10 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  bool get isValid =>
-      _selectedLeague != null &&
-      _selectedHomeTeam != null &&
-      _selectedAwayTeam != null &&
-      !_isLoading;
-
   List<String> get _availableLeagues {
     final leagues = _leagueTranslations.keys.toList();
     leagues.sort();
     return leagues;
-  }
-
-  List<Team> get _availableHomeTeams {
-    if (_selectedLeague == null || _leagueTeams.isEmpty) {
-      return [];
-    }
-    final teams = List<Team>.from(_leagueTeams);
-    teams.sort((a, b) => a.effectiveName.compareTo(b.effectiveName));
-    return teams;
-  }
-
-  List<Team> get _availableAwayTeams {
-    if (_selectedLeague == null || _selectedHomeTeam == null || _leagueTeams.isEmpty) {
-      return [];
-    }
-    final teams = _leagueTeams
-        .where((team) => team != _selectedHomeTeam)
-        .toList();
-    teams.sort((a, b) => a.effectiveName.compareTo(b.effectiveName));
-    return teams;
   }
 
   void _showAboutDialog() {
@@ -214,93 +181,6 @@ class _HomePageState extends State<HomePage> {
           _loadTeamsForLeague(_selectedLeague!);
         }
       },
-    );
-  }
-
-  Future<void> _onGoPressed() async {
-    if (_selectedHomeTeam == null || _selectedAwayTeam == null) return;
-    
-    final home = _selectedHomeTeam!.name;
-    final away = _selectedAwayTeam!.name;
-    final league = _selectedHomeTeam!.leagueEnum;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    Timer? hapticTimer;
-    hapticTimer = Timer.periodic(const Duration(milliseconds: 1000), (timer) {
-      HapticFeedback.lightImpact();
-    });
-
-    String responseText;
-    bool isError;
-
-    try {
-      final uri = AppConfig.isHttps
-          ? Uri.https(
-              AppConfig.apiBaseUrl,
-              AppConfig.apiPath,
-              {
-                'home-team': home,
-                'away-team': away,
-                'league': league,
-                'language': _selectedLanguage.toUpperCase(),
-              },
-            )
-          : Uri.http(
-              AppConfig.apiBaseUrl,
-              AppConfig.apiPath,
-              {
-                'home-team': home,
-                'away-team': away,
-                'league': league,
-                'language': _selectedLanguage.toUpperCase(),
-              },
-            );
-
-      final response = await http.get(uri);
-
-      if (!mounted) return;
-
-      if (response.statusCode == 200) {
-        responseText = response.body;
-        isError = false;
-      } else {
-        responseText = 'Server returned status ${response.statusCode}.\n\nBody:\n${response.body}';
-        isError = true;
-      }
-    } catch (e) {
-      if (!mounted) return;
-      responseText = 'Failed to contact server:\n$e';
-      isError = true;
-    }
-
-    hapticTimer?.cancel();
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (!mounted) return;
-
-    if (kReleaseMode && AdMobService.isInterstitialAdReady) {
-      AdMobService.showInterstitialAd();
-      _loadInterstitialAd();
-    }
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ResultsPage(
-          homeTeam: home,
-          awayTeam: away,
-          response: responseText,
-          isError: isError,
-          language: _selectedLanguage,
-          drawText: _drawText,
-        ),
-      ),
     );
   }
 
@@ -440,16 +320,22 @@ class _HomePageState extends State<HomePage> {
               _buildModeSelector(),
             ],
             const SizedBox(height: 24),
-            if (_matchMode == 'custom') ...[
-              if (_isLoadingTeams)
-                _buildLoadingIndicator()
-              else
-                _buildTeamSelectors(),
-              const SizedBox(height: 32),
-              _buildGoButton(),
-            ] else ...[
-              _buildUpcomingGames(),
-            ],
+            if (_matchMode == 'custom')
+              CustomMatchWidget(
+                leagueTeams: _leagueTeams,
+                selectedLeague: _selectedLeague,
+                isLoadingTeams: _isLoadingTeams,
+                selectedLanguage: _selectedLanguage,
+                drawText: _drawText,
+              )
+            else
+              UpcomingGamesWidget(
+                upcomingFixtures: _upcomingFixtures,
+                isLoadingFixtures: _isLoadingFixtures,
+                selectedLanguage: _selectedLanguage,
+                drawText: _drawText,
+                selectedLeague: _selectedLeague ?? '',
+              ),
           ],
         ),
       ),
@@ -513,8 +399,6 @@ class _HomePageState extends State<HomePage> {
               onChanged: (String? newValue) {
                 setState(() {
                   _selectedLeague = newValue;
-                  _selectedHomeTeam = null;
-                  _selectedAwayTeam = null;
                   _leagueTeams = [];
                   _upcomingFixtures = [];
                 });
@@ -528,114 +412,6 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildLoadingIndicator() {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 12),
-            Text(
-              'Loading teams...',
-              style: TextStyle(color: Colors.white),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTeamSelectors() {
-    return Column(
-      children: [
-        TeamAutocompleteField(
-          key: ValueKey('home_$_selectedLeague'),
-          label: "Home Team",
-          availableTeams: _availableHomeTeams,
-          selectedTeam: _selectedHomeTeam,
-          onTeamSelected: (team) {
-            setState(() {
-              _selectedHomeTeam = team;
-              _selectedAwayTeam = null;
-            });
-          },
-          enabled: _selectedLeague != null && !_isLoadingTeams,
-        ),
-        const SizedBox(height: 16),
-        const Center(
-          child: Text(
-            "VS",
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-        ),
-        const SizedBox(height: 16),
-        TeamAutocompleteField(
-          key: ValueKey('away_${_selectedLeague}_${_selectedHomeTeam?.effectiveName}'),
-          label: "Away Team",
-          availableTeams: _availableAwayTeams,
-          selectedTeam: _selectedAwayTeam,
-          onTeamSelected: (team) {
-            setState(() {
-              _selectedAwayTeam = team;
-            });
-          },
-          enabled: _selectedHomeTeam != null && !_isLoadingTeams,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGoButton() {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: isValid
-            ? [
-                BoxShadow(
-                  color: Colors.blue.withAlpha(100),
-                  blurRadius: 20,
-                  spreadRadius: 2,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : [],
-      ),
-      child: ElevatedButton(
-        onPressed: isValid ? _onGoPressed : null,
-        style: ElevatedButton.styleFrom(
-          minimumSize: const Size(double.infinity, 60),
-          backgroundColor: isValid ? Colors.blue.shade700 : null,
-          foregroundColor: Colors.white,
-          elevation: isValid ? 8 : 0,
-          shadowColor: Colors.blue.shade900,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        child: _isLoading
-            ? const SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(
-            strokeWidth: 3,
-            color: Colors.white,
-          ),
-        )
-            : const Text(
-          "GO",
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2,
-          ),
-        ),
       ),
     );
   }
@@ -733,254 +509,6 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
-  }
-
-  Widget _buildUpcomingGames() {
-    if (_isLoadingFixtures) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(40.0),
-          child: Column(
-            children: [
-              CircularProgressIndicator(color: Colors.white),
-              SizedBox(height: 12),
-              Text(
-                'Loading upcoming matches...',
-                style: TextStyle(color: Colors.white),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    if (_upcomingFixtures.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(24),
-        child: const Column(
-          children: [
-            Icon(Icons.sports_soccer, size: 48, color: Colors.white54),
-            SizedBox(height: 12),
-            Text(
-              'No Upcoming Matches',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'No fixtures available for this league',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white70,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Column(
-      children: [
-        const Row(
-          children: [
-            Icon(Icons.calendar_today, color: Colors.white, size: 20),
-            SizedBox(width: 8),
-            Text(
-              'Upcoming Matches',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        ..._upcomingFixtures.map((fixture) => _buildFixtureCard(fixture)),
-      ],
-    );
-  }
-
-  Widget _buildFixtureCard(Fixture fixture) {
-    final dateTime = fixture.date;
-    final dateStr = '${dateTime.day}/${dateTime.month}/${dateTime.year}';
-    final timeStr = '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  children: [
-                    CachedNetworkImage(
-                      imageUrl: fixture.homeTeamLogo,
-                      width: 40,
-                      height: 40,
-                      fit: BoxFit.contain,
-                      placeholder: (context, url) => const SizedBox(
-                        width: 40,
-                        height: 40,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                      errorWidget: (context, url, error) => const Icon(
-                        Icons.sports_soccer,
-                        size: 40,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      fixture.effectiveHomeTeam,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  children: [
-                    Text(
-                      dateStr,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      timeStr,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.green.shade50,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        fixture.status,
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.green.shade700,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  children: [
-                    CachedNetworkImage(
-                      imageUrl: fixture.awayTeamLogo,
-                      width: 40,
-                      height: 40,
-                      fit: BoxFit.contain,
-                      placeholder: (context, url) => const SizedBox(
-                        width: 40,
-                        height: 40,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                      errorWidget: (context, url, error) => const Icon(
-                        Icons.sports_soccer,
-                        size: 40,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      fixture.effectiveAwayTeam,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ElevatedButton.icon(
-            onPressed: () => _analyzeFixture(fixture),
-            icon: const Icon(Icons.analytics, size: 18),
-            label: const Text('Analyze Match'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue.shade700,
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 40),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _analyzeFixture(Fixture fixture) {
-    // Set the teams and trigger prediction
-    setState(() {
-      _matchMode = 'custom';
-      // Find the teams in the league teams list
-      _selectedHomeTeam = _leagueTeams.firstWhere(
-        (team) => team.effectiveName == fixture.effectiveHomeTeam,
-        orElse: () => Team(
-          id: 0,
-          name: fixture.effectiveHomeTeam,
-          leagueEnum: _selectedLeague!,
-          logo: fixture.homeTeamLogo,
-        ),
-      );
-      _selectedAwayTeam = _leagueTeams.firstWhere(
-        (team) => team.effectiveName == fixture.effectiveAwayTeam,
-        orElse: () => Team(
-          id: 0,
-          name: fixture.effectiveAwayTeam,
-          leagueEnum: _selectedLeague!,
-          logo: fixture.awayTeamLogo,
-        ),
-      );
-    });
-    // Trigger the prediction
-    _onGoPressed();
   }
 
   Widget? _buildBottomNavigationBar() {
