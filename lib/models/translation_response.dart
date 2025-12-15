@@ -5,6 +5,15 @@ class TranslationResponse {
   final String settings;
   final String about;
   final String draw;
+  final String vs;
+  final String winProbabilities;
+  final String predictionJustification;
+  final String detailedAnalysis;
+  final String recentFormAnalysis;
+  final String expectedGoalsAnalysis;
+  final String headToHeadSummary;
+  final String keyNewsInjuries;
+  final String results;
 
   const TranslationResponse({
     required this.leagueTranslations,
@@ -13,6 +22,15 @@ class TranslationResponse {
     required this.settings,
     required this.about,
     required this.draw,
+    required this.vs,
+    required this.winProbabilities,
+    required this.predictionJustification,
+    required this.detailedAnalysis,
+    required this.recentFormAnalysis,
+    required this.expectedGoalsAnalysis,
+    required this.headToHeadSummary,
+    required this.keyNewsInjuries,
+    required this.results,
   });
 
   factory TranslationResponse.fromJson(Map<String, dynamic> json) {
@@ -30,6 +48,15 @@ class TranslationResponse {
       settings: json['settings'] as String? ?? 'Settings',
       about: json['about'] as String? ?? '',
       draw: json['draw'] as String? ?? 'Draw',
+      vs: json['vs'] as String? ?? 'VS',
+      winProbabilities: json['winProbabilities'] as String? ?? 'Win Probabilities',
+      predictionJustification: json['predictionJustification'] as String? ?? 'Prediction Justification',
+      detailedAnalysis: json['detailedAnalysis'] as String? ?? 'Detailed Analysis',
+      recentFormAnalysis: json['recentFormAnalysis'] as String? ?? 'Recent Form Analysis',
+      expectedGoalsAnalysis: json['expectedGoalsAnalysis'] as String? ?? 'Expected Goals (xG) Analysis',
+      headToHeadSummary: json['headToHeadSummary'] as String? ?? 'Head-to-Head Summary',
+      keyNewsInjuries: json['keyNewsInjuries'] as String? ?? 'Key News & Injuries',
+      results: json['results'] as String? ?? 'Results',
     );
   }
 }

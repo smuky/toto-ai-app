@@ -2,15 +2,16 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../config/environment.dart';
 import '../models/prediction_response.dart';
+import '../models/translation_response.dart';
+import '../services/team_service.dart';
 import '../widgets/prediction_report_widget.dart';
 
-class ResultsPage extends StatelessWidget {
+class ResultsPage extends StatefulWidget {
   final String homeTeam;
   final String awayTeam;
   final String response;
   final bool isError;
   final String language;
-  final String drawText;
 
   const ResultsPage({
     super.key,
@@ -19,8 +20,35 @@ class ResultsPage extends StatelessWidget {
     required this.response,
     required this.isError,
     required this.language,
-    required this.drawText,
   });
+
+  @override
+  State<ResultsPage> createState() => _ResultsPageState();
+}
+
+class _ResultsPageState extends State<ResultsPage> {
+  TranslationResponse? _translations;
+  bool _isLoadingTranslations = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTranslations();
+  }
+
+  Future<void> _loadTranslations() async {
+    try {
+      final translations = await TeamService.fetchTranslations(widget.language);
+      setState(() {
+        _translations = translations;
+        _isLoadingTranslations = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingTranslations = false;
+      });
+    }
+  
 
   Widget _buildResponseContent() {
     if (isError) {
@@ -46,7 +74,7 @@ class ResultsPage extends StatelessWidget {
       return PredictionReportWidget(
         prediction: prediction,
         language: language,
-        drawText: drawText,
+        translations: translations,
       );
     } catch (e) {
       return SingleChildScrollView(
@@ -111,7 +139,7 @@ class ResultsPage extends StatelessWidget {
       appBar: AppBar(
         title: Row(
           children: [
-            const Text('Results'),
+            Text(translations.results),
             const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -159,11 +187,11 @@ class ResultsPage extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Text(
-                    'VS',
-                    style: TextStyle(
+                    translations.vs,
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: Colors.grey,

@@ -6,6 +6,7 @@ import '../config/environment.dart';
 import '../config/league_logos_config.dart';
 import '../models/team.dart';
 import '../models/fixture.dart';
+import '../models/translation_response.dart';
 import '../services/team_service.dart';
 import '../widgets/custom_match_widget.dart';
 import '../widgets/upcoming_games_widget.dart';
@@ -27,10 +28,10 @@ class _HomePageState extends State<HomePage> {
   String? _loadError;
   String _selectedLanguage = 'en';
   String? _selectedLeague;
+  TranslationResponse? _translations;
   Map<String, String> _leagueTranslations = {};
   String _aboutText = '';
   String _selectLeagueText = 'Select League';
-  String _drawText = 'Draw';
   String _appVersion = '';
   String _buildNumber = '';
   BannerAd? _bannerAd;
@@ -100,10 +101,10 @@ class _HomePageState extends State<HomePage> {
     try {
       final translations = await TeamService.fetchTranslations(_selectedLanguage);
       setState(() {
+        _translations = translations;
         _leagueTranslations = translations.leagueTranslations;
         _aboutText = translations.about;
         _selectLeagueText = translations.selectLeague;
-        _drawText = translations.draw;
       });
     } catch (e) {
       setState(() {
@@ -320,21 +321,21 @@ class _HomePageState extends State<HomePage> {
               _buildModeSelector(),
             ],
             const SizedBox(height: 24),
-            if (_matchMode == 'custom')
+            if (_matchMode == 'custom' && _translations != null)
               CustomMatchWidget(
                 leagueTeams: _leagueTeams,
                 selectedLeague: _selectedLeague,
                 isLoadingTeams: _isLoadingTeams,
                 selectedLanguage: _selectedLanguage,
-                drawText: _drawText,
+                translations: _translations!,
               )
-            else
+            else if (_translations != null)
               UpcomingGamesWidget(
                 upcomingFixtures: _upcomingFixtures,
                 isLoadingFixtures: _isLoadingFixtures,
                 selectedLanguage: _selectedLanguage,
-                drawText: _drawText,
                 selectedLeague: _selectedLeague ?? '',
+                translations: _translations!,
               ),
           ],
         ),

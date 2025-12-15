@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
 import '../config/environment.dart';
 import '../models/fixture.dart';
+import '../models/translation_response.dart';
 import '../services/admob_service.dart';
 import '../pages/results_page.dart';
 
@@ -13,16 +14,16 @@ class UpcomingGamesWidget extends StatefulWidget {
   final List<Fixture> upcomingFixtures;
   final bool isLoadingFixtures;
   final String selectedLanguage;
-  final String drawText;
   final String selectedLeague;
+  final TranslationResponse translations;
 
   const UpcomingGamesWidget({
     super.key,
     required this.upcomingFixtures,
     required this.isLoadingFixtures,
     required this.selectedLanguage,
-    required this.drawText,
     required this.selectedLeague,
+    required this.translations,
   });
 
   @override
@@ -110,7 +111,7 @@ class _UpcomingGamesWidgetState extends State<UpcomingGamesWidget> {
           response: responseText,
           isError: isError,
           language: widget.selectedLanguage,
-          drawText: widget.drawText,
+          translations: widget.translations,
         ),
       ),
     );

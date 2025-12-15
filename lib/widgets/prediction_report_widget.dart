@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui' as ui;
 import '../models/prediction_response.dart';
+import '../models/translation_response.dart';
 
 class PredictionReportWidget extends StatelessWidget {
   final PredictionResponse prediction;
   final String language;
-  final String drawText;
+  final TranslationResponse translations;
 
   const PredictionReportWidget({
     super.key,
     required this.prediction,
     this.language = 'en',
-    this.drawText = 'Draw',
+    required this.translations,
   });
 
   @override
@@ -88,10 +89,10 @@ class PredictionReportWidget extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                 ),
-                const Padding(
+                Padding(
                   padding: EdgeInsets.symmetric(horizontal: 12),
                   child: Text(
-                    'VS',
+                    translations.vs,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -184,8 +185,8 @@ class PredictionReportWidget extends StatelessWidget {
               children: [
                 Icon(Icons.analytics, color: Colors.blue.shade700, size: 24),
                 const SizedBox(width: 8),
-                const Text(
-                  'Win Probabilities',
+                Text(
+                  translations.winProbabilities,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -196,7 +197,7 @@ class PredictionReportWidget extends StatelessWidget {
             const SizedBox(height: 16),
             _buildProbabilityBar(topTeam, topPercentage, Colors.green),
             const SizedBox(height: 12),
-            _buildProbabilityBar(drawText, draw, Colors.orange),
+            _buildProbabilityBar(translations.draw, draw, Colors.orange),
             const SizedBox(height: 12),
             _buildProbabilityBar(bottomTeam, bottomPercentage, Colors.red),
           ],
@@ -255,8 +256,8 @@ class PredictionReportWidget extends StatelessWidget {
               children: [
                 Icon(Icons.lightbulb, color: Colors.amber.shade700, size: 24),
                 const SizedBox(width: 8),
-                const Text(
-                  'Prediction Justification',
+                Text(
+                  translations.predictionJustification,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -285,7 +286,7 @@ class PredictionReportWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Detailed Analysis',
+          translations.detailedAnalysis,
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -296,35 +297,39 @@ class PredictionReportWidget extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         _buildExpandableCard(
-          'Recent Form Analysis',
+          translations.recentFormAnalysis,
           prediction.analysis.recentFormAnalysis,
           Icons.trending_up,
           Colors.blue,
           isRtl,
+          false,
         ),
         const SizedBox(height: 8),
         _buildExpandableCard(
-          'Expected Goals (xG) Analysis',
+          translations.expectedGoalsAnalysis,
           prediction.analysis.xGAnalysis,
           Icons.sports_soccer,
           Colors.green,
           isRtl,
+          false,
         ),
         const SizedBox(height: 8),
         _buildExpandableCard(
-          'Head-to-Head Summary',
+          translations.headToHeadSummary,
           prediction.analysis.headToHeadSummary,
           Icons.history,
           Colors.purple,
           isRtl,
+          false,
         ),
         const SizedBox(height: 8),
         _buildExpandableCard(
-          'Key News & Injuries',
+          translations.keyNewsInjuries,
           prediction.analysis.keyNews,
           Icons.medical_services,
           Colors.red,
           isRtl,
+          false,
         ),
       ],
     );
@@ -336,6 +341,7 @@ class PredictionReportWidget extends StatelessWidget {
     IconData icon,
     Color color,
     bool isRtl,
+    bool initiallyExpanded,
   ) {
     return _ExpandableCardWidget(
       title: title,
@@ -343,6 +349,7 @@ class PredictionReportWidget extends StatelessWidget {
       icon: icon,
       color: color,
       isRtl: isRtl,
+      initiallyExpanded: initiallyExpanded,
     );
   }
 }
@@ -353,6 +360,7 @@ class _ExpandableCardWidget extends StatefulWidget {
   final IconData icon;
   final Color color;
   final bool isRtl;
+  final bool initiallyExpanded;
 
   const _ExpandableCardWidget({
     required this.title,
@@ -360,6 +368,7 @@ class _ExpandableCardWidget extends StatefulWidget {
     required this.icon,
     required this.color,
     required this.isRtl,
+    this.initiallyExpanded = false,
   });
 
   @override
@@ -367,7 +376,13 @@ class _ExpandableCardWidget extends StatefulWidget {
 }
 
 class _ExpandableCardWidgetState extends State<_ExpandableCardWidget> {
-  bool _isExpanded = false;
+  late bool _isExpanded;
+
+  @override
+  void initState() {
+    super.initState();
+    _isExpanded = widget.initiallyExpanded;
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import '../config/environment.dart';
 import '../models/team.dart';
+import '../models/translation_response.dart';
 import '../services/admob_service.dart';
 import '../pages/results_page.dart';
 import 'team_autocomplete_field.dart';
@@ -14,7 +15,7 @@ class CustomMatchWidget extends StatefulWidget {
   final String? selectedLeague;
   final bool isLoadingTeams;
   final String selectedLanguage;
-  final String drawText;
+  final TranslationResponse translations;
 
   const CustomMatchWidget({
     super.key,
@@ -22,7 +23,7 @@ class CustomMatchWidget extends StatefulWidget {
     required this.selectedLeague,
     required this.isLoadingTeams,
     required this.selectedLanguage,
-    required this.drawText,
+    required this.translations,
   });
 
   @override
@@ -140,7 +141,7 @@ class _CustomMatchWidgetState extends State<CustomMatchWidget> {
           response: responseText,
           isError: isError,
           language: widget.selectedLanguage,
-          drawText: widget.drawText,
+          translations: widget.translations,
         ),
       ),
     );
