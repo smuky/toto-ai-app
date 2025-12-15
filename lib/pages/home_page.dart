@@ -849,7 +849,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      fixture.homeTeam,
+                      fixture.effectiveHomeTeam,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 12,
@@ -922,7 +922,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      fixture.awayTeam,
+                      fixture.effectiveAwayTeam,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 12,
@@ -961,19 +961,19 @@ class _HomePageState extends State<HomePage> {
       _matchMode = 'custom';
       // Find the teams in the league teams list
       _selectedHomeTeam = _leagueTeams.firstWhere(
-        (team) => team.effectiveName == fixture.homeTeam,
+        (team) => team.effectiveName == fixture.effectiveHomeTeam,
         orElse: () => Team(
           id: 0,
-          name: fixture.homeTeam,
+          name: fixture.effectiveHomeTeam,
           leagueEnum: _selectedLeague!,
           logo: fixture.homeTeamLogo,
         ),
       );
       _selectedAwayTeam = _leagueTeams.firstWhere(
-        (team) => team.effectiveName == fixture.awayTeam,
+        (team) => team.effectiveName == fixture.effectiveAwayTeam,
         orElse: () => Team(
           id: 0,
-          name: fixture.awayTeam,
+          name: fixture.effectiveAwayTeam,
           leagueEnum: _selectedLeague!,
           logo: fixture.awayTeamLogo,
         ),

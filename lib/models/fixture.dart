@@ -1,7 +1,9 @@
 class Fixture {
   final int fixtureId;
   final String homeTeam;
+  final String? homeTeamDisplayName;
   final String awayTeam;
+  final String? awayTeamDisplayName;
   final String homeTeamLogo;
   final String awayTeamLogo;
   final DateTime date;
@@ -11,13 +13,18 @@ class Fixture {
   Fixture({
     required this.fixtureId,
     required this.homeTeam,
+    this.homeTeamDisplayName,
     required this.awayTeam,
+    this.awayTeamDisplayName,
     required this.homeTeamLogo,
     required this.awayTeamLogo,
     required this.date,
     required this.status,
     required this.venue,
   });
+
+  String get effectiveHomeTeam => homeTeamDisplayName ?? homeTeam;
+  String get effectiveAwayTeam => awayTeamDisplayName ?? awayTeam;
 
   factory Fixture.fromJson(Map<String, dynamic> json) {
     final fixture = json['fixture'] as Map<String, dynamic>? ?? {};
@@ -30,7 +37,9 @@ class Fixture {
     return Fixture(
       fixtureId: fixture['id'] ?? 0,
       homeTeam: home['name'] ?? '',
+      homeTeamDisplayName: home['displayName'] as String?,
       awayTeam: away['name'] ?? '',
+      awayTeamDisplayName: away['displayName'] as String?,
       homeTeamLogo: home['logo'] ?? '',
       awayTeamLogo: away['logo'] ?? '',
       date: DateTime.parse(fixture['date'] ?? DateTime.now().toIso8601String()),
