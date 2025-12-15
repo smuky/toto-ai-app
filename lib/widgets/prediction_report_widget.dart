@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'dart:ui' as ui;
 import '../models/prediction_response.dart';
 import '../models/translation_response.dart';
+import '../utils/text_direction_helper.dart';
 
 class PredictionReportWidget extends StatelessWidget {
   final PredictionResponse prediction;
@@ -179,17 +180,22 @@ class PredictionReportWidget extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
+              textDirection: TextDirectionHelper.getTextDirection(language),
               children: [
                 Icon(Icons.analytics, color: Colors.blue.shade700, size: 24),
                 const SizedBox(width: 8),
-                Text(
-                  translations.winProbabilities,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    translations.winProbabilities,
+                    textAlign: TextDirectionHelper.getTextAlign(language),
+                    textDirection: TextDirectionHelper.getTextDirection(language),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -250,17 +256,22 @@ class PredictionReportWidget extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
+              textDirection: TextDirectionHelper.getTextDirection(language),
               children: [
                 Icon(Icons.lightbulb, color: Colors.amber.shade700, size: 24),
                 const SizedBox(width: 8),
-                Text(
-                  translations.predictionJustification,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    translations.predictionJustification,
+                    textAlign: TextDirectionHelper.getTextAlign(language),
+                    textDirection: TextDirectionHelper.getTextDirection(language),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -292,8 +303,8 @@ class PredictionReportWidget extends StatelessWidget {
             fontWeight: FontWeight.bold,
             color: Colors.blue.shade700,
           ),
-          textAlign: isRtl ? TextAlign.right : TextAlign.left,
-          textDirection: isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+          textAlign: TextDirectionHelper.getTextAlign(language),
+          textDirection: TextDirectionHelper.getTextDirection(language),
         ),
         const SizedBox(height: 12),
         _buildExpandableCard(
@@ -405,11 +416,12 @@ class _ExpandableCardWidgetState extends State<_ExpandableCardWidget> {
                   Expanded(
                     child: Text(
                       widget.title,
+                      textAlign: widget.isRtl ? TextAlign.right : TextAlign.left,
+                      textDirection: widget.isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
-                      textDirection: widget.isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
                     ),
                   ),
                   Icon(

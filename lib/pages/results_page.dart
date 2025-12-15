@@ -110,28 +110,22 @@ class ResultsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            Text(translations.results),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppConfig.environment == Environment.prod
-                    ? Colors.green
-                    : Colors.orange,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                AppConfig.environment == Environment.prod ? 'LIVE' : 'LOCAL',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
+        title: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: AppConfig.environment == Environment.prod
+                ? Colors.green
+                : Colors.orange,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(
+            AppConfig.environment == Environment.prod ? 'LIVE' : 'LOCAL',
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
-          ],
+          ),
         ),
         automaticallyImplyLeading: false,
       ),

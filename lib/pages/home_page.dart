@@ -8,6 +8,7 @@ import '../models/team.dart';
 import '../models/fixture.dart';
 import '../models/translation_response.dart';
 import '../services/team_service.dart';
+import '../utils/text_direction_helper.dart';
 import '../widgets/custom_match_widget.dart';
 import '../widgets/upcoming_games_widget.dart';
 import '../services/language_preference_service.dart';
@@ -178,6 +179,7 @@ class _HomePageState extends State<HomePage> {
       aboutText: _aboutText,
       appVersion: _appVersion,
       buildNumber: _buildNumber,
+      language: _selectedLanguage,
     );
   }
 
@@ -392,37 +394,49 @@ class _HomePageState extends State<HomePage> {
               child: Icon(Icons.sports_soccer, color: Colors.blue, size: 28),
             ),
           Expanded(
-            child: DropdownButton<String>(
-              value: _selectedLeague,
-              hint: Text(_selectLeagueText),
-              isExpanded: true,
-              underline: const SizedBox(),
-              items: _availableLeagues.map((league) {
-                final translatedName = _leagueTranslations[league] ?? league;
-                return DropdownMenuItem<String>(
-                  value: league,
-                  child: Text(
-                    translatedName,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+            child: Directionality(
+              textDirection: TextDirectionHelper.getTextDirection(_selectedLanguage),
+              child: DropdownButton<String>(
+                value: _selectedLeague,
+                hint: Text(
+                  _selectLeagueText,
+                  textAlign: TextDirectionHelper.getTextAlign(_selectedLanguage),
+                  textDirection: TextDirectionHelper.getTextDirection(_selectedLanguage),
+                ),
+                isExpanded: true,
+                underline: const SizedBox(),
+                items: _availableLeagues.map((league) {
+                  final translatedName = _leagueTranslations[league] ?? league;
+                  return DropdownMenuItem<String>(
+                    value: league,
+                    alignment: TextDirectionHelper.isRTL(_selectedLanguage) 
+                        ? AlignmentDirectional.centerEnd 
+                        : AlignmentDirectional.centerStart,
+                    child: Text(
+                      translatedName,
+                      textAlign: TextDirectionHelper.getTextAlign(_selectedLanguage),
+                      textDirection: TextDirectionHelper.getTextDirection(_selectedLanguage),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                );
+                  );
               }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedLeague = newValue;
-                  _leagueTeams = [];
-                  _upcomingFixtures = [];
-                });
-                if (newValue != null) {
-                  _loadTeamsForLeague(newValue);
-                  if (_matchMode == 'upcoming') {
-                    _loadUpcomingFixtures(newValue);
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedLeague = newValue;
+                    _leagueTeams = [];
+                    _upcomingFixtures = [];
+                  });
+                  if (newValue != null) {
+                    _loadTeamsForLeague(newValue);
+                    if (_matchMode == 'upcoming') {
+                      _loadUpcomingFixtures(newValue);
+                    }
                   }
-                }
-              },
+                },
+              ),
             ),
           ),
         ],
