@@ -46,7 +46,7 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>GADApplicationIdentifier</key>
-	<string>$(ADMOB_APP_ID)</string>
+	<string>ca-app-pub-3174197364390991~1671937563</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>

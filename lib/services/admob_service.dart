@@ -5,8 +5,8 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 class AdMobService {
   static const String _prodAndroidBannerAdUnitId = 'ca-app-pub-3174197364390991/5036467502';
   static const String _prodIosBannerAdUnitId = 'ca-app-pub-3174197364390991/5036467502';
-  static const String _prodAndroidInterstitialAdUnitId = 'YOUR_ANDROID_INTERSTITIAL_AD_UNIT_ID';
-  static const String _prodIosInterstitialAdUnitId = 'YOUR_IOS_INTERSTITIAL_AD_UNIT_ID';
+  static const String _prodAndroidInterstitialAdUnitId = 'ca-app-pub-3174197364390991/1362985800';
+  static const String _prodIosInterstitialAdUnitId = 'ca-app-pub-3174197364390991/1362985800';
 
   static const String _testAndroidBannerAdUnitId = 'ca-app-pub-3940256099942544/6300978111';
   static const String _testIosBannerAdUnitId = 'ca-app-pub-3940256099942544/2934735716';
