@@ -13,8 +13,7 @@ import '../widgets/custom_match_widget.dart';
 import '../widgets/upcoming_games_widget.dart';
 import '../services/language_preference_service.dart';
 import '../services/admob_service.dart';
-import '../widgets/about_dialog.dart';
-import '../widgets/language_selector_dialog.dart';
+import '../pages/settings_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -173,30 +172,30 @@ class _HomePageState extends State<HomePage> {
     return leagues;
   }
 
-  void _showAboutDialog() {
-    showAboutAppDialog(
-      context: context,
-      aboutText: _aboutText,
-      appVersion: _appVersion,
-      buildNumber: _buildNumber,
-      language: _selectedLanguage,
-    );
-  }
-
-  void _showLanguageMenu() {
-    showLanguageSelectorDialog(
-      context: context,
-      selectedLanguage: _selectedLanguage,
-      onLanguageSelected: (language) async {
-        setState(() {
-          _selectedLanguage = language;
-        });
-        await LanguagePreferenceService.setLanguage(language);
-        _loadTranslations();
-        if (_selectedLeague != null) {
-          _loadTeamsForLeague(_selectedLeague!);
-        }
-      },
+  void _navigateToSettings() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SettingsPage(
+          selectedLanguage: _selectedLanguage,
+          aboutText: _aboutText,
+          appVersion: _appVersion,
+          buildNumber: _buildNumber,
+          onLanguageChanged: (language) async {
+            setState(() {
+              _selectedLanguage = language;
+            });
+            await _loadTranslations();
+            if (_selectedLeague != null) {
+              if (_matchMode == 'upcoming') {
+                _loadUpcomingFixtures(_selectedLeague!);
+              } else {
+                _loadTeamsForLeague(_selectedLeague!);
+              }
+            }
+          },
+        ),
+      ),
     );
   }
 
@@ -267,21 +266,9 @@ class _HomePageState extends State<HomePage> {
             shape: BoxShape.circle,
           ),
           child: IconButton(
-            icon: const Icon(Icons.language, color: Colors.white),
-            onPressed: _showLanguageMenu,
-            tooltip: 'Language',
-          ),
-        ),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0F172A).withValues(alpha: 0.9),
-            shape: BoxShape.circle,
-          ),
-          child: IconButton(
-            icon: const Icon(Icons.info_outline, color: Colors.white),
-            onPressed: _showAboutDialog,
-            tooltip: 'About',
+            icon: const Icon(Icons.settings, color: Colors.white),
+            onPressed: _navigateToSettings,
+            tooltip: 'Settings',
           ),
         ),
       ],
