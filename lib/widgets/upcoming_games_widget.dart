@@ -1,14 +1,8 @@
-import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
-import '../config/environment.dart';
 import '../models/fixture.dart';
 import '../models/translation_response.dart';
-import '../services/admob_service.dart';
-import '../pages/results_page.dart';
+import '../services/prediction_service.dart';
 
 class UpcomingGamesWidget extends StatefulWidget {
   final List<Fixture> upcomingFixtures;
@@ -34,86 +28,24 @@ class _UpcomingGamesWidgetState extends State<UpcomingGamesWidget> {
   int? _analyzingFixtureId;
 
   Future<void> _analyzeFixture(Fixture fixture) async {
-    final home = fixture.effectiveHomeTeam;
-    final away = fixture.effectiveAwayTeam;
-    final league = widget.selectedLeague;
-
     setState(() {
       _analyzingFixtureId = fixture.fixtureId;
     });
 
-    Timer? hapticTimer;
-    hapticTimer = Timer.periodic(const Duration(milliseconds: 1000), (timer) {
-      HapticFeedback.lightImpact();
-    });
-
-    String responseText;
-    bool isError;
-
-    try {
-      final uri = AppConfig.isHttps
-          ? Uri.https(
-              AppConfig.apiBaseUrl,
-              AppConfig.apiPath,
-              {
-                'home-team': home,
-                'away-team': away,
-                'league': league,
-                'language': widget.selectedLanguage.toUpperCase(),
-              },
-            )
-          : Uri.http(
-              AppConfig.apiBaseUrl,
-              AppConfig.apiPath,
-              {
-                'home-team': home,
-                'away-team': away,
-                'league': league,
-                'language': widget.selectedLanguage.toUpperCase(),
-              },
-            );
-
-      final response = await http.get(uri);
-
-      if (!mounted) return;
-
-      if (response.statusCode == 200) {
-        responseText = response.body;
-        isError = false;
-      } else {
-        responseText = 'Server returned status ${response.statusCode}.\n\nBody:\n${response.body}';
-        isError = true;
-      }
-    } catch (e) {
-      if (!mounted) return;
-      responseText = 'Failed to contact server:\n$e';
-      isError = true;
-    }
-
-    hapticTimer.cancel();
-
-    setState(() {
-      _analyzingFixtureId = null;
-    });
-
-    if (!mounted) return;
-
-    if (kReleaseMode && AdMobService.isInterstitialAdReady) {
-      AdMobService.showInterstitialAd();
-    }
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ResultsPage(
-          homeTeam: home,
-          awayTeam: away,
-          response: responseText,
-          isError: isError,
-          language: widget.selectedLanguage,
-          translations: widget.translations,
-        ),
-      ),
+    await PredictionService.fetchPredictionAndNavigate(
+      context: context,
+      homeTeam: fixture.effectiveHomeTeam,
+      awayTeam: fixture.effectiveAwayTeam,
+      league: widget.selectedLeague,
+      language: widget.selectedLanguage,
+      translations: widget.translations,
+      onLoadingChanged: (isLoading) {
+        if (mounted) {
+          setState(() {
+            _analyzingFixtureId = isLoading ? fixture.fixtureId : null;
+          });
+        }
+      },
     );
   }
 

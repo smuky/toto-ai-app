@@ -1,13 +1,7 @@
-import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import '../config/environment.dart';
 import '../models/team.dart';
 import '../models/translation_response.dart';
-import '../services/admob_service.dart';
-import '../pages/results_page.dart';
+import '../services/prediction_service.dart';
 import 'team_autocomplete_field.dart';
 
 class CustomMatchWidget extends StatefulWidget {
@@ -64,86 +58,20 @@ class _CustomMatchWidgetState extends State<CustomMatchWidget> {
   Future<void> _onGoPressed() async {
     if (_selectedHomeTeam == null || _selectedAwayTeam == null) return;
     
-    final home = _selectedHomeTeam!.name;
-    final away = _selectedAwayTeam!.name;
-    final league = _selectedHomeTeam!.leagueEnum;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    Timer? hapticTimer;
-    hapticTimer = Timer.periodic(const Duration(milliseconds: 1000), (timer) {
-      HapticFeedback.lightImpact();
-    });
-
-    String responseText;
-    bool isError;
-
-    try {
-      final uri = AppConfig.isHttps
-          ? Uri.https(
-              AppConfig.apiBaseUrl,
-              AppConfig.apiPath,
-              {
-                'home-team': home,
-                'away-team': away,
-                'league': league,
-                'language': widget.selectedLanguage.toUpperCase(),
-              },
-            )
-          : Uri.http(
-              AppConfig.apiBaseUrl,
-              AppConfig.apiPath,
-              {
-                'home-team': home,
-                'away-team': away,
-                'league': league,
-                'language': widget.selectedLanguage.toUpperCase(),
-              },
-            );
-
-      final response = await http.get(uri);
-
-      if (!mounted) return;
-
-      if (response.statusCode == 200) {
-        responseText = response.body;
-        isError = false;
-      } else {
-        responseText = 'Server returned status ${response.statusCode}.\n\nBody:\n${response.body}';
-        isError = true;
-      }
-    } catch (e) {
-      if (!mounted) return;
-      responseText = 'Failed to contact server:\n$e';
-      isError = true;
-    }
-
-    hapticTimer.cancel();
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (!mounted) return;
-
-    if (kReleaseMode && AdMobService.isInterstitialAdReady) {
-      AdMobService.showInterstitialAd();
-    }
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ResultsPage(
-          homeTeam: home,
-          awayTeam: away,
-          response: responseText,
-          isError: isError,
-          language: widget.selectedLanguage,
-          translations: widget.translations,
-        ),
-      ),
+    await PredictionService.fetchPredictionAndNavigate(
+      context: context,
+      homeTeam: _selectedHomeTeam!.effectiveName,
+      awayTeam: _selectedAwayTeam!.effectiveName,
+      league: _selectedHomeTeam!.leagueEnum,
+      language: widget.selectedLanguage,
+      translations: widget.translations,
+      onLoadingChanged: (isLoading) {
+        if (mounted) {
+          setState(() {
+            _isLoading = isLoading;
+          });
+        }
+      },
     );
   }
 
