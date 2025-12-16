@@ -408,7 +408,7 @@ class _UpcomingGamesWidgetState extends State<UpcomingGamesWidget> {
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   )
                 : const Icon(Icons.analytics, size: 18),
-            label: Text(isAnalyzing ? 'Analyzing...' : 'Analyze Match'),
+            label: Text(isAnalyzing ? widget.translations.analyzing : widget.translations.analyzeMatch),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue.shade700,
               foregroundColor: Colors.white,
