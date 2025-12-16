@@ -29,10 +29,12 @@ class _SettingsPageState extends State<SettingsPage> {
   int _reviewCount = 0;
   bool _reviewCompleted = false;
   DateTime? _lastReviewDate;
+  late String _currentLanguage;
 
   @override
   void initState() {
     super.initState();
+    _currentLanguage = widget.selectedLanguage;
     _loadReviewData();
   }
 
@@ -64,7 +66,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 context: context,
                 icon: Icons.language,
                 title: 'Language',
-                subtitle: _getLanguageDisplayName(widget.selectedLanguage),
+                subtitle: _getLanguageDisplayName(_currentLanguage),
                 onTap: () => _showLanguageSelector(context),
               ),
             ],
@@ -222,9 +224,12 @@ class _SettingsPageState extends State<SettingsPage> {
   void _showLanguageSelector(BuildContext context) {
     showLanguageSelectorDialog(
       context: context,
-      selectedLanguage: widget.selectedLanguage,
+      selectedLanguage: _currentLanguage,
       onLanguageSelected: (language) async {
         await LanguagePreferenceService.setLanguage(language);
+        setState(() {
+          _currentLanguage = language;
+        });
         widget.onLanguageChanged(language);
       },
     );
