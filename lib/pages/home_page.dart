@@ -473,6 +473,9 @@ class _HomePageState extends State<HomePage> {
                 setState(() {
                   _matchMode = 'custom';
                 });
+                if (_selectedLeague != null && _leagueTeams.isEmpty) {
+                  _loadTeamsForLeague(_selectedLeague!);
+                }
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
