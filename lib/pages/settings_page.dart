@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import '../widgets/about_dialog.dart';
 import '../widgets/language_selector_dialog.dart';
 import '../services/language_preference_service.dart';
+import '../services/review_service.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   final String selectedLanguage;
   final String aboutText;
   final String appVersion;
@@ -18,6 +19,32 @@ class SettingsPage extends StatelessWidget {
     required this.buildNumber,
     required this.onLanguageChanged,
   });
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  int _reviewCount = 0;
+  bool _reviewCompleted = false;
+  DateTime? _lastReviewDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReviewData();
+  }
+
+  Future<void> _loadReviewData() async {
+    final count = await ReviewService.getResultCount();
+    final completed = await ReviewService.hasCompletedReview();
+    final date = await ReviewService.getLastReviewRequestDate();
+    setState(() {
+      _reviewCount = count;
+      _reviewCompleted = completed;
+      _lastReviewDate = date;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +63,7 @@ class SettingsPage extends StatelessWidget {
                 context: context,
                 icon: Icons.language,
                 title: 'Language',
-                subtitle: _getLanguageDisplayName(selectedLanguage),
+                subtitle: _getLanguageDisplayName(widget.selectedLanguage),
                 onTap: () => _showLanguageSelector(context),
               ),
             ],
@@ -53,6 +80,15 @@ class SettingsPage extends StatelessWidget {
                 subtitle: 'App information and version',
                 onTap: () => _showAbout(context),
               ),
+            ],
+          ),
+          const Divider(height: 1),
+          _buildSettingsSection(
+            context: context,
+            title: 'Debug (Development Only)',
+            items: [
+              _buildDebugInfoTile(context),
+              _buildResetReviewTile(context),
             ],
           ),
         ],
@@ -112,13 +148,69 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
+  Widget _buildDebugInfoTile(BuildContext context) {
+    return ListTile(
+      leading: Icon(Icons.bug_report, color: Colors.orange.shade700),
+      title: const Text(
+        'Review Data',
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      subtitle: Text(
+        'Count: $_reviewCount | Completed: $_reviewCompleted${_lastReviewDate != null ? '\nLast request: ${_lastReviewDate!.toLocal()}' : ''}',
+        style: TextStyle(
+          fontSize: 12,
+          color: Colors.grey.shade600,
+        ),
+      ),
+      isThreeLine: _lastReviewDate != null,
+    );
+  }
+
+  Widget _buildResetReviewTile(BuildContext context) {
+    return ListTile(
+      leading: Icon(Icons.refresh, color: Colors.red.shade700),
+      title: const Text(
+        'Reset Review Counter',
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      subtitle: Text(
+        'Clear review data for testing',
+        style: TextStyle(
+          fontSize: 14,
+          color: Colors.grey.shade600,
+        ),
+      ),
+      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+      onTap: () => _resetReviewData(context),
+    );
+  }
+
+  Future<void> _resetReviewData(BuildContext context) async {
+    await ReviewService.resetReviewData();
+    await _loadReviewData();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Review data reset successfully'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   void _showLanguageSelector(BuildContext context) {
     showLanguageSelectorDialog(
       context: context,
-      selectedLanguage: selectedLanguage,
+      selectedLanguage: widget.selectedLanguage,
       onLanguageSelected: (language) async {
         await LanguagePreferenceService.setLanguage(language);
-        onLanguageChanged(language);
+        widget.onLanguageChanged(language);
       },
     );
   }
@@ -126,10 +218,10 @@ class SettingsPage extends StatelessWidget {
   void _showAbout(BuildContext context) {
     showAboutAppDialog(
       context: context,
-      aboutText: aboutText,
-      appVersion: appVersion,
-      buildNumber: buildNumber,
-      language: selectedLanguage,
+      aboutText: widget.aboutText,
+      appVersion: widget.appVersion,
+      buildNumber: widget.buildNumber,
+      language: widget.selectedLanguage,
     );
   }
 

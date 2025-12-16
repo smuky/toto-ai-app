@@ -7,6 +7,7 @@ import '../config/environment.dart';
 import '../models/translation_response.dart';
 import '../pages/results_page.dart';
 import '../services/admob_service.dart';
+import '../services/review_service.dart';
 
 class PredictionService {
   /// Fetches prediction from the API and navigates to ResultsPage
@@ -85,6 +86,11 @@ class PredictionService {
 
     // Check if context is still mounted before navigation
     if (!context.mounted) return;
+
+    // Increment review counter if result was successful (not an error)
+    if (!isError) {
+      await ReviewService.onResultReceived();
+    }
 
     // Show interstitial ad if available
     if (kReleaseMode && AdMobService.isInterstitialAdReady) {
