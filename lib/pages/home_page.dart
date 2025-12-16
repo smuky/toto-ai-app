@@ -14,6 +14,8 @@ import '../widgets/upcoming_games_widget.dart';
 import '../services/language_preference_service.dart';
 import '../services/admob_service.dart';
 import '../pages/settings_page.dart';
+import '../services/version_check_service.dart';
+import '../widgets/update_required_dialog.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -59,6 +61,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _initializeApp() async {
     await _loadLanguagePreference();
     await _loadAppVersion();
+    await _checkAppVersion();
     await _loadTranslations();
     
     // Load initial data based on default state
@@ -74,9 +77,33 @@ class _HomePageState extends State<HomePage> {
   Future<void> _loadAppVersion() async {
     final packageInfo = await PackageInfo.fromPlatform();
     setState(() {
-      _appVersion = packageInfo.version;
+      _appVersion = '${packageInfo.version}+${packageInfo.buildNumber}';
       _buildNumber = packageInfo.buildNumber;
     });
+  }
+
+  Future<void> _checkAppVersion() async {
+    try {
+      print('HomePage: Checking app version: $_appVersion');
+      final isSupported = await VersionCheckService.isVersionSupported(_appVersion);
+      print('HomePage: Version supported: $isSupported');
+      
+      if (!isSupported && mounted) {
+        // Get minimum version for the dialog
+        final minVersion = await VersionCheckService.getMinimumVersion();
+        print('HomePage: Showing update dialog - Current: $_appVersion, Min: $minVersion');
+        
+        // Show update required dialog
+        showUpdateRequiredDialog(
+          context: context,
+          currentVersion: _appVersion,
+          minimumVersion: minVersion ?? 'Unknown',
+        );
+      }
+    } catch (e) {
+      print('HomePage: Error checking app version: $e');
+      // Continue with app initialization on error
+    }
   }
 
   void _loadBannerAd() {
