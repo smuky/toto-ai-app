@@ -21,7 +21,7 @@ void showAboutAppDialog({
           ],
         ),
         content: Text(
-          '$aboutText\n\nVersion: $appVersion ($buildNumber)',
+          '$aboutText\n\nVersion: $appVersion',
           textAlign: TextDirectionHelper.getTextAlign(language),
           textDirection: TextDirectionHelper.getTextDirection(language),
           style: const TextStyle(fontSize: 15, height: 1.5, color: Colors.white),
