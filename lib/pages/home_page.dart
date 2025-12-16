@@ -412,11 +412,35 @@ class _HomePageState extends State<HomePage> {
               textDirection: TextDirectionHelper.getTextDirection(_selectedLanguage),
               child: DropdownButton<String>(
                 value: _selectedLeague,
-                hint: Text(
-                  _selectLeagueText,
-                  textAlign: TextDirectionHelper.getTextAlign(_selectedLanguage),
-                  textDirection: TextDirectionHelper.getTextDirection(_selectedLanguage),
+                hint: Align(
+                  alignment: TextDirectionHelper.isRTL(_selectedLanguage)
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft,
+                  child: Text(
+                    _selectLeagueText,
+                    textAlign: TextDirectionHelper.getTextAlign(_selectedLanguage),
+                    textDirection: TextDirectionHelper.getTextDirection(_selectedLanguage),
+                  ),
                 ),
+                selectedItemBuilder: (BuildContext context) {
+                  return _availableLeagues.map((league) {
+                    final translatedName = _leagueTranslations[league] ?? league;
+                    return Align(
+                      alignment: TextDirectionHelper.isRTL(_selectedLanguage)
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
+                      child: Text(
+                        translatedName,
+                        textAlign: TextDirectionHelper.getTextAlign(_selectedLanguage),
+                        textDirection: TextDirectionHelper.getTextDirection(_selectedLanguage),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    );
+                  }).toList();
+                },
                 isExpanded: true,
                 underline: const SizedBox(),
                 items: _availableLeagues.map((league) {
