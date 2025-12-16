@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/about_dialog.dart';
 import '../widgets/language_selector_dialog.dart';
+import '../widgets/feedback_dialog.dart';
 import '../services/language_preference_service.dart';
 import '../services/review_service.dart';
 
@@ -65,6 +66,20 @@ class _SettingsPageState extends State<SettingsPage> {
                 title: 'Language',
                 subtitle: _getLanguageDisplayName(widget.selectedLanguage),
                 onTap: () => _showLanguageSelector(context),
+              ),
+            ],
+          ),
+          const Divider(height: 1),
+          _buildSettingsSection(
+            context: context,
+            title: 'Support',
+            items: [
+              _buildSettingsTile(
+                context: context,
+                icon: Icons.feedback_outlined,
+                title: 'Send Feedback',
+                subtitle: 'Share your ideas or report issues',
+                onTap: () => _showFeedback(context),
               ),
             ],
           ),
@@ -213,6 +228,10 @@ class _SettingsPageState extends State<SettingsPage> {
         widget.onLanguageChanged(language);
       },
     );
+  }
+
+  void _showFeedback(BuildContext context) {
+    showFeedbackDialog(context);
   }
 
   void _showAbout(BuildContext context) {
