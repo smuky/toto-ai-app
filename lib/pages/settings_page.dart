@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../widgets/about_dialog.dart';
 import '../widgets/language_selector_dialog.dart';
 import '../widgets/feedback_dialog.dart';
@@ -96,6 +97,13 @@ class _SettingsPageState extends State<SettingsPage> {
                 title: 'About',
                 subtitle: 'App information and version',
                 onTap: () => _showAbout(context),
+              ),
+              _buildSettingsTile(
+                context: context,
+                icon: Icons.privacy_tip_outlined,
+                title: 'Terms of Use & Privacy Policy',
+                subtitle: 'View our terms and privacy policy',
+                onTap: () => _launchPrivacyPolicy(context),
               ),
             ],
           ),
@@ -247,6 +255,17 @@ class _SettingsPageState extends State<SettingsPage> {
       buildNumber: widget.buildNumber,
       language: widget.selectedLanguage,
     );
+  }
+
+  Future<void> _launchPrivacyPolicy(BuildContext context) async {
+    final languageCode = await LanguagePreferenceService.getLanguage();
+    final languageName = _getLanguageDisplayName(languageCode).split(' ').first.toLowerCase();
+    final url = 'https://smuky.github.io/ai-football-predictor-privacy.html#$languageName';
+    
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   String _getLanguageDisplayName(String languageCode) {

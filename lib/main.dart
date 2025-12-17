@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'config/environment.dart';
 import 'services/admob_service.dart';
 import 'pages/home_page.dart';
+import 'pages/terms_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,18 +16,23 @@ void main() async {
   
   AdMobService.initialize();
   
-  runApp(const TotoAIApp());
+  // Check if user has accepted terms
+  final hasAcceptedTerms = await TermsScreen.hasAcceptedTerms();
+  
+  runApp(TotoAIApp(hasAcceptedTerms: hasAcceptedTerms));
 }
 
 class TotoAIApp extends StatelessWidget {
-  const TotoAIApp({super.key});
+  final bool hasAcceptedTerms;
+
+  const TotoAIApp({super.key, required this.hasAcceptedTerms});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: '1X2-AI',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const HomePage(),
+      home: hasAcceptedTerms ? const HomePage() : const TermsScreen(),
     );
   }
 }

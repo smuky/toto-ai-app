@@ -18,6 +18,14 @@ class TranslationResponse {
   final String upcomingGames;
   final String analyzing;
   final String analyzeMatch;
+  final String termsOfUseTitle;
+  final String termsOfUseHeader;
+  final String termsOfUseStatisticalInfo;
+  final String termsOfUseNotGambling;
+  final String termsOfUseAgeRequirement;
+  final String termsOfUseNoResponsibility;
+  final String termsOfUseReadPolicy;
+  final String termsOfUseAgreeContinue;
 
   const TranslationResponse({
     required this.leagueTranslations,
@@ -39,6 +47,14 @@ class TranslationResponse {
     required this.upcomingGames,
     required this.analyzing,
     required this.analyzeMatch,
+    required this.termsOfUseTitle,
+    required this.termsOfUseHeader,
+    required this.termsOfUseStatisticalInfo,
+    required this.termsOfUseNotGambling,
+    required this.termsOfUseAgeRequirement,
+    required this.termsOfUseNoResponsibility,
+    required this.termsOfUseReadPolicy,
+    required this.termsOfUseAgreeContinue,
   });
 
   factory TranslationResponse.fromJson(Map<String, dynamic> json) {
@@ -69,6 +85,14 @@ class TranslationResponse {
       upcomingGames: json['upcomingGames'] as String? ?? 'Upcoming Games',
       analyzing: json['analyzing'] as String? ?? 'Analyzing...',
       analyzeMatch: json['analyzeMatch'] as String? ?? 'Analyze Match',
+      termsOfUseTitle: json['termsOfUseTitle'] as String? ?? 'Welcome to 1X2-AI',
+      termsOfUseHeader: json['termsOfUseHeader'] as String? ?? 'Before we start, please read and accept the following:',
+      termsOfUseStatisticalInfo: json['termsOfUseStatisticalInfo'] as String? ?? 'This app provides statistical information only.',
+      termsOfUseNotGambling: json['termsOfUseNotGambling'] as String? ?? 'This is NOT a gambling application.',
+      termsOfUseAgeRequirement: json['termsOfUseAgeRequirement'] as String? ?? 'You must be 18+ years old to use this app.',
+      termsOfUseNoResponsibility: json['termsOfUseNoResponsibility'] as String? ?? 'We are not responsible for any financial losses.',
+      termsOfUseReadPolicy: json['termsOfUseReadPolicy'] as String? ?? 'Read full Privacy Policy & Terms',
+      termsOfUseAgreeContinue: json['termsOfUseAgreeContinue'] as String? ?? 'I Agree & Continue',
     );
   }
 }
