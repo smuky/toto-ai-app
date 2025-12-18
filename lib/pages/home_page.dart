@@ -49,7 +49,6 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _initializeApp();
     _loadBannerAd();
-    _loadInterstitialAd();
   }
 
   @override
@@ -119,13 +118,6 @@ class _HomePageState extends State<HomePage> {
       },
     );
     _bannerAd?.load();
-  }
-
-  void _loadInterstitialAd() {
-    AdMobService.loadInterstitialAd(
-      onAdLoaded: () {},
-      onAdFailedToLoad: (error) {},
-    );
   }
 
   Future<void> _loadLanguagePreference() async {

@@ -27,27 +27,12 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  int _reviewCount = 0;
-  bool _reviewCompleted = false;
-  DateTime? _lastReviewDate;
   late String _currentLanguage;
 
   @override
   void initState() {
     super.initState();
     _currentLanguage = widget.selectedLanguage;
-    _loadReviewData();
-  }
-
-  Future<void> _loadReviewData() async {
-    final count = await ReviewService.getResultCount();
-    final completed = await ReviewService.hasCompletedReview();
-    final date = await ReviewService.getLastReviewRequestDate();
-    setState(() {
-      _reviewCount = count;
-      _reviewCompleted = completed;
-      _lastReviewDate = date;
-    });
   }
 
   @override
@@ -108,14 +93,6 @@ class _SettingsPageState extends State<SettingsPage> {
             ],
           ),
           const Divider(height: 1),
-          _buildSettingsSection(
-            context: context,
-            title: 'Debug (Development Only)',
-            items: [
-              _buildDebugInfoTile(context),
-              _buildResetReviewTile(context),
-            ],
-          ),
         ],
       ),
     );
@@ -171,62 +148,6 @@ class _SettingsPageState extends State<SettingsPage> {
       trailing: const Icon(Icons.chevron_right, color: Colors.grey),
       onTap: onTap,
     );
-  }
-
-  Widget _buildDebugInfoTile(BuildContext context) {
-    return ListTile(
-      leading: Icon(Icons.bug_report, color: Colors.orange.shade700),
-      title: const Text(
-        'Review Data',
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      subtitle: Text(
-        'Count: $_reviewCount | Completed: $_reviewCompleted${_lastReviewDate != null ? '\nLast request: ${_lastReviewDate!.toLocal()}' : ''}',
-        style: TextStyle(
-          fontSize: 12,
-          color: Colors.grey.shade600,
-        ),
-      ),
-      isThreeLine: _lastReviewDate != null,
-    );
-  }
-
-  Widget _buildResetReviewTile(BuildContext context) {
-    return ListTile(
-      leading: Icon(Icons.refresh, color: Colors.red.shade700),
-      title: const Text(
-        'Reset Review Counter',
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      subtitle: Text(
-        'Clear review data for testing',
-        style: TextStyle(
-          fontSize: 14,
-          color: Colors.grey.shade600,
-        ),
-      ),
-      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-      onTap: () => _resetReviewData(context),
-    );
-  }
-
-  Future<void> _resetReviewData(BuildContext context) async {
-    await ReviewService.resetReviewData();
-    await _loadReviewData();
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Review data reset successfully'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
   }
 
   void _showLanguageSelector(BuildContext context) {
