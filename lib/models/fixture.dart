@@ -42,7 +42,7 @@ class Fixture {
       awayTeamDisplayName: away['displayName'] as String?,
       homeTeamLogo: home['logo'] ?? '',
       awayTeamLogo: away['logo'] ?? '',
-      date: DateTime.parse(fixture['date'] ?? DateTime.now().toIso8601String()),
+      date: DateTime.parse(fixture['date'] ?? DateTime.now().toIso8601String()).toLocal(),
       status: statusData['long'] ?? 'Scheduled',
       venue: venueData['name'] ?? '',
     );
