@@ -28,6 +28,7 @@ class UpcomingGamesWidget extends StatefulWidget {
 
 class _UpcomingGamesWidgetState extends State<UpcomingGamesWidget> {
   int? _analyzingFixtureId;
+  int? _newPredictionFixtureId;
 
   Future<void> _analyzeFixture(Fixture fixture) async {
     setState(() {
@@ -45,6 +46,26 @@ class _UpcomingGamesWidgetState extends State<UpcomingGamesWidget> {
         if (mounted) {
           setState(() {
             _analyzingFixtureId = isLoading ? fixture.fixtureId : null;
+          });
+        }
+      },
+    );
+  }
+
+  Future<void> _newPredictionFromFixture(Fixture fixture) async {
+    setState(() {
+      _newPredictionFixtureId = fixture.fixtureId;
+    });
+
+    await PredictionService.fetchPredictionFromFixtureAndNavigate(
+      context: context,
+      fixtureId: fixture.fixtureId,
+      language: widget.selectedLanguage,
+      translations: widget.translations,
+      onLoadingChanged: (isLoading) {
+        if (mounted) {
+          setState(() {
+            _newPredictionFixtureId = isLoading ? fixture.fixtureId : null;
           });
         }
       },
@@ -112,6 +133,7 @@ class _UpcomingGamesWidgetState extends State<UpcomingGamesWidget> {
     final dateStr = '${dateTime.day}/${dateTime.month}/${dateTime.year}';
     final timeStr = '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
     final isAnalyzing = _analyzingFixtureId == fixture.fixtureId;
+    final isNewPredicting = _newPredictionFixtureId == fixture.fixtureId;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -399,27 +421,56 @@ class _UpcomingGamesWidgetState extends State<UpcomingGamesWidget> {
             ],
           ),
           const SizedBox(height: 12),
-          ElevatedButton.icon(
-            onPressed: isAnalyzing ? null : () => _analyzeFixture(fixture),
-            icon: isAnalyzing
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                  )
-                : const Icon(Icons.analytics, size: 18),
-            label: Text(isAnalyzing ? widget.translations.analyzing : widget.translations.analyzeMatch),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue.shade700,
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 40),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: isAnalyzing ? null : () => _analyzeFixture(fixture),
+                  icon: isAnalyzing
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Icon(Icons.analytics, size: 18),
+                  label: Text(isAnalyzing ? widget.translations.analyzing : widget.translations.analyzeMatch),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue.shade700,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(0, 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: isNewPredicting ? null : () => _newPredictionFromFixture(fixture),
+                  icon: isNewPredicting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Icon(Icons.new_releases, size: 18),
+                  label: Text(isNewPredicting ? 'Loading...' : 'New'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green.shade700,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(0, 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 }
+

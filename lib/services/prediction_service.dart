@@ -112,4 +112,85 @@ class PredictionService {
       ),
     );
   }
+
+  static Future<void> fetchPredictionFromFixtureAndNavigate({
+    required BuildContext context,
+    required int fixtureId,
+    required String language,
+    required TranslationResponse translations,
+    required Function(bool) onLoadingChanged,
+  }) async {
+    onLoadingChanged(true);
+
+    Timer? hapticTimer;
+    hapticTimer = Timer.periodic(const Duration(milliseconds: 1000), (timer) {
+      HapticFeedback.lightImpact();
+    });
+
+    String responseText;
+    bool isError;
+
+    try {
+      final uri = AppConfig.isHttps
+          ? Uri.https(
+              AppConfig.apiBaseUrl,
+              AppConfig.predictionFromFixturePath,
+              {
+                'fixtureId': fixtureId.toString(),
+              },
+            )
+          : Uri.http(
+              AppConfig.apiBaseUrl,
+              AppConfig.predictionFromFixturePath,
+              {
+                'fixtureId': fixtureId.toString(),
+              },
+            );
+
+      final response = await http.get(
+        uri,
+        headers: {
+          'Accept-Language': language.toUpperCase(),
+        },
+      );
+
+      if (response.statusCode == 200) {
+        responseText = response.body;
+        isError = false;
+      } else {
+        responseText = 'Server returned status ${response.statusCode}.\n\nBody:\n${response.body}';
+        isError = true;
+      }
+    } catch (e) {
+      responseText = 'Failed to contact server:\n$e';
+      isError = true;
+    }
+
+    hapticTimer.cancel();
+    onLoadingChanged(false);
+
+    if (!context.mounted) return;
+
+    if (!isError) {
+      await ReviewService.onResultReceived();
+    }
+
+    if (kReleaseMode && AdMobService.isInterstitialAdReady) {
+      AdMobService.showInterstitialAd();
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ResultsPage(
+          homeTeam: '',
+          awayTeam: '',
+          response: responseText,
+          isError: isError,
+          language: language,
+          translations: translations,
+        ),
+      ),
+    );
+  }
 }
