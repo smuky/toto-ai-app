@@ -12,6 +12,7 @@ import '../utils/text_direction_helper.dart';
 import '../widgets/custom_match_widget.dart';
 import '../widgets/upcoming_games_widget.dart';
 import '../services/language_preference_service.dart';
+import '../services/league_preference_service.dart';
 import '../services/admob_service.dart';
 import '../pages/settings_page.dart';
 import '../services/version_check_service.dart';
@@ -59,6 +60,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _initializeApp() async {
     await _loadLanguagePreference();
+    await _loadLeaguePreference();
     await _loadAppVersion();
     await _checkAppVersion();
     await _loadTranslations();
@@ -125,6 +127,15 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _selectedLanguage = language;
     });
+  }
+
+  Future<void> _loadLeaguePreference() async {
+    final savedLeague = await LeaguePreferenceService.getLeague();
+    if (savedLeague != null) {
+      setState(() {
+        _selectedLeague = savedLeague;
+      });
+    }
   }
 
   Future<void> _loadTranslations() async {
@@ -453,13 +464,14 @@ class _HomePageState extends State<HomePage> {
                     ),
                   );
               }).toList(),
-                onChanged: (String? newValue) {
+                onChanged: (String? newValue) async {
                   setState(() {
                     _selectedLeague = newValue;
                     _leagueTeams = [];
                     _upcomingFixtures = [];
                   });
                   if (newValue != null) {
+                    await LeaguePreferenceService.setLeague(newValue);
                     _loadTeamsForLeague(newValue);
                     if (_matchMode == 'upcoming') {
                       _loadUpcomingFixtures(newValue);

@@ -60,6 +60,8 @@ class _UpcomingGamesWidgetState extends State<UpcomingGamesWidget> {
     await PredictionService.fetchPredictionFromFixtureAndNavigate(
       context: context,
       fixtureId: fixture.fixtureId,
+      homeTeam: fixture.effectiveHomeTeam,
+      awayTeam: fixture.effectiveAwayTeam,
       language: widget.selectedLanguage,
       translations: widget.translations,
       onLoadingChanged: (isLoading) {

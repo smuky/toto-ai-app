@@ -116,6 +116,8 @@ class PredictionService {
   static Future<void> fetchPredictionFromFixtureAndNavigate({
     required BuildContext context,
     required int fixtureId,
+    required String homeTeam,
+    required String awayTeam,
     required String language,
     required TranslationResponse translations,
     required Function(bool) onLoadingChanged,
@@ -137,6 +139,8 @@ class PredictionService {
               AppConfig.predictionFromFixturePath,
               {
                 'fixtureId': fixtureId.toString(),
+                'home-team': homeTeam,
+                'away-team': awayTeam,
               },
             )
           : Uri.http(
@@ -144,6 +148,8 @@ class PredictionService {
               AppConfig.predictionFromFixturePath,
               {
                 'fixtureId': fixtureId.toString(),
+                'home-team': homeTeam,
+                'away-team': awayTeam,
               },
             );
 
@@ -183,8 +189,8 @@ class PredictionService {
       context,
       MaterialPageRoute(
         builder: (context) => ResultsPage(
-          homeTeam: '',
-          awayTeam: '',
+          homeTeam: homeTeam,
+          awayTeam: awayTeam,
           response: responseText,
           isError: isError,
           language: language,

@@ -29,7 +29,7 @@ class PredictionResponse {
       matchDetails: MatchDetails.fromJson(json['matchDetails']),
       analysis: PredictionStats.fromJson(json['analysis']),
       probabilities: parsedProbabilities,
-      justification: json['justification'],
+      justification: json['justification'] ?? 'No justification provided',
     );
   }
 
@@ -60,11 +60,11 @@ class MatchDetails {
 
   factory MatchDetails.fromJson(Map<String, dynamic> json) {
     return MatchDetails(
-      date: json['date'],
-      competition: json['competition'],
-      venue: json['venue'],
-      homeTeam: json['homeTeam'],
-      awayTeam: json['awayTeam'],
+      date: json['date'] ?? 'N/A',
+      competition: json['competition'] ?? 'N/A',
+      venue: json['venue'] ?? 'N/A',
+      homeTeam: json['homeTeam'] ?? 'Unknown',
+      awayTeam: json['awayTeam'] ?? 'Unknown',
     );
   }
 
@@ -94,10 +94,10 @@ class PredictionStats {
 
   factory PredictionStats.fromJson(Map<String, dynamic> json) {
     return PredictionStats(
-      recentFormAnalysis: json['recentFormAnalysis'],
-      xGAnalysis: json['xGAnalysis'],
-      headToHeadSummary: json['headToHeadSummary'],
-      keyNews: json['keyNews'],
+      recentFormAnalysis: json['recentFormAnalysis'] ?? 'No data available',
+      xGAnalysis: json['xGAnalysis'] ?? 'No data available',
+      headToHeadSummary: json['headToHeadSummary'] ?? 'No data available',
+      keyNews: json['keyNews'] ?? 'No news available',
     );
   }
 

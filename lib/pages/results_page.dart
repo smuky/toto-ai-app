@@ -23,7 +23,7 @@ class ResultsPage extends StatelessWidget {
     required this.translations,
   });
 
-  Widget _buildResponseContent() {
+  Widget _buildResponseContent(BuildContext context) {
     if (isError) {
       return SingleChildScrollView(
         child: Padding(
@@ -49,56 +49,123 @@ class ResultsPage extends StatelessWidget {
         language: language,
         translations: translations,
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      // Log detailed error information for debugging
+      print('═══════════════════════════════════════════════════════');
+      print('ERROR: Failed to parse prediction response');
+      print('Error Type: ${e.runtimeType}');
+      print('Error Message: $e');
+      print('Stack Trace: $stackTrace');
+      print('Raw Response Length: ${response.length} characters');
+      print('Raw Response: $response');
+      print('═══════════════════════════════════════════════════════');
       return SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.shade300),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.error_outline, color: Colors.red.shade700),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Error parsing response: $e',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.red.shade900,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
+              Icon(
+                Icons.sports_soccer,
+                size: 80,
+                color: Colors.blue.shade300,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                '⚽ That was a difficult one!',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue.shade700,
                 ),
               ),
               const SizedBox(height: 16),
               Text(
-                'Raw Response:',
+                'Our AI had trouble analyzing this match.\nLet\'s try again later or pick a different match.',
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
                   color: Colors.grey.shade700,
+                  height: 1.5,
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                response,
-                textAlign: language == 'he' ? TextAlign.right : TextAlign.left,
-                textDirection: language == 'he' ? TextDirection.rtl : TextDirection.ltr,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.black87,
+              const SizedBox(height: 32),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.arrow_back),
+                label: const Text('Go Back'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue.shade700,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
+              const SizedBox(height: 24),
+              if (AppConfig.environment != Environment.prod) ...[
+                const Divider(),
+                const SizedBox(height: 16),
+                ExpansionTile(
+                  title: Text(
+                    'Debug Info (Dev Only)',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange.shade700,
+                    ),
+                  ),
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.red.shade200),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Error: $e',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.red.shade900,
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Divider(),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Raw Response:',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey.shade700,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            response,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
@@ -183,7 +250,7 @@ class ResultsPage extends StatelessWidget {
             child: Container(
               width: double.infinity,
               color: isError ? Colors.red.shade50 : Colors.white,
-              child: _buildResponseContent(),
+              child: _buildResponseContent(context),
             ),
           ),
         ],
