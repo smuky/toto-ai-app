@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'config/environment.dart';
 import 'services/admob_service.dart';
+import 'services/revenue_cat_service.dart';
 import 'pages/home_page.dart';
 import 'pages/terms_screen.dart';
 
@@ -15,6 +16,13 @@ void main() async {
   await AppConfig.initialize(environment);
   
   AdMobService.initialize();
+  
+  // Initialize RevenueCat
+  try {
+    await RevenueCatService.initialize();
+  } catch (e) {
+    print('Failed to initialize RevenueCat: $e');
+  }
   
   // Check if user has accepted terms
   final hasAcceptedTerms = await TermsScreen.hasAcceptedTerms();

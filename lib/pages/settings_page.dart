@@ -3,8 +3,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../widgets/about_dialog.dart';
 import '../widgets/language_selector_dialog.dart';
 import '../widgets/feedback_dialog.dart';
+import '../widgets/subscription_status_widget.dart';
 import '../services/language_preference_service.dart';
 import '../services/review_service.dart';
+import '../pages/customer_center_page.dart';
 
 class SettingsPage extends StatefulWidget {
   final String selectedLanguage;
@@ -44,6 +46,24 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       body: ListView(
         children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SubscriptionStatusWidget(
+              onStatusChanged: () {
+                setState(() {});
+              },
+            ),
+          ),
+          const Divider(height: 1),
+          _buildSettingsSection(
+            context: context,
+            title: 'Subscription',
+            items: [
+              const ManageSubscriptionButton(),
+              const RestorePurchasesButton(),
+            ],
+          ),
+          const Divider(height: 1),
           _buildSettingsSection(
             context: context,
             title: 'General',
