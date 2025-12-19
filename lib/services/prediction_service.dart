@@ -11,7 +11,7 @@ import '../services/admob_service.dart';
 import '../services/review_service.dart';
 
 class PredictionService {
-  /// Unified prediction method that uses the selected predictor's endpoint
+  /// Unified prediction method that uses the selected predictor
   static Future<void> fetchPredictionWithPredictor({
     required BuildContext context,
     required Predictor predictor,
@@ -23,46 +23,23 @@ class PredictionService {
     required Function(bool) onLoadingChanged,
     int? fixtureId,
   }) async {
-    if (predictor.apiEndpoint == 'calculate-odds') {
-      await fetchPredictionAndNavigate(
-        context: context,
-        homeTeam: homeTeam,
-        awayTeam: awayTeam,
-        league: league,
-        language: language,
-        translations: translations,
-        onLoadingChanged: onLoadingChanged,
-      );
-    } else if (predictor.apiEndpoint == 'prediction-from-fixture') {
-      if (fixtureId == null) {
-        throw ArgumentError('fixtureId is required for prediction-from-fixture endpoint');
-      }
-      await fetchPredictionFromFixtureAndNavigate(
-        context: context,
-        fixtureId: fixtureId,
-        homeTeam: homeTeam,
-        awayTeam: awayTeam,
-        language: language,
-        translations: translations,
-        onLoadingChanged: onLoadingChanged,
-      );
-    } else {
-      throw UnsupportedError('Unknown API endpoint: ${predictor.apiEndpoint}');
-    }
+    await fetchPredictionFromFixtureAndNavigate(
+      context: context,
+      predictorId: predictor.id,
+      fixtureId: fixtureId ?? 0,
+      homeTeam: homeTeam,
+      awayTeam: awayTeam,
+      league: league,
+      language: language,
+      translations: translations,
+      onLoadingChanged: onLoadingChanged,
+    );
   }
 
-  /// Fetches prediction from the API and navigates to ResultsPage
-  /// 
-  /// Parameters:
-  /// - context: BuildContext for navigation
-  /// - homeTeam: Home team name (should use displayName if available)
-  /// - awayTeam: Away team name (should use displayName if available)
-  /// - league: League enum string
-  /// - language: Selected language code
-  /// - translations: Translation response object
-  /// - onLoadingChanged: Callback to update loading state in the calling widget
-  static Future<void> fetchPredictionAndNavigate({
+  static Future<void> fetchPredictionFromFixtureAndNavigate({
     required BuildContext context,
+    required String predictorId,
+    required int fixtureId,
     required String homeTeam,
     required String awayTeam,
     required String league,
@@ -70,99 +47,6 @@ class PredictionService {
     required TranslationResponse translations,
     required Function(bool) onLoadingChanged,
   }) async {
-    // Start loading
-    onLoadingChanged(true);
-
-    // Start haptic feedback
-    Timer? hapticTimer;
-    hapticTimer = Timer.periodic(const Duration(milliseconds: 1000), (timer) {
-      HapticFeedback.lightImpact();
-    });
-
-    String responseText;
-    bool isError;
-
-    try {
-      final uri = AppConfig.isHttps
-          ? Uri.https(
-              AppConfig.apiBaseUrl,
-              AppConfig.apiPath,
-              {
-                'home-team': homeTeam,
-                'away-team': awayTeam,
-                'league': league,
-                'language': language.toUpperCase(),
-              },
-            )
-          : Uri.http(
-              AppConfig.apiBaseUrl,
-              AppConfig.apiPath,
-              {
-                'home-team': homeTeam,
-                'away-team': awayTeam,
-                'league': league,
-                'language': language.toUpperCase(),
-              },
-            );
-
-      final response = await http.get(uri);
-
-      if (response.statusCode == 200) {
-        responseText = response.body;
-        isError = false;
-      } else {
-        responseText = 'Server returned status ${response.statusCode}.\n\nBody:\n${response.body}';
-        isError = true;
-      }
-    } catch (e) {
-      responseText = 'Failed to contact server:\n$e';
-      isError = true;
-    }
-
-    // Stop haptic feedback
-    hapticTimer.cancel();
-
-    // Stop loading
-    onLoadingChanged(false);
-
-    // Check if context is still mounted before navigation
-    if (!context.mounted) return;
-
-    // Increment review counter if result was successful (not an error)
-    if (!isError) {
-      await ReviewService.onResultReceived();
-    }
-
-    // Show interstitial ad if available
-    if (kReleaseMode && AdMobService.isInterstitialAdReady) {
-      AdMobService.showInterstitialAd();
-    }
-
-    // Navigate to results page
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ResultsPage(
-          homeTeam: homeTeam,
-          awayTeam: awayTeam,
-          response: responseText,
-          isError: isError,
-          language: language,
-          translations: translations,
-        ),
-      ),
-    );
-  }
-
-  static Future<void> fetchPredictionFromFixtureAndNavigate({
-    required BuildContext context,
-    required int fixtureId,
-    required String homeTeam,
-    required String awayTeam,
-    required String language,
-    required TranslationResponse translations,
-    required Function(bool) onLoadingChanged,
-  }) async {
     onLoadingChanged(true);
 
     Timer? hapticTimer;
@@ -177,20 +61,24 @@ class PredictionService {
       final uri = AppConfig.isHttps
           ? Uri.https(
               AppConfig.apiBaseUrl,
-              AppConfig.predictionFromFixturePath,
+              AppConfig.apiPath,
               {
+                'predictorId': predictorId,
                 'fixtureId': fixtureId.toString(),
                 'home-team': homeTeam,
                 'away-team': awayTeam,
+                'league': league,
               },
             )
           : Uri.http(
               AppConfig.apiBaseUrl,
-              AppConfig.predictionFromFixturePath,
+              AppConfig.apiPath,
               {
+                'predictorId': predictorId,
                 'fixtureId': fixtureId.toString(),
                 'home-team': homeTeam,
                 'away-team': awayTeam,
+                'league': league,
               },
             );
 

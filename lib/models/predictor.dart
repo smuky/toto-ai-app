@@ -26,7 +26,7 @@ class Predictor {
   Color get shadowColorWithAlpha => shadowColor;
 
   static const Predictor classic = Predictor(
-    id: 'classic',
+    id: 'gpt',
     name: 'Classic Predictor',
     image: 'assets/predictor_classic.png',
     description: 'Traditional statistical analysis based on team standings, form, and historical performance. Reliable and time-tested approach.',
@@ -37,11 +37,11 @@ class Predictor {
   );
 
   static const Predictor advanced = Predictor(
-    id: 'advanced',
+    id: 'perplexity',
     name: 'Advanced Predictor',
     image: 'assets/predictor_advanced.png',
     description: 'Next-generation AI model using fixture-specific data, recent match statistics, and advanced analytics for enhanced predictions.',
-    apiEndpoint: 'prediction-from-fixture',
+    apiEndpoint: 'calculate-odds',
     icon: Icons.auto_awesome,
     primaryColor: Color(0xFF7B1FA2),
     shadowColor: Color(0xFF4A148C),

@@ -50,9 +50,4 @@ class AppConfig {
     _ensureInitialized();
     return _config!['api']['endpoints']['calculate-odds'] as String;
   }
-
-  static String get predictionFromFixturePath {
-    _ensureInitialized();
-    return _config!['api']['endpoints']['prediction-from-fixture'] as String;
-  }
 }
