@@ -59,8 +59,8 @@ class AdMobService {
   static bool _isInterstitialAdReady = false;
 
   static void loadInterstitialAd({
-    required void Function() onAdLoaded,
-    required void Function(LoadAdError error) onAdFailedToLoad,
+    void Function()? onAdLoaded,
+    void Function(LoadAdError error)? onAdFailedToLoad,
   }) {
     InterstitialAd.load(
       adUnitId: interstitialAdUnitId,
@@ -69,24 +69,26 @@ class AdMobService {
         onAdLoaded: (ad) {
           _interstitialAd = ad;
           _isInterstitialAdReady = true;
-          onAdLoaded();
+          onAdLoaded?.call();
 
           ad.fullScreenContentCallback = FullScreenContentCallback(
             onAdDismissedFullScreenContent: (ad) {
               ad.dispose();
               _interstitialAd = null;
               _isInterstitialAdReady = false;
+              loadInterstitialAd();
             },
             onAdFailedToShowFullScreenContent: (ad, error) {
               ad.dispose();
               _interstitialAd = null;
               _isInterstitialAdReady = false;
+              loadInterstitialAd();
             },
           );
         },
         onAdFailedToLoad: (error) {
           _isInterstitialAdReady = false;
-          onAdFailedToLoad(error);
+          onAdFailedToLoad?.call(error);
         },
       ),
     );

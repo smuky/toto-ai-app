@@ -16,6 +16,7 @@ void main() async {
   await AppConfig.initialize(environment);
   
   AdMobService.initialize();
+  AdMobService.loadInterstitialAd();
   
   // Initialize RevenueCat
   try {
