@@ -6,6 +6,7 @@ import '../services/language_preference_service.dart';
 import '../services/team_service.dart';
 import '../config/language_config.dart';
 import '../models/translation_response.dart';
+import '../utils/text_direction_helper.dart';
 
 class TermsScreen extends StatefulWidget {
   const TermsScreen({super.key});
@@ -24,6 +25,7 @@ class TermsScreen extends StatefulWidget {
 class _TermsScreenState extends State<TermsScreen> {
   TranslationResponse? _translations;
   bool _isLoading = true;
+  String _currentLanguage = 'en';
 
   static const String _privacyPolicyBaseUrl = 'https://smuky.github.io/ai-football-predictor-privacy.html';
 
@@ -39,6 +41,7 @@ class _TermsScreenState extends State<TermsScreen> {
       final translations = await TeamService.fetchTranslations(languageCode);
       setState(() {
         _translations = translations;
+        _currentLanguage = languageCode;
         _isLoading = false;
       });
     } catch (e) {
@@ -255,33 +258,47 @@ class _TermsScreenState extends State<TermsScreen> {
     required String text,
     required Color iconColor,
   }) {
+    final isRTL = TextDirectionHelper.isRTL(_currentLanguage);
+    
+    final iconWidget = Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: iconColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Icon(
+        icon,
+        color: iconColor,
+        size: 24,
+      ),
+    );
+    
+    final textWidget = Expanded(
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 16,
+          height: 1.5,
+          color: Colors.black87,
+        ),
+        textAlign: TextDirectionHelper.getTextAlign(_currentLanguage),
+        textDirection: TextDirectionHelper.getTextDirection(_currentLanguage),
+      ),
+    );
+    
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            icon,
-            color: iconColor,
-            size: 24,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 16,
-              height: 1.5,
-              color: Colors.black87,
-            ),
-          ),
-        ),
-      ],
+      children: isRTL
+          ? [
+              textWidget,
+              const SizedBox(width: 16),
+              iconWidget,
+            ]
+          : [
+              iconWidget,
+              const SizedBox(width: 16),
+              textWidget,
+            ],
     );
   }
 }
