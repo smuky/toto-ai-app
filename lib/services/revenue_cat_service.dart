@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 class RevenueCatService {
-  static const String _apiKey = 'test_npBJgEkFjxBxOPmeyRUDSZkPYAN';
+  static const String _apiKey = 'goog_AkVuvoDljodKjgbYiqBSGNCbhyW';
   static const String _entitlementId = '1X2-AI Pro';
   
   static bool _isInitialized = false;
@@ -97,14 +97,14 @@ class RevenueCatService {
         print('RevenueCat: Attempting to purchase ${package.identifier}');
       }
       
-      final customerInfo = await Purchases.purchasePackage(package);
+      final purchaseResult = await Purchases.purchasePackage(package);
       
       if (kDebugMode) {
         print('RevenueCat: Purchase successful');
-        print('Active entitlements: ${customerInfo.entitlements.active.keys}');
+        print('Active entitlements: ${purchaseResult.customerInfo.entitlements.active.keys}');
       }
       
-      return customerInfo;
+      return purchaseResult.customerInfo;
     } on PlatformException catch (e) {
       final errorCode = PurchasesErrorHelper.getErrorCode(e);
       
