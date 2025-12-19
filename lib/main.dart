@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'config/environment.dart';
 import 'services/admob_service.dart';
 import 'services/revenue_cat_service.dart';
 import 'pages/home_page.dart';
 import 'pages/terms_screen.dart';
+import 'providers/predictor_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,10 +40,13 @@ class TotoAIApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: '1X2-AI',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: hasAcceptedTerms ? const HomePage() : const TermsScreen(),
+    return ChangeNotifierProvider(
+      create: (_) => PredictorProvider(),
+      child: MaterialApp(
+        title: '1X2-AI',
+        theme: ThemeData(primarySwatch: Colors.blue),
+        home: hasAcceptedTerms ? const HomePage() : const TermsScreen(),
+      ),
     );
   }
 }

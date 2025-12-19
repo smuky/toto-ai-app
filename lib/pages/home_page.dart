@@ -2,21 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
 import '../config/environment.dart';
 import '../config/league_logos_config.dart';
 import '../models/team.dart';
 import '../models/fixture.dart';
 import '../models/translation_response.dart';
+import '../models/predictor.dart';
 import '../services/team_service.dart';
 import '../utils/text_direction_helper.dart';
 import '../widgets/custom_match_widget.dart';
 import '../widgets/upcoming_games_widget.dart';
+import '../widgets/predictor_card_modal.dart';
 import '../services/language_preference_service.dart';
 import '../services/league_preference_service.dart';
 import '../services/admob_service.dart';
 import '../pages/settings_page.dart';
 import '../services/version_check_service.dart';
 import '../widgets/update_required_dialog.dart';
+import '../providers/predictor_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -289,6 +293,56 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       actions: [
+        Consumer<PredictorProvider>(
+          builder: (context, predictorProvider, _) {
+            final predictor = predictorProvider.selectedPredictor;
+            return GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => const PredictorCardModal(),
+                );
+              },
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.amber,
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.amber.withOpacity(0.5),
+                      blurRadius: 8,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+                child: CircleAvatar(
+                  radius: 18,
+                  backgroundColor: Colors.grey.shade100,
+                  child: ClipOval(
+                    child: Image.asset(
+                      predictor.image,
+                      width: 36,
+                      height: 36,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          predictor.icon,
+                          size: 20,
+                          color: predictor.primaryColor,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 4),
           decoration: BoxDecoration(

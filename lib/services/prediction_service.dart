@@ -5,11 +5,52 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../config/environment.dart';
 import '../models/translation_response.dart';
+import '../models/predictor.dart';
 import '../pages/results_page.dart';
 import '../services/admob_service.dart';
 import '../services/review_service.dart';
 
 class PredictionService {
+  /// Unified prediction method that uses the selected predictor's endpoint
+  static Future<void> fetchPredictionWithPredictor({
+    required BuildContext context,
+    required Predictor predictor,
+    required String homeTeam,
+    required String awayTeam,
+    required String league,
+    required String language,
+    required TranslationResponse translations,
+    required Function(bool) onLoadingChanged,
+    int? fixtureId,
+  }) async {
+    if (predictor.apiEndpoint == 'calculate-odds') {
+      await fetchPredictionAndNavigate(
+        context: context,
+        homeTeam: homeTeam,
+        awayTeam: awayTeam,
+        league: league,
+        language: language,
+        translations: translations,
+        onLoadingChanged: onLoadingChanged,
+      );
+    } else if (predictor.apiEndpoint == 'prediction-from-fixture') {
+      if (fixtureId == null) {
+        throw ArgumentError('fixtureId is required for prediction-from-fixture endpoint');
+      }
+      await fetchPredictionFromFixtureAndNavigate(
+        context: context,
+        fixtureId: fixtureId,
+        homeTeam: homeTeam,
+        awayTeam: awayTeam,
+        language: language,
+        translations: translations,
+        onLoadingChanged: onLoadingChanged,
+      );
+    } else {
+      throw UnsupportedError('Unknown API endpoint: ${predictor.apiEndpoint}');
+    }
+  }
+
   /// Fetches prediction from the API and navigates to ResultsPage
   /// 
   /// Parameters:

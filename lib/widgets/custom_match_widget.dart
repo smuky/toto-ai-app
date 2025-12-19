@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/team.dart';
 import '../models/translation_response.dart';
 import '../services/prediction_service.dart';
+import '../providers/predictor_provider.dart';
 import 'team_autocomplete_field.dart';
 
 class CustomMatchWidget extends StatefulWidget {
@@ -58,13 +60,17 @@ class _CustomMatchWidgetState extends State<CustomMatchWidget> {
   Future<void> _onGoPressed() async {
     if (_selectedHomeTeam == null || _selectedAwayTeam == null) return;
     
-    await PredictionService.fetchPredictionAndNavigate(
+    final predictor = Provider.of<PredictorProvider>(context, listen: false).selectedPredictor;
+    
+    await PredictionService.fetchPredictionWithPredictor(
       context: context,
+      predictor: predictor,
       homeTeam: _selectedHomeTeam!.effectiveName,
       awayTeam: _selectedAwayTeam!.effectiveName,
       league: _selectedHomeTeam!.leagueEnum,
       language: widget.selectedLanguage,
       translations: widget.translations,
+      fixtureId: null,
       onLoadingChanged: (isLoading) {
         if (mounted) {
           setState(() {
@@ -131,52 +137,61 @@ class _CustomMatchWidgetState extends State<CustomMatchWidget> {
           enabled: _selectedHomeTeam != null && !widget.isLoadingTeams,
         ),
         const SizedBox(height: 32),
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: isValid
-                ? [
-                    BoxShadow(
-                      color: Colors.blue.withAlpha(100),
-                      blurRadius: 20,
-                      spreadRadius: 2,
-                      offset: const Offset(0, 4),
-                    ),
-                  ]
-                : [],
-          ),
-          child: ElevatedButton(
-            onPressed: isValid ? _onGoPressed : null,
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 60),
-              backgroundColor: isValid ? Colors.blue.shade700 : null,
-              foregroundColor: Colors.white,
-              elevation: isValid ? 8 : 0,
-              shadowColor: Colors.blue.shade900,
-              shape: RoundedRectangleBorder(
+        Consumer<PredictorProvider>(
+          builder: (context, predictorProvider, _) {
+            final predictor = predictorProvider.selectedPredictor;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
+                boxShadow: isValid
+                    ? [
+                        BoxShadow(
+                          color: predictor.glowColor.withAlpha(100),
+                          blurRadius: 20,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                    : [],
               ),
-            ),
-            child: _isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Text(
-                    "GO",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 2,
-                    ),
+              child: ElevatedButton.icon(
+                onPressed: isValid ? _onGoPressed : null,
+                icon: _isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Icon(
+                        predictor.icon,
+                        size: 24,
+                      ),
+                label: Text(
+                  _isLoading ? widget.translations.analyzing : widget.translations.analyzeMatch,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
                   ),
-          ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 60),
+                  backgroundColor: isValid ? predictor.buttonColor : null,
+                  foregroundColor: Colors.white,
+                  elevation: isValid ? 8 : 0,
+                  shadowColor: predictor.shadowColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ],
     );
