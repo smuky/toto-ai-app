@@ -109,16 +109,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   const Divider(height: 1),
                 ],
-                // Show subscription section with conditional items
-                if (_isPro)
-                  _buildSettingsSection(
-                    context: context,
-                    title: 'Subscription',
-                    items: [
-                      const ManageSubscriptionButton(),
-                    ],
-                  )
-                else
+                // Show Restore Purchases section only for free users
+                if (!_isPro) ...[
                   _buildSettingsSection(
                     context: context,
                     title: 'Subscription',
@@ -126,34 +118,37 @@ class _SettingsPageState extends State<SettingsPage> {
                       const RestorePurchasesButton(),
                     ],
                   ),
-          const Divider(height: 1),
-          _buildSettingsSection(
-            context: context,
-            title: 'General',
-            items: [
-              _buildSettingsTile(
-                context: context,
-                icon: Icons.language,
-                title: 'Language',
-                subtitle: _getLanguageDisplayName(_currentLanguage),
-                onTap: () => _showLanguageSelector(context),
-              ),
-            ],
-          ),
-          const Divider(height: 1),
-          _buildSettingsSection(
-            context: context,
-            title: 'Support',
-            items: [
-              _buildSettingsTile(
-                context: context,
-                icon: Icons.feedback_outlined,
-                title: 'Send Feedback',
-                subtitle: 'Share your ideas or report issues',
-                onTap: () => _showFeedback(context),
-              ),
-            ],
-          ),
+                  const Divider(height: 1),
+                ],
+                _buildSettingsSection(
+                  context: context,
+                  title: 'General',
+                  items: [
+                    _buildSettingsTile(
+                      context: context,
+                      icon: Icons.language,
+                      title: 'Language',
+                      subtitle: _getLanguageDisplayName(_currentLanguage),
+                      onTap: () => _showLanguageSelector(context),
+                    ),
+                  ],
+                ),
+                const Divider(height: 1),
+                _buildSettingsSection(
+                  context: context,
+                  title: 'Support',
+                  items: [
+                    _buildSettingsTile(
+                      context: context,
+                      icon: Icons.feedback_outlined,
+                      title: 'Send Feedback',
+                      subtitle: 'Share your ideas or report issues',
+                      onTap: () => _showFeedback(context),
+                    ),
+                    // Add Manage Subscription for Pro users in Support section
+                    if (_isPro) const ManageSubscriptionButton(),
+                  ],
+                ),
           const Divider(height: 1),
           _buildSettingsSection(
             context: context,
