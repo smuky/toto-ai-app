@@ -215,22 +215,6 @@ class _UpcomingGamesWidgetState extends State<UpcomingGamesWidget> {
                               color: Colors.blue,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.green.shade50,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              fixture.status,
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.green.shade700,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ),
@@ -346,22 +330,6 @@ class _UpcomingGamesWidgetState extends State<UpcomingGamesWidget> {
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: Colors.blue,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.green.shade50,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              fixture.status,
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.green.shade700,
-                                fontWeight: FontWeight.w600,
-                              ),
                             ),
                           ),
                         ],

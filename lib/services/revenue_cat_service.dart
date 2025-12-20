@@ -7,6 +7,10 @@ class RevenueCatService {
   static const String _entitlementId = '1X2-AI Pro';
   
   static bool _isInitialized = false;
+  
+  // DEBUG: Set this to true to simulate premium status in development
+  // Set to false to test free plan restrictions
+  static const bool _debugSimulatePremium = false;
 
   static Future<void> initialize() async {
     if (_isInitialized) {
@@ -42,6 +46,12 @@ class RevenueCatService {
   }
 
   static Future<bool> isProUser() async {
+    // In debug mode, allow simulating premium status for testing
+    if (kDebugMode && _debugSimulatePremium) {
+      print('RevenueCat: DEBUG MODE - Simulating premium status: true');
+      return true;
+    }
+    
     try {
       final customerInfo = await Purchases.getCustomerInfo();
       final hasEntitlement = customerInfo.entitlements.active.containsKey(_entitlementId);
