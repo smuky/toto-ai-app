@@ -5,7 +5,7 @@ import '../widgets/language_selector_dialog.dart';
 import '../widgets/feedback_dialog.dart';
 import '../widgets/subscription_status_widget.dart';
 import '../services/language_preference_service.dart';
-import '../services/review_service.dart';
+import '../services/revenue_cat_service.dart';
 import '../pages/customer_center_page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -30,11 +30,24 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   late String _currentLanguage;
+  bool _isPro = false;
+  bool _isLoadingProStatus = true;
 
   @override
   void initState() {
     super.initState();
     _currentLanguage = widget.selectedLanguage;
+    _checkProStatus();
+  }
+
+  Future<void> _checkProStatus() async {
+    final isPro = await RevenueCatService.isProUser();
+    if (mounted) {
+      setState(() {
+        _isPro = isPro;
+        _isLoadingProStatus = false;
+      });
+    }
   }
 
   @override
@@ -43,26 +56,76 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(
         title: const Text('Settings'),
         backgroundColor: Colors.blue.shade700,
-      ),
-      body: ListView(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SubscriptionStatusWidget(
-              onStatusChanged: () {
-                setState(() {});
-              },
+        actions: [
+          if (_isPro && !_isLoadingProStatus)
+            Container(
+              margin: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.amber.shade400, Colors.amber.shade600],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.amber.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.star, color: Colors.white, size: 16),
+                  SizedBox(width: 4),
+                  Text(
+                    'PRO',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const Divider(height: 1),
-          _buildSettingsSection(
-            context: context,
-            title: 'Subscription',
-            items: [
-              const ManageSubscriptionButton(),
-              const RestorePurchasesButton(),
-            ],
-          ),
+        ],
+      ),
+      body: _isLoadingProStatus
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              children: [
+                // Show large subscription card only for free users
+                if (!_isPro) ...[
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: SubscriptionStatusWidget(
+                      onStatusChanged: () {
+                        _checkProStatus();
+                      },
+                    ),
+                  ),
+                  const Divider(height: 1),
+                ],
+                // Show subscription section with conditional items
+                if (_isPro)
+                  _buildSettingsSection(
+                    context: context,
+                    title: 'Subscription',
+                    items: [
+                      const ManageSubscriptionButton(),
+                    ],
+                  )
+                else
+                  _buildSettingsSection(
+                    context: context,
+                    title: 'Subscription',
+                    items: [
+                      const RestorePurchasesButton(),
+                    ],
+                  ),
           const Divider(height: 1),
           _buildSettingsSection(
             context: context,
