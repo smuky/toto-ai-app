@@ -15,6 +15,32 @@ class PredefinedEvent {
   }
 }
 
+class UpgradeMessages {
+  final String header;
+  final String body;
+  final String currentVersion;
+  final String requiredVersion;
+  final String button;
+
+  const UpgradeMessages({
+    required this.header,
+    required this.body,
+    required this.currentVersion,
+    required this.requiredVersion,
+    required this.button,
+  });
+
+  factory UpgradeMessages.fromJson(Map<String, dynamic> json) {
+    return UpgradeMessages(
+      header: json['header'] as String? ?? 'Mandatory Update',
+      body: json['body'] as String? ?? 'To continue using the app and enjoy the latest features, please update to the most recent version.',
+      currentVersion: json['currentVersion'] as String? ?? 'Current version:',
+      requiredVersion: json['requiredVersion'] as String? ?? 'Required version:',
+      button: json['button'] as String? ?? 'Update Now',
+    );
+  }
+}
+
 class TranslationResponse {
   final Map<String, String> leagueTranslations;
   final Map<String, String> languageTranslations;
@@ -46,6 +72,7 @@ class TranslationResponse {
   final String termsOfUseNoResponsibility;
   final String termsOfUseReadPolicy;
   final String termsOfUseAgreeContinue;
+  final UpgradeMessages upgradeMessages;
 
   const TranslationResponse({
     required this.leagueTranslations,
@@ -78,6 +105,7 @@ class TranslationResponse {
     required this.termsOfUseNoResponsibility,
     required this.termsOfUseReadPolicy,
     required this.termsOfUseAgreeContinue,
+    required this.upgradeMessages,
   });
 
   factory TranslationResponse.fromJson(Map<String, dynamic> json) {
@@ -122,6 +150,15 @@ class TranslationResponse {
       termsOfUseNoResponsibility: json['termsOfUseNoResponsibility'] as String? ?? 'We are not responsible for any financial losses.',
       termsOfUseReadPolicy: json['termsOfUseReadPolicy'] as String? ?? 'Read full Privacy Policy & Terms',
       termsOfUseAgreeContinue: json['termsOfUseAgreeContinue'] as String? ?? 'I Agree & Continue',
+      upgradeMessages: json['upgradeMessages'] != null
+          ? UpgradeMessages.fromJson(json['upgradeMessages'] as Map<String, dynamic>)
+          : const UpgradeMessages(
+              header: 'Mandatory Update',
+              body: 'To continue using the app and enjoy the latest features, please update to the most recent version.',
+              currentVersion: 'Current version:',
+              requiredVersion: 'Required version:',
+              button: 'Update Now',
+            ),
     );
   }
 }

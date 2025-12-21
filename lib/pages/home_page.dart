@@ -72,8 +72,8 @@ class _HomePageState extends State<HomePage> {
     await _loadLanguagePreference();
     await _loadLeaguePreference();
     await _loadAppVersion();
-    await _checkAppVersion();
     await _loadTranslations();
+    await _checkAppVersion(); // Check version AFTER translations are loaded
     await _checkProStatus();
     
     // Load initial data based on default state
@@ -109,16 +109,17 @@ class _HomePageState extends State<HomePage> {
       final isSupported = await VersionCheckService.isVersionSupported(_appVersion);
       print('HomePage: Version supported: $isSupported');
       
-      if (!isSupported && mounted) {
+      if (!isSupported && mounted && _translations != null) {
         // Get minimum version for the dialog
         final minVersion = await VersionCheckService.getMinimumVersion();
         print('HomePage: Showing update dialog - Current: $_appVersion, Min: $minVersion');
         
-        // Show update required dialog
+        // Show update required dialog with translations
         showUpdateRequiredDialog(
           context: context,
           currentVersion: _appVersion,
           minimumVersion: minVersion ?? 'Unknown',
+          upgradeMessages: _translations!.upgradeMessages,
         );
       }
     } catch (e) {

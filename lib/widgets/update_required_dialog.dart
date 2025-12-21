@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
+import '../models/translation_response.dart';
 
 class UpdateRequiredDialog extends StatelessWidget {
   final String currentVersion;
   final String minimumVersion;
-  final String? updateMessage;
+  final UpgradeMessages upgradeMessages;
 
   const UpdateRequiredDialog({
     super.key,
     required this.currentVersion,
     required this.minimumVersion,
-    this.updateMessage,
+    required this.upgradeMessages,
   });
 
   Future<void> _openStore() async {
@@ -44,9 +45,9 @@ class UpdateRequiredDialog extends StatelessWidget {
                 color: Colors.orange.shade700,
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Update Required',
-                style: TextStyle(
+              Text(
+                upgradeMessages.header,
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
@@ -54,8 +55,7 @@ class UpdateRequiredDialog extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                updateMessage ??
-                    'A new version of the app is required to continue. Please update to the latest version.',
+                upgradeMessages.body,
                 style: const TextStyle(
                   fontSize: 16,
                   color: Colors.black87,
@@ -75,9 +75,9 @@ class UpdateRequiredDialog extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Current Version:',
-                          style: TextStyle(
+                        Text(
+                          upgradeMessages.currentVersion,
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
@@ -96,9 +96,9 @@ class UpdateRequiredDialog extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Required Version:',
-                          style: TextStyle(
+                        Text(
+                          upgradeMessages.requiredVersion,
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
@@ -122,9 +122,9 @@ class UpdateRequiredDialog extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: _openStore,
                   icon: const Icon(Icons.download),
-                  label: const Text(
-                    'Update Now',
-                    style: TextStyle(
+                  label: Text(
+                    upgradeMessages.button,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -151,7 +151,7 @@ void showUpdateRequiredDialog({
   required BuildContext context,
   required String currentVersion,
   required String minimumVersion,
-  String? updateMessage,
+  required UpgradeMessages upgradeMessages,
 }) {
   showDialog(
     context: context,
@@ -159,7 +159,7 @@ void showUpdateRequiredDialog({
     builder: (context) => UpdateRequiredDialog(
       currentVersion: currentVersion,
       minimumVersion: minimumVersion,
-      updateMessage: updateMessage,
+      upgradeMessages: upgradeMessages,
     ),
   );
 }
