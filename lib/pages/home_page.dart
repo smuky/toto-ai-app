@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../config/environment.dart';
-import '../config/league_logos_config.dart';
 import '../models/team.dart';
 import '../models/fixture.dart';
 import '../models/translation_response.dart';
 import '../models/predictor.dart';
 import '../services/team_service.dart';
-import '../utils/text_direction_helper.dart';
 import '../widgets/custom_match_widget.dart';
 import '../widgets/upcoming_games_widget.dart';
 import '../widgets/predictor_card_modal.dart';
+import '../widgets/selection_mode_toggle_widget.dart';
+import '../widgets/league_selector_widget.dart';
+import '../widgets/recommended_list_selector_widget.dart';
+import '../widgets/match_mode_toggle_widget.dart';
 import '../services/language_preference_service.dart';
 import '../services/league_preference_service.dart';
 import '../services/admob_service.dart';
@@ -137,10 +138,14 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadLeaguePreference() async {
     final savedLeague = await LeaguePreferenceService.getLeague();
-    if (savedLeague != null) {
-      setState(() {
-        _selectedLeague = savedLeague;
-      });
+    setState(() {
+      // If no saved league, default to ISRAEL_WINNER
+      _selectedLeague = savedLeague ?? 'ISRAEL_WINNER';
+    });
+    
+    // Save the default league if this is first time
+    if (savedLeague == null && _selectedLeague != null) {
+      await LeaguePreferenceService.setLeague(_selectedLeague!);
     }
   }
 
@@ -226,6 +231,60 @@ class _HomePageState extends State<HomePage> {
     final leagues = _leagueTranslations.keys.toList();
     leagues.sort();
     return leagues;
+  }
+
+  void _handleSelectionModeChanged(String mode) {
+    setState(() {
+      _selectionMode = mode;
+      if (mode == 'league') {
+        _matchMode = 'upcoming';
+        if (_selectedLeague != null) {
+          _loadUpcomingFixtures(_selectedLeague!);
+        }
+      } else {
+        if (_selectedRecommendedList == null && _translations != null && _translations!.predefinedEvents.isNotEmpty) {
+          _selectedRecommendedList = _translations!.predefinedEvents.first.key;
+        }
+        if (_selectedRecommendedList != null) {
+          _loadRecommendedList(_selectedRecommendedList!);
+        }
+      }
+    });
+  }
+
+  void _handleLeagueChanged(String? newValue) async {
+    setState(() {
+      _selectedLeague = newValue;
+      _leagueTeams = [];
+      _upcomingFixtures = [];
+    });
+    if (newValue != null) {
+      await LeaguePreferenceService.setLeague(newValue);
+      _loadTeamsForLeague(newValue);
+      if (_matchMode == 'upcoming') {
+        _loadUpcomingFixtures(newValue);
+      }
+    }
+  }
+
+  void _handleRecommendedListChanged(String? newValue) {
+    if (newValue != null) {
+      setState(() {
+        _selectedRecommendedList = newValue;
+      });
+      _loadRecommendedList(newValue);
+    }
+  }
+
+  void _handleMatchModeChanged(String mode) {
+    setState(() {
+      _matchMode = mode;
+    });
+    if (mode == 'custom' && _selectedLeague != null && _leagueTeams.isEmpty) {
+      _loadTeamsForLeague(_selectedLeague!);
+    } else if (mode == 'upcoming' && _selectedLeague != null && _upcomingFixtures.isEmpty) {
+      _loadUpcomingFixtures(_selectedLeague!);
+    }
   }
 
   void _navigateToSettings() {
@@ -424,17 +483,38 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Selection Mode Toggle (League vs Recommended Lists)
-            _buildSelectionModeToggle(),
+            SelectionModeToggleWidget(
+              selectionMode: _selectionMode,
+              translations: _translations,
+              onModeChanged: _handleSelectionModeChanged,
+            ),
             const SizedBox(height: 24),
             // Conditional selector based on mode
             if (_selectionMode == 'league')
-              _buildLeagueSelector()
+              LeagueSelectorWidget(
+                selectedLeague: _selectedLeague,
+                availableLeagues: _availableLeagues,
+                leagueTranslations: _leagueTranslations,
+                selectedLanguage: _selectedLanguage,
+                selectLeagueText: _selectLeagueText,
+                onLeagueChanged: _handleLeagueChanged,
+              )
             else
-              _buildRecommendedListSelector(),
+              RecommendedListSelectorWidget(
+                selectedRecommendedList: _selectedRecommendedList,
+                translations: _translations,
+                selectedLanguage: _selectedLanguage,
+                onListChanged: _handleRecommendedListChanged,
+              ),
             // Show match mode toggle only in league mode
             if (_selectionMode == 'league' && _selectedLeague != null) ...[
               const SizedBox(height: 24),
-              _buildModeSelector(),
+              MatchModeToggleWidget(
+                matchMode: _matchMode,
+                customMatchText: _customMatchText,
+                upcomingGamesText: _upcomingGamesText,
+                onModeChanged: _handleMatchModeChanged,
+              ),
             ],
             const SizedBox(height: 24),
             // Content area
@@ -460,421 +540,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildLeagueSelector() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300, width: 1),
-      ),
-      child: Row(
-        children: [
-          if (_selectedLeague != null && LeagueLogosConfig.getLeagueLogo(_selectedLeague!) != null)
-            Padding(
-              padding: const EdgeInsets.only(right: 12.0),
-              child: CachedNetworkImage(
-                imageUrl: LeagueLogosConfig.getLeagueLogo(_selectedLeague!)!,
-                width: 28,
-                height: 28,
-                fit: BoxFit.contain,
-                placeholder: (context, url) => const SizedBox(
-                  width: 28,
-                  height: 28,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-                errorWidget: (context, url, error) => const Icon(
-                  Icons.sports_soccer,
-                  color: Colors.blue,
-                  size: 28,
-                ),
-              ),
-            )
-          else
-            const Padding(
-              padding: EdgeInsets.only(right: 12.0),
-              child: Icon(Icons.sports_soccer, color: Colors.blue, size: 28),
-            ),
-          Expanded(
-            child: Directionality(
-              textDirection: TextDirectionHelper.getTextDirection(_selectedLanguage),
-              child: DropdownButton<String>(
-                value: _selectedLeague,
-                hint: Align(
-                  alignment: TextDirectionHelper.isRTL(_selectedLanguage)
-                      ? Alignment.centerRight
-                      : Alignment.centerLeft,
-                  child: Text(
-                    _selectLeagueText,
-                    textAlign: TextDirectionHelper.getTextAlign(_selectedLanguage),
-                    textDirection: TextDirectionHelper.getTextDirection(_selectedLanguage),
-                  ),
-                ),
-                selectedItemBuilder: (BuildContext context) {
-                  return _availableLeagues.map((league) {
-                    final translatedName = _leagueTranslations[league] ?? league;
-                    return Align(
-                      alignment: TextDirectionHelper.isRTL(_selectedLanguage)
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      child: Text(
-                        translatedName,
-                        textAlign: TextDirectionHelper.getTextAlign(_selectedLanguage),
-                        textDirection: TextDirectionHelper.getTextDirection(_selectedLanguage),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    );
-                  }).toList();
-                },
-                isExpanded: true,
-                underline: const SizedBox(),
-                items: _availableLeagues.map((league) {
-                  final translatedName = _leagueTranslations[league] ?? league;
-                  return DropdownMenuItem<String>(
-                    value: league,
-                    alignment: TextDirectionHelper.isRTL(_selectedLanguage) 
-                        ? AlignmentDirectional.centerEnd 
-                        : AlignmentDirectional.centerStart,
-                    child: Text(
-                      translatedName,
-                      textAlign: TextDirectionHelper.getTextAlign(_selectedLanguage),
-                      textDirection: TextDirectionHelper.getTextDirection(_selectedLanguage),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  );
-              }).toList(),
-                onChanged: (String? newValue) async {
-                  setState(() {
-                    _selectedLeague = newValue;
-                    _leagueTeams = [];
-                    _upcomingFixtures = [];
-                  });
-                  if (newValue != null) {
-                    await LeaguePreferenceService.setLeague(newValue);
-                    _loadTeamsForLeague(newValue);
-                    if (_matchMode == 'upcoming') {
-                      _loadUpcomingFixtures(newValue);
-                    }
-                  }
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSelectionModeToggle() {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(25),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectionMode = 'league';
-                  _matchMode = 'upcoming';
-                });
-                if (_selectedLeague != null) {
-                  _loadUpcomingFixtures(_selectedLeague!);
-                }
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: _selectionMode == 'league'
-                      ? Colors.white
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: _selectionMode == 'league'
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                      : [],
-                ),
-                child: Text(
-                  _translations?.selectLeagueMode ?? 'Select League',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: _selectionMode == 'league'
-                        ? Colors.blue.shade700
-                        : Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectionMode = 'recommended';
-                  if (_selectedRecommendedList == null && _translations != null && _translations!.predefinedEvents.isNotEmpty) {
-                    _selectedRecommendedList = _translations!.predefinedEvents.first.key;
-                  }
-                });
-                if (_selectedRecommendedList != null) {
-                  _loadRecommendedList(_selectedRecommendedList!);
-                }
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: _selectionMode == 'recommended'
-                      ? Colors.white
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: _selectionMode == 'recommended'
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                      : [],
-                ),
-                child: Text(
-                  _translations?.recommendedListsMode ?? 'Recommended Lists',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: _selectionMode == 'recommended'
-                        ? Colors.blue.shade700
-                        : Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRecommendedListSelector() {
-    if (_translations == null || _translations!.predefinedEvents.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300, width: 1),
-        ),
-        child: const Center(
-          child: Text(
-            'No recommended lists available',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey,
-            ),
-          ),
-        ),
-      );
-    }
-
-    final predefinedEvents = _translations!.predefinedEvents;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300, width: 1),
-      ),
-      child: Row(
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(right: 12.0),
-            child: Icon(Icons.star, color: Colors.amber, size: 28),
-          ),
-          Expanded(
-            child: Directionality(
-              textDirection: TextDirectionHelper.getTextDirection(_selectedLanguage),
-              child: DropdownButton<String>(
-                value: _selectedRecommendedList,
-                hint: Align(
-                  alignment: TextDirectionHelper.isRTL(_selectedLanguage)
-                      ? Alignment.centerRight
-                      : Alignment.centerLeft,
-                  child: Text(
-                    'Select Recommended List',
-                    textAlign: TextDirectionHelper.getTextAlign(_selectedLanguage),
-                    textDirection: TextDirectionHelper.getTextDirection(_selectedLanguage),
-                  ),
-                ),
-                selectedItemBuilder: (BuildContext context) {
-                  return predefinedEvents.map((event) {
-                    return Align(
-                      alignment: TextDirectionHelper.isRTL(_selectedLanguage)
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      child: Text(
-                        event.displayName,
-                        textAlign: TextDirectionHelper.getTextAlign(_selectedLanguage),
-                        textDirection: TextDirectionHelper.getTextDirection(_selectedLanguage),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    );
-                  }).toList();
-                },
-                isExpanded: true,
-                underline: const SizedBox(),
-                items: predefinedEvents.map((event) {
-                  return DropdownMenuItem<String>(
-                    value: event.key,
-                    alignment: TextDirectionHelper.isRTL(_selectedLanguage)
-                        ? AlignmentDirectional.centerEnd
-                        : AlignmentDirectional.centerStart,
-                    child: Text(
-                      event.displayName,
-                      textAlign: TextDirectionHelper.getTextAlign(_selectedLanguage),
-                      textDirection: TextDirectionHelper.getTextDirection(_selectedLanguage),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  if (newValue != null) {
-                    setState(() {
-                      _selectedRecommendedList = newValue;
-                    });
-                    _loadRecommendedList(newValue);
-                  }
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildModeSelector() {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(25),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _matchMode = 'custom';
-                });
-                if (_selectedLeague != null && _leagueTeams.isEmpty) {
-                  _loadTeamsForLeague(_selectedLeague!);
-                }
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: _matchMode == 'custom'
-                      ? Colors.white
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: _matchMode == 'custom'
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                      : [],
-                ),
-                child: Text(
-                  _customMatchText,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: _matchMode == 'custom'
-                        ? Colors.blue.shade700
-                        : Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  _matchMode = 'upcoming';
-                });
-                if (_selectedLeague != null && _upcomingFixtures.isEmpty) {
-                  _loadUpcomingFixtures(_selectedLeague!);
-                }
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: _matchMode == 'upcoming'
-                      ? Colors.white
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: _matchMode == 'upcoming'
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                      : [],
-                ),
-                child: Text(
-                  _upcomingGamesText,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: _matchMode == 'upcoming'
-                        ? Colors.blue.shade700
-                        : Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget? _buildBottomNavigationBar() {
     if (_isBannerAdLoaded && _bannerAd != null) {
