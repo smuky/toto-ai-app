@@ -489,73 +489,73 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildMainContent() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Selection Mode Toggle (League vs Recommended Lists)
-            SelectionModeToggleWidget(
-              selectionMode: _selectionMode,
-              translations: _translations,
-              onModeChanged: _handleSelectionModeChanged,
-            ),
-            const SizedBox(height: 24),
-            // Conditional selector based on mode
-            if (_selectionMode == 'league')
-              LeagueSelectorWidget(
-                selectedLeague: _selectedLeague,
-                availableLeagues: _availableLeagues,
-                leagueTranslations: _leagueTranslations,
-                selectedLanguage: _selectedLanguage,
-                selectLeagueText: _selectLeagueText,
-                onLeagueChanged: _handleLeagueChanged,
-              )
-            else
-              RecommendedListSelectorWidget(
-                selectedRecommendedList: _selectedRecommendedList,
+    return ProUpgradeOverlayWidget(
+      showOverlay: _selectionMode == 'recommended' && !_isProUser,
+      onBackToLeague: () {
+        setState(() {
+          _selectionMode = 'league';
+        });
+      },
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Selection Mode Toggle (League vs Recommended Lists)
+              SelectionModeToggleWidget(
+                selectionMode: _selectionMode,
                 translations: _translations,
-                selectedLanguage: _selectedLanguage,
-                onListChanged: _handleRecommendedListChanged,
+                onModeChanged: _handleSelectionModeChanged,
               ),
-            // Show match mode toggle only in league mode
-            if (_selectionMode == 'league' && _selectedLeague != null) ...[
               const SizedBox(height: 24),
-              MatchModeToggleWidget(
-                matchMode: _matchMode,
-                customMatchText: _customMatchText,
-                upcomingGamesText: _upcomingGamesText,
-                onModeChanged: _handleMatchModeChanged,
-              ),
-            ],
-            const SizedBox(height: 24),
-            // Content area
-            if (_selectionMode == 'league' && _matchMode == 'custom' && _translations != null)
-              CustomMatchWidget(
-                leagueTeams: _leagueTeams,
-                selectedLeague: _selectedLeague,
-                isLoadingTeams: _isLoadingTeams,
-                selectedLanguage: _selectedLanguage,
-                translations: _translations!,
-              )
-            else if (_translations != null)
-              ProUpgradeOverlayWidget(
-                showOverlay: _selectionMode == 'recommended' && !_isProUser,
-                onBackToLeague: () {
-                  setState(() {
-                    _selectionMode = 'league';
-                  });
-                },
-                child: UpcomingGamesWidget(
+              // Conditional selector based on mode
+              if (_selectionMode == 'league')
+                LeagueSelectorWidget(
+                  selectedLeague: _selectedLeague,
+                  availableLeagues: _availableLeagues,
+                  leagueTranslations: _leagueTranslations,
+                  selectedLanguage: _selectedLanguage,
+                  selectLeagueText: _selectLeagueText,
+                  onLeagueChanged: _handleLeagueChanged,
+                )
+              else
+                RecommendedListSelectorWidget(
+                  selectedRecommendedList: _selectedRecommendedList,
+                  translations: _translations,
+                  selectedLanguage: _selectedLanguage,
+                  onListChanged: _handleRecommendedListChanged,
+                ),
+              // Show match mode toggle only in league mode
+              if (_selectionMode == 'league' && _selectedLeague != null) ...[
+                const SizedBox(height: 24),
+                MatchModeToggleWidget(
+                  matchMode: _matchMode,
+                  customMatchText: _customMatchText,
+                  upcomingGamesText: _upcomingGamesText,
+                  onModeChanged: _handleMatchModeChanged,
+                ),
+              ],
+              const SizedBox(height: 24),
+              // Content area
+              if (_selectionMode == 'league' && _matchMode == 'custom' && _translations != null)
+                CustomMatchWidget(
+                  leagueTeams: _leagueTeams,
+                  selectedLeague: _selectedLeague,
+                  isLoadingTeams: _isLoadingTeams,
+                  selectedLanguage: _selectedLanguage,
+                  translations: _translations!,
+                )
+              else if (_translations != null)
+                UpcomingGamesWidget(
                   upcomingFixtures: _upcomingFixtures,
                   isLoadingFixtures: _isLoadingFixtures,
                   selectedLanguage: _selectedLanguage,
                   selectedLeague: _selectedLeague ?? _selectedRecommendedList ?? '',
                   translations: _translations!,
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -60,43 +60,58 @@ class _ProUpgradeOverlayWidgetState extends State<ProUpgradeOverlayWidget>
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.showOverlay) {
+      return widget.child;
+    }
+
     return Stack(
       children: [
-        // Original content
-        widget.child,
+        // Original content (blurred and non-interactive)
+        IgnorePointer(
+          child: widget.child,
+        ),
         
-        // Overlay (blur + upgrade card)
-        if (widget.showOverlay)
-          FadeTransition(
+        // Full-screen blocking overlay
+        Positioned.fill(
+          child: FadeTransition(
             opacity: _fadeAnimation,
-            child: Stack(
-              children: [
-                // Blurred background with disabled interactions
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: ClipRect(
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                        child: Container(
-                          color: Colors.black.withOpacity(0.3),
+            child: AbsorbPointer(
+              absorbing: true,
+              child: Container(
+                color: Colors.transparent,
+                child: Stack(
+                  children: [
+                    // Blurred background
+                    Positioned.fill(
+                      child: ClipRect(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            color: Colors.black.withOpacity(0.3),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-                
-                // Centered upgrade card
-                Center(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: _buildUpgradeCard(context),
+                    
+                    // Centered upgrade card (only interactive element)
+                    Center(
+                      child: AbsorbPointer(
+                        absorbing: false,
+                        child: SingleChildScrollView(
+                          physics: const ClampingScrollPhysics(),
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: _buildUpgradeCard(context),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
+        ),
       ],
     );
   }
