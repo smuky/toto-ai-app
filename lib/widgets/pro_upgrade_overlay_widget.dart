@@ -71,44 +71,38 @@ class _ProUpgradeOverlayWidgetState extends State<ProUpgradeOverlayWidget>
           child: widget.child,
         ),
         
-        // Full-screen blocking overlay
+        // Full-screen blocking overlay with single fade animation
         Positioned.fill(
           child: FadeTransition(
             opacity: _fadeAnimation,
-            child: AbsorbPointer(
-              absorbing: true,
-              child: Container(
-                color: Colors.transparent,
-                child: Stack(
-                  children: [
-                    // Blurred background
-                    Positioned.fill(
-                      child: ClipRect(
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Container(
-                            color: Colors.black.withOpacity(0.3),
-                          ),
+            child: Stack(
+              children: [
+                // Blurred background - blocks all interaction
+                Positioned.fill(
+                  child: AbsorbPointer(
+                    absorbing: true,
+                    child: ClipRect(
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        child: Container(
+                          color: Colors.black.withOpacity(0.3),
                         ),
                       ),
                     ),
-                    
-                    // Centered upgrade card (only interactive element)
-                    Center(
-                      child: AbsorbPointer(
-                        absorbing: false,
-                        child: SingleChildScrollView(
-                          physics: const ClampingScrollPhysics(),
-                          child: Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: _buildUpgradeCard(context),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+                
+                // Centered upgrade card (interactive)
+                Center(
+                  child: SingleChildScrollView(
+                    physics: const ClampingScrollPhysics(),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: _buildUpgradeCard(context),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
