@@ -15,9 +15,11 @@ import '../widgets/selection_mode_toggle_widget.dart';
 import '../widgets/league_selector_widget.dart';
 import '../widgets/recommended_list_selector_widget.dart';
 import '../widgets/match_mode_toggle_widget.dart';
+import '../widgets/pro_upgrade_overlay_widget.dart';
 import '../services/language_preference_service.dart';
 import '../services/league_preference_service.dart';
 import '../services/admob_service.dart';
+import '../services/revenue_cat_service.dart';
 import '../pages/settings_page.dart';
 import '../services/version_check_service.dart';
 import '../widgets/update_required_dialog.dart';
@@ -51,6 +53,7 @@ class _HomePageState extends State<HomePage> {
   bool _isLoadingFixtures = false;
   String _selectionMode = 'league'; // 'league' or 'recommended'
   String? _selectedRecommendedList; // 'Winner16' or 'Winner16World'
+  bool _isProUser = false;
 
   @override
   void initState() {
@@ -71,6 +74,7 @@ class _HomePageState extends State<HomePage> {
     await _loadAppVersion();
     await _checkAppVersion();
     await _loadTranslations();
+    await _checkProStatus();
     
     // Load initial data based on default state
     if (_selectedLeague != null) {
@@ -79,6 +83,15 @@ class _HomePageState extends State<HomePage> {
       } else {
         await _loadTeamsForLeague(_selectedLeague!);
       }
+    }
+  }
+
+  Future<void> _checkProStatus() async {
+    final isPro = await RevenueCatService.isProUser();
+    if (mounted) {
+      setState(() {
+        _isProUser = isPro;
+      });
     }
   }
 
@@ -527,12 +540,20 @@ class _HomePageState extends State<HomePage> {
                 translations: _translations!,
               )
             else if (_translations != null)
-              UpcomingGamesWidget(
-                upcomingFixtures: _upcomingFixtures,
-                isLoadingFixtures: _isLoadingFixtures,
-                selectedLanguage: _selectedLanguage,
-                selectedLeague: _selectedLeague ?? _selectedRecommendedList ?? '',
-                translations: _translations!,
+              ProUpgradeOverlayWidget(
+                showOverlay: _selectionMode == 'recommended' && !_isProUser,
+                onBackToLeague: () {
+                  setState(() {
+                    _selectionMode = 'league';
+                  });
+                },
+                child: UpcomingGamesWidget(
+                  upcomingFixtures: _upcomingFixtures,
+                  isLoadingFixtures: _isLoadingFixtures,
+                  selectedLanguage: _selectedLanguage,
+                  selectedLeague: _selectedLeague ?? _selectedRecommendedList ?? '',
+                  translations: _translations!,
+                ),
               ),
           ],
         ),
