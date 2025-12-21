@@ -64,7 +64,7 @@ class PredictionReportWidget extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: isRtl ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             Text(
               prediction.matchDetails.competition,
@@ -78,6 +78,7 @@ class PredictionReportWidget extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
+              textDirection: isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
               children: [
                 Expanded(
                   child: Text(
@@ -88,6 +89,7 @@ class PredictionReportWidget extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
+                    textDirection: isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
                   ),
                 ),
                 Padding(
@@ -110,6 +112,7 @@ class PredictionReportWidget extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
+                    textDirection: isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
                   ),
                 ),
               ],
@@ -117,23 +120,21 @@ class PredictionReportWidget extends StatelessWidget {
             if (formattedDate.isNotEmpty) ...[
               const SizedBox(height: 12),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: isRtl ? MainAxisAlignment.end : MainAxisAlignment.start,
+                textDirection: isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
                 children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.calendar_today, color: Colors.white70, size: 16),
-                      const SizedBox(width: 6),
-                      Text(
-                        formattedDate,
-                        style: const TextStyle(color: Colors.white70, fontSize: 13),
-                      ),
-                    ],
+                  const Icon(Icons.calendar_today, color: Colors.white70, size: 16),
+                  const SizedBox(width: 6),
+                  Text(
+                    formattedDate,
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
                   ),
                 ],
               ),
               const SizedBox(height: 4),
             ],
             Row(
+              textDirection: isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
               children: [
                 const Icon(Icons.location_on, color: Colors.white70, size: 16),
                 const SizedBox(width: 6),

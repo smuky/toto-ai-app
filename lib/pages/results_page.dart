@@ -209,6 +209,7 @@ class ResultsPage extends StatelessWidget {
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
+              textDirection: language == 'he' ? TextDirection.rtl : TextDirection.ltr,
               children: [
                 Flexible(
                   child: Text(
@@ -217,7 +218,8 @@ class ResultsPage extends StatelessWidget {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
-                    textAlign: TextAlign.right,
+                    textAlign: TextAlign.center,
+                    textDirection: language == 'he' ? TextDirection.rtl : TextDirection.ltr,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -239,7 +241,8 @@ class ResultsPage extends StatelessWidget {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
-                    textAlign: TextAlign.left,
+                    textAlign: TextAlign.center,
+                    textDirection: language == 'he' ? TextDirection.rtl : TextDirection.ltr,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
