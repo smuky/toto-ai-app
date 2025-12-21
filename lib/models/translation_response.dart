@@ -1,6 +1,24 @@
+class PredefinedEvent {
+  final String key;
+  final String displayName;
+
+  const PredefinedEvent({
+    required this.key,
+    required this.displayName,
+  });
+
+  factory PredefinedEvent.fromJson(Map<String, dynamic> json) {
+    return PredefinedEvent(
+      key: json['key'] as String? ?? '',
+      displayName: json['displayName'] as String? ?? '',
+    );
+  }
+}
+
 class TranslationResponse {
   final Map<String, String> leagueTranslations;
   final Map<String, String> languageTranslations;
+  final List<PredefinedEvent> predefinedEvents;
   final String selectLeague;
   final String settings;
   final String about;
@@ -18,6 +36,8 @@ class TranslationResponse {
   final String upcomingGames;
   final String analyzing;
   final String analyzeMatch;
+  final String selectLeagueMode;
+  final String recommendedListsMode;
   final String termsOfUseTitle;
   final String termsOfUseHeader;
   final String termsOfUseStatisticalInfo;
@@ -30,6 +50,7 @@ class TranslationResponse {
   const TranslationResponse({
     required this.leagueTranslations,
     required this.languageTranslations,
+    required this.predefinedEvents,
     required this.selectLeague,
     required this.settings,
     required this.about,
@@ -47,6 +68,8 @@ class TranslationResponse {
     required this.upcomingGames,
     required this.analyzing,
     required this.analyzeMatch,
+    required this.selectLeagueMode,
+    required this.recommendedListsMode,
     required this.termsOfUseTitle,
     required this.termsOfUseHeader,
     required this.termsOfUseStatisticalInfo,
@@ -60,6 +83,7 @@ class TranslationResponse {
   factory TranslationResponse.fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> leagueTransMap = json['leagueTranslations'] as Map<String, dynamic>? ?? {};
     final Map<String, dynamic> langTransMap = json['languageTranslations'] as Map<String, dynamic>? ?? {};
+    final List<dynamic> predefinedEventsList = json['predefinedEvents'] as List<dynamic>? ?? [];
     
     return TranslationResponse(
       leagueTranslations: leagueTransMap.map(
@@ -68,6 +92,9 @@ class TranslationResponse {
       languageTranslations: langTransMap.map(
         (key, value) => MapEntry(key, value.toString()),
       ),
+      predefinedEvents: predefinedEventsList
+          .map((e) => PredefinedEvent.fromJson(e as Map<String, dynamic>))
+          .toList(),
       selectLeague: json['selectLeague'] as String? ?? 'Select League',
       settings: json['settings'] as String? ?? 'Settings',
       about: json['about'] as String? ?? '',
@@ -85,6 +112,8 @@ class TranslationResponse {
       upcomingGames: json['upcomingGames'] as String? ?? 'Upcoming Games',
       analyzing: json['analyzing'] as String? ?? 'Analyzing...',
       analyzeMatch: json['analyzeMatch'] as String? ?? 'Analyze Match',
+      selectLeagueMode: json['selectLeagueMode'] as String? ?? 'Select League',
+      recommendedListsMode: json['recommendedListsMode'] as String? ?? 'Recommended Lists',
       termsOfUseTitle: json['termsOfUseTitle'] as String? ?? 'Welcome to 1X2-AI',
       termsOfUseHeader: json['termsOfUseHeader'] as String? ?? 'Before we start, please read and accept the following:',
       termsOfUseStatisticalInfo: json['termsOfUseStatisticalInfo'] as String? ?? 'This app provides statistical information only.',

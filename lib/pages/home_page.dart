@@ -48,6 +48,8 @@ class _HomePageState extends State<HomePage> {
   String _matchMode = 'upcoming'; // 'custom' or 'upcoming'
   List<Fixture> _upcomingFixtures = [];
   bool _isLoadingFixtures = false;
+  String _selectionMode = 'league'; // 'league' or 'recommended'
+  String? _selectedRecommendedList; // 'Winner16' or 'Winner16World'
 
   @override
   void initState() {
@@ -188,6 +190,26 @@ class _HomePageState extends State<HomePage> {
 
     try {
       final response = await TeamService.fetchUpcomingFixtures(leagueEnum, 20);
+      setState(() {
+        _upcomingFixtures = response.fixtures;
+        _isLoadingFixtures = false;
+      });
+    } catch (e) {
+      setState(() {
+        _loadError = e.toString();
+        _isLoadingFixtures = false;
+      });
+    }
+  }
+
+  Future<void> _loadRecommendedList(String listType) async {
+    setState(() {
+      _isLoadingFixtures = true;
+      _loadError = null;
+    });
+
+    try {
+      final response = await TeamService.fetchRecommendedList(listType);
       setState(() {
         _upcomingFixtures = response.fixtures;
         _isLoadingFixtures = false;
@@ -401,13 +423,22 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildLeagueSelector(),
-            if (_selectedLeague != null) ...[
+            // Selection Mode Toggle (League vs Recommended Lists)
+            _buildSelectionModeToggle(),
+            const SizedBox(height: 24),
+            // Conditional selector based on mode
+            if (_selectionMode == 'league')
+              _buildLeagueSelector()
+            else
+              _buildRecommendedListSelector(),
+            // Show match mode toggle only in league mode
+            if (_selectionMode == 'league' && _selectedLeague != null) ...[
               const SizedBox(height: 24),
               _buildModeSelector(),
             ],
             const SizedBox(height: 24),
-            if (_matchMode == 'custom' && _translations != null)
+            // Content area
+            if (_selectionMode == 'league' && _matchMode == 'custom' && _translations != null)
               CustomMatchWidget(
                 leagueTeams: _leagueTeams,
                 selectedLeague: _selectedLeague,
@@ -420,7 +451,7 @@ class _HomePageState extends State<HomePage> {
                 upcomingFixtures: _upcomingFixtures,
                 isLoadingFixtures: _isLoadingFixtures,
                 selectedLanguage: _selectedLanguage,
-                selectedLeague: _selectedLeague ?? '',
+                selectedLeague: _selectedLeague ?? _selectedRecommendedList ?? '',
                 translations: _translations!,
               ),
           ],
@@ -530,6 +561,213 @@ class _HomePageState extends State<HomePage> {
                     if (_matchMode == 'upcoming') {
                       _loadUpcomingFixtures(newValue);
                     }
+                  }
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSelectionModeToggle() {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(25),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectionMode = 'league';
+                  _matchMode = 'upcoming';
+                });
+                if (_selectedLeague != null) {
+                  _loadUpcomingFixtures(_selectedLeague!);
+                }
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: _selectionMode == 'league'
+                      ? Colors.white
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: _selectionMode == 'league'
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : [],
+                ),
+                child: Text(
+                  _translations?.selectLeagueMode ?? 'Select League',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: _selectionMode == 'league'
+                        ? Colors.blue.shade700
+                        : Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectionMode = 'recommended';
+                  if (_selectedRecommendedList == null && _translations != null && _translations!.predefinedEvents.isNotEmpty) {
+                    _selectedRecommendedList = _translations!.predefinedEvents.first.key;
+                  }
+                });
+                if (_selectedRecommendedList != null) {
+                  _loadRecommendedList(_selectedRecommendedList!);
+                }
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: _selectionMode == 'recommended'
+                      ? Colors.white
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: _selectionMode == 'recommended'
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : [],
+                ),
+                child: Text(
+                  _translations?.recommendedListsMode ?? 'Recommended Lists',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: _selectionMode == 'recommended'
+                        ? Colors.blue.shade700
+                        : Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecommendedListSelector() {
+    if (_translations == null || _translations!.predefinedEvents.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade300, width: 1),
+        ),
+        child: const Center(
+          child: Text(
+            'No recommended lists available',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+      );
+    }
+
+    final predefinedEvents = _translations!.predefinedEvents;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300, width: 1),
+      ),
+      child: Row(
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(right: 12.0),
+            child: Icon(Icons.star, color: Colors.amber, size: 28),
+          ),
+          Expanded(
+            child: Directionality(
+              textDirection: TextDirectionHelper.getTextDirection(_selectedLanguage),
+              child: DropdownButton<String>(
+                value: _selectedRecommendedList,
+                hint: Align(
+                  alignment: TextDirectionHelper.isRTL(_selectedLanguage)
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft,
+                  child: Text(
+                    'Select Recommended List',
+                    textAlign: TextDirectionHelper.getTextAlign(_selectedLanguage),
+                    textDirection: TextDirectionHelper.getTextDirection(_selectedLanguage),
+                  ),
+                ),
+                selectedItemBuilder: (BuildContext context) {
+                  return predefinedEvents.map((event) {
+                    return Align(
+                      alignment: TextDirectionHelper.isRTL(_selectedLanguage)
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
+                      child: Text(
+                        event.displayName,
+                        textAlign: TextDirectionHelper.getTextAlign(_selectedLanguage),
+                        textDirection: TextDirectionHelper.getTextDirection(_selectedLanguage),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    );
+                  }).toList();
+                },
+                isExpanded: true,
+                underline: const SizedBox(),
+                items: predefinedEvents.map((event) {
+                  return DropdownMenuItem<String>(
+                    value: event.key,
+                    alignment: TextDirectionHelper.isRTL(_selectedLanguage)
+                        ? AlignmentDirectional.centerEnd
+                        : AlignmentDirectional.centerStart,
+                    child: Text(
+                      event.displayName,
+                      textAlign: TextDirectionHelper.getTextAlign(_selectedLanguage),
+                      textDirection: TextDirectionHelper.getTextDirection(_selectedLanguage),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      _selectedRecommendedList = newValue;
+                    });
+                    _loadRecommendedList(newValue);
                   }
                 },
               ),

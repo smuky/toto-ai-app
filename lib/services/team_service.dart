@@ -68,4 +68,27 @@ class TeamService {
       throw Exception('Error fetching fixtures: $e');
     }
   }
+
+  static Future<FixturesResponse> fetchRecommendedList(String eventName) async {
+    try {
+      final uri = AppConfig.isHttps
+          ? Uri.https(AppConfig.apiBaseUrl, '/api-football/fixtures/predefined', {
+              'eventName': eventName,
+            })
+          : Uri.http(AppConfig.apiBaseUrl, '/api-football/fixtures/predefined', {
+              'eventName': eventName,
+            });
+
+      final response = await ApiClient.get(uri);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonResponse = json.decode(response.body);
+        return FixturesResponse.fromJson(jsonResponse);
+      } else {
+        throw Exception('Failed to load recommended list: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching recommended list: $e');
+    }
+  }
 }
