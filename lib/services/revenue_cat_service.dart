@@ -10,7 +10,7 @@ class RevenueCatService {
   
   // DEBUG: Set this to true to simulate premium status in development
   // Set to false to test free plan restrictions
-  static const bool _debugSimulatePremium = true;
+  static const bool _debugSimulatePremium = false;
 
   static Future<void> initialize() async {
     if (_isInitialized) {
