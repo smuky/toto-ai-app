@@ -22,6 +22,7 @@ class _ProUpgradeOverlayWidgetState extends State<ProUpgradeOverlayWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  bool _shouldShowOverlay = false;
 
   @override
   void initState() {
@@ -36,7 +37,7 @@ class _ProUpgradeOverlayWidgetState extends State<ProUpgradeOverlayWidget>
     );
 
     if (widget.showOverlay) {
-      _animationController.forward();
+      _delayedShowOverlay();
     }
   }
 
@@ -45,11 +46,26 @@ class _ProUpgradeOverlayWidgetState extends State<ProUpgradeOverlayWidget>
     super.didUpdateWidget(oldWidget);
     if (widget.showOverlay != oldWidget.showOverlay) {
       if (widget.showOverlay) {
-        _animationController.forward();
+        _delayedShowOverlay();
       } else {
+        setState(() {
+          _shouldShowOverlay = false;
+        });
         _animationController.reverse();
       }
     }
+  }
+
+  void _delayedShowOverlay() {
+    // Wait for the content to render first, then show the overlay
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted && widget.showOverlay) {
+        setState(() {
+          _shouldShowOverlay = true;
+        });
+        _animationController.forward();
+      }
+    });
   }
 
   @override
@@ -60,7 +76,7 @@ class _ProUpgradeOverlayWidgetState extends State<ProUpgradeOverlayWidget>
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.showOverlay) {
+    if (!widget.showOverlay || !_shouldShowOverlay) {
       return widget.child;
     }
 
@@ -200,14 +216,19 @@ class _ProUpgradeOverlayWidgetState extends State<ProUpgradeOverlayWidget>
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
+                    onPressed: () async {
+                      final result = await Navigator.push<bool>(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const PaywallPage(),
                           fullscreenDialog: true,
                         ),
                       );
+                      
+                      // If user upgraded, go back to league mode
+                      if (result == true && context.mounted) {
+                        widget.onBackToLeague();
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.amber,

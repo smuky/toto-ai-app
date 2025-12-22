@@ -492,7 +492,9 @@ class _HomePageState extends State<HomePage> {
   Widget _buildMainContent() {
     return ProUpgradeOverlayWidget(
       showOverlay: _selectionMode == 'recommended' && !_isProUser,
-      onBackToLeague: () {
+      onBackToLeague: () async {
+        // Refresh pro status in case user just upgraded
+        await _checkProStatus();
         setState(() {
           _selectionMode = 'league';
         });
