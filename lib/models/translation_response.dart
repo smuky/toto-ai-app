@@ -41,6 +41,29 @@ class UpgradeMessages {
   }
 }
 
+class PremiumBadgeMessages {
+  final String title;
+  final String body;
+  final String button;
+  final String back;
+
+  const PremiumBadgeMessages({
+    required this.title,
+    required this.body,
+    required this.button,
+    required this.back,
+  });
+
+  factory PremiumBadgeMessages.fromJson(Map<String, dynamic> json) {
+    return PremiumBadgeMessages(
+      title: json['title'] as String? ?? 'This service is for PRO subscribers only',
+      body: json['body'] as String? ?? 'All your ticket matches, organized in one place – no manual searching required. To unlock these curated lists and access exclusive features, upgrade to PRO and start betting smarter.',
+      button: json['button'] as String? ?? 'Upgrade to PRO',
+      back: json['back'] as String? ?? 'Back to Select League',
+    );
+  }
+}
+
 class TranslationResponse {
   final Map<String, String> leagueTranslations;
   final Map<String, String> languageTranslations;
@@ -73,6 +96,7 @@ class TranslationResponse {
   final String termsOfUseReadPolicy;
   final String termsOfUseAgreeContinue;
   final UpgradeMessages upgradeMessages;
+  final PremiumBadgeMessages premiumBadgeMessages;
 
   const TranslationResponse({
     required this.leagueTranslations,
@@ -106,6 +130,7 @@ class TranslationResponse {
     required this.termsOfUseReadPolicy,
     required this.termsOfUseAgreeContinue,
     required this.upgradeMessages,
+    required this.premiumBadgeMessages,
   });
 
   factory TranslationResponse.fromJson(Map<String, dynamic> json) {
@@ -158,6 +183,14 @@ class TranslationResponse {
               currentVersion: 'Current version:',
               requiredVersion: 'Required version:',
               button: 'Update Now',
+            ),
+      premiumBadgeMessages: json['premiumBadgeMessages'] != null
+          ? PremiumBadgeMessages.fromJson(json['premiumBadgeMessages'] as Map<String, dynamic>)
+          : const PremiumBadgeMessages(
+              title: 'This service is for PRO subscribers only',
+              body: 'All your ticket matches, organized in one place – no manual searching required. To unlock these curated lists and access exclusive features, upgrade to PRO and start betting smarter.',
+              button: 'Upgrade to PRO',
+              back: 'Back to Select League',
             ),
     );
   }

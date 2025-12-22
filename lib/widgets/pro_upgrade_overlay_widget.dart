@@ -1,17 +1,20 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../pages/paywall_page.dart';
+import '../models/translation_response.dart';
 
 class ProUpgradeOverlayWidget extends StatefulWidget {
   final Widget child;
   final bool showOverlay;
   final VoidCallback onBackToLeague;
+  final PremiumBadgeMessages? premiumBadgeMessages;
 
   const ProUpgradeOverlayWidget({
     super.key,
     required this.child,
     required this.showOverlay,
     required this.onBackToLeague,
+    this.premiumBadgeMessages,
   });
 
   @override
@@ -127,6 +130,13 @@ class _ProUpgradeOverlayWidgetState extends State<ProUpgradeOverlayWidget>
   }
 
   Widget _buildUpgradeCard(BuildContext context) {
+    final messages = widget.premiumBadgeMessages ?? const PremiumBadgeMessages(
+      title: 'This service is for PRO subscribers only',
+      body: 'All your ticket matches, organized in one place – no manual searching required. To unlock these curated lists and access exclusive features, upgrade to PRO and start betting smarter.',
+      button: 'Upgrade to PRO',
+      back: 'Back to Select League',
+    );
+    
     return Container(
       constraints: const BoxConstraints(maxWidth: 400),
       decoration: BoxDecoration(
@@ -182,10 +192,10 @@ class _ProUpgradeOverlayWidgetState extends State<ProUpgradeOverlayWidget>
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'This service is for PRO subscribers only',
+                Text(
+                  messages.title,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -201,10 +211,10 @@ class _ProUpgradeOverlayWidgetState extends State<ProUpgradeOverlayWidget>
             padding: const EdgeInsets.all(24),
             child: Column(
               children: [
-                const Text(
-                  'All your ticket matches, organized in one place – no manual searching required. To unlock these curated lists and access exclusive features, upgrade to PRO and start betting smarter.',
+                Text(
+                  messages.body,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 15,
                     color: Colors.white70,
                     height: 1.5,
@@ -244,9 +254,9 @@ class _ProUpgradeOverlayWidgetState extends State<ProUpgradeOverlayWidget>
                       children: [
                         const Icon(Icons.star, size: 24),
                         const SizedBox(width: 8),
-                        const Text(
-                          'Upgrade to PRO',
-                          style: TextStyle(
+                        Text(
+                          messages.button,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -271,9 +281,9 @@ class _ProUpgradeOverlayWidgetState extends State<ProUpgradeOverlayWidget>
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      'Back to Select League',
-                      style: TextStyle(
+                    child: Text(
+                      messages.back,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
