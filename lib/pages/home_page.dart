@@ -508,6 +508,7 @@ class _HomePageState extends State<HomePage> {
                 selectionMode: _selectionMode,
                 translations: _translations,
                 onModeChanged: _handleSelectionModeChanged,
+                selectedLanguage: _selectedLanguage,
               ),
               const SizedBox(height: 24),
               // Conditional selector based on mode
