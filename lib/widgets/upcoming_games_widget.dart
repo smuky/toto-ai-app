@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../models/fixture.dart';
 import '../models/translation_response.dart';
 import '../services/prediction_service.dart';
@@ -115,6 +116,7 @@ class _UpcomingGamesWidgetState extends State<UpcomingGamesWidget> {
 
   Widget _buildFixtureCard(Fixture fixture) {
     final dateTime = fixture.date;
+    final dayName = DateFormat('EEEE').format(dateTime);
     final dateStr = '${dateTime.day}/${dateTime.month}/${dateTime.year}';
     final timeStr = '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
 
@@ -175,6 +177,15 @@ class _UpcomingGamesWidgetState extends State<UpcomingGamesWidget> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Column(
                         children: [
+                          Text(
+                            dayName,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey.shade500,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -292,6 +303,15 @@ class _UpcomingGamesWidgetState extends State<UpcomingGamesWidget> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Column(
                         children: [
+                          Text(
+                            dayName,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey.shade500,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
