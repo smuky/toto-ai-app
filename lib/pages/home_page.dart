@@ -208,7 +208,7 @@ class _HomePageState extends State<HomePage> {
     });
 
     try {
-      final response = await TeamService.fetchUpcomingFixtures(leagueEnum, 20);
+      final response = await TeamService.fetchUpcomingFixtures(leagueEnum, 30);
       setState(() {
         _upcomingFixtures = response.fixtures;
         _isLoadingFixtures = false;
