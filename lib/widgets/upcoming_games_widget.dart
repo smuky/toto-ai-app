@@ -116,7 +116,8 @@ class _UpcomingGamesWidgetState extends State<UpcomingGamesWidget> {
 
   Widget _buildFixtureCard(Fixture fixture) {
     final dateTime = fixture.date;
-    final dayName = DateFormat('EEEE').format(dateTime);
+    final dayNameKey = DateFormat('EEEE').format(dateTime).toLowerCase();
+    final dayName = widget.translations.days[dayNameKey] ?? dayNameKey;
     final dateStr = '${dateTime.day}/${dateTime.month}/${dateTime.year}';
     final timeStr = '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
 

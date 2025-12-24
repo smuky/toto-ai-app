@@ -67,6 +67,7 @@ class PremiumBadgeMessages {
 class TranslationResponse {
   final Map<String, String> leagueTranslations;
   final Map<String, String> languageTranslations;
+  final Map<String, String> days;
   final List<PredefinedEvent> predefinedEvents;
   final String selectLeague;
   final String settings;
@@ -101,6 +102,7 @@ class TranslationResponse {
   const TranslationResponse({
     required this.leagueTranslations,
     required this.languageTranslations,
+    required this.days,
     required this.predefinedEvents,
     required this.selectLeague,
     required this.settings,
@@ -136,6 +138,7 @@ class TranslationResponse {
   factory TranslationResponse.fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> leagueTransMap = json['leagueTranslations'] as Map<String, dynamic>? ?? {};
     final Map<String, dynamic> langTransMap = json['languageTranslations'] as Map<String, dynamic>? ?? {};
+    final Map<String, dynamic> daysMap = json['days'] as Map<String, dynamic>? ?? {};
     final List<dynamic> predefinedEventsList = json['predefinedEvents'] as List<dynamic>? ?? [];
     
     return TranslationResponse(
@@ -143,6 +146,9 @@ class TranslationResponse {
         (key, value) => MapEntry(key, value.toString()),
       ),
       languageTranslations: langTransMap.map(
+        (key, value) => MapEntry(key, value.toString()),
+      ),
+      days: daysMap.map(
         (key, value) => MapEntry(key, value.toString()),
       ),
       predefinedEvents: predefinedEventsList
