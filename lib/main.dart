@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:toto_ai/services/user_permission_service.dart';
 import 'config/environment.dart';
 import 'services/admob_service.dart';
 import 'services/revenue_cat_service.dart';
@@ -33,6 +34,12 @@ void main() async {
     await RevenueCatService.initialize();
   } catch (e) {
     print('Failed to initialize RevenueCat: $e');
+  }
+
+  try {
+    await UserPermissionService.initialize();
+  } catch (e) {
+    print('Failed to initialize UserPermissionService: $e');
   }
   
   // Check if user has accepted terms
