@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:toto_ai/services/user_permission_service.dart';
 
 class RevenueCatService {
   static const String _apiKey = 'goog_AkVuvoDljodKjgbYiqBSGNCbhyW';
@@ -46,7 +47,17 @@ class RevenueCatService {
   }
 
   static Future<bool> isProUser() async {
-    // In debug mode, allow simulating premium status for testing
+    // First check server permissions
+    try {
+      if (UserPermissionService.isPro) {
+        return true; // User has premium permissions from server
+      }
+    } catch (e) {
+      // If there's an error checking server permissions, continue with local check
+      print('Error checking server permissions: $e');
+    }
+
+    // Fall back to local premium status
     if (kDebugMode && _debugSimulatePremium) {
       print('RevenueCat: DEBUG MODE - Simulating premium status: true');
       return true;
