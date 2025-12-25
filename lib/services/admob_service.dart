@@ -3,6 +3,18 @@ import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class AdMobService {
+  static bool _isProUser = false;
+  
+  // Call this method when the app starts and when the user's pro status changes
+  static void updateProStatus(bool isPro) {
+    _isProUser = isPro;
+    if (isPro) {
+      // If user becomes pro, dispose of any loaded ads
+      _interstitialAd?.dispose();
+      _interstitialAd = null;
+      _isInterstitialAdReady = false;
+    }
+  }
   static const String _prodAndroidBannerAdUnitId = 'ca-app-pub-3174197364390991/5036467502';
   static const String _prodIosBannerAdUnitId = 'ca-app-pub-3174197364390991/5036467502';
   static const String _prodAndroidInterstitialAdUnitId = 'ca-app-pub-3174197364390991/1362985800';
@@ -16,6 +28,7 @@ class AdMobService {
   static bool get _isDebugMode => kDebugMode;
 
   static String get bannerAdUnitId {
+    if (_isProUser) return ''; // Return empty string for pro users
     if (Platform.isAndroid) {
       return _isDebugMode ? _testAndroidBannerAdUnitId : _prodAndroidBannerAdUnitId;
     } else if (Platform.isIOS) {
@@ -26,6 +39,7 @@ class AdMobService {
   }
 
   static String get interstitialAdUnitId {
+    if (_isProUser) return ''; // Return empty string for pro users
     if (Platform.isAndroid) {
       return _isDebugMode ? _testAndroidInterstitialAdUnitId : _prodAndroidInterstitialAdUnitId;
     } else if (Platform.isIOS) {
@@ -39,11 +53,14 @@ class AdMobService {
     MobileAds.instance.initialize();
   }
 
-  static BannerAd createBannerAd({
-    required AdSize adSize,
-    required void Function(Ad, LoadAdError) onAdFailedToLoad,
-    required void Function(Ad) onAdLoaded,
+  static BannerAd? createBannerAd({
+    AdSize adSize = AdSize.banner,
+    void Function(Ad, LoadAdError)? onAdFailedToLoad,
+    void Function(Ad)? onAdLoaded,
   }) {
+    if (_isProUser) {
+      return null; // Don't create ad for pro users
+    }
     return BannerAd(
       adUnitId: bannerAdUnitId,
       size: adSize,
@@ -62,6 +79,9 @@ class AdMobService {
     void Function()? onAdLoaded,
     void Function(LoadAdError error)? onAdFailedToLoad,
   }) {
+    if (_isProUser) {
+      return; // Don't load ads for pro users
+    }
     InterstitialAd.load(
       adUnitId: interstitialAdUnitId,
       request: const AdRequest(),
@@ -95,12 +115,13 @@ class AdMobService {
   }
 
   static void showInterstitialAd() {
-    if (_isInterstitialAdReady && _interstitialAd != null) {
-      _interstitialAd!.show();
+    if (_isProUser || !_isInterstitialAdReady || _interstitialAd == null) {
+      return; // Don't show ads for pro users or if ad isn't ready
     }
+    _interstitialAd!.show();
   }
 
-  static bool get isInterstitialAdReady => _isInterstitialAdReady;
+  static bool get isInterstitialAdReady => !_isProUser && _isInterstitialAdReady;
 
   static void disposeInterstitialAd() {
     _interstitialAd?.dispose();

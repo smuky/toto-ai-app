@@ -92,6 +92,17 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _isProUser = isPro;
       });
+      // Update AdMobService with the latest pro status
+      AdMobService.updateProStatus(isPro);
+      
+      // If user is pro, dispose of any existing banner ad
+      if (isPro && _bannerAd != null) {
+        _bannerAd?.dispose();
+        _bannerAd = null;
+        setState(() {
+          _isBannerAdLoaded = false;
+        });
+      }
     }
   }
 
@@ -129,7 +140,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _loadBannerAd() {
-    _bannerAd = AdMobService.createBannerAd(
+    final bannerAd = AdMobService.createBannerAd(
       adSize: AdSize.banner,
       onAdLoaded: (ad) {
         setState(() {
@@ -140,7 +151,11 @@ class _HomePageState extends State<HomePage> {
         ad.dispose();
       },
     );
-    _bannerAd?.load();
+    
+    if (bannerAd != null) {
+      _bannerAd = bannerAd;
+      _bannerAd!.load();
+    }
   }
 
   Future<void> _loadLanguagePreference() async {
@@ -568,7 +583,7 @@ class _HomePageState extends State<HomePage> {
 
 
   Widget? _buildBottomNavigationBar() {
-    if (_isBannerAdLoaded && _bannerAd != null) {
+    if (!_isProUser && _isBannerAdLoaded && _bannerAd != null) {
       return Container(
         height: _bannerAd!.size.height.toDouble(),
         color: Colors.transparent,
