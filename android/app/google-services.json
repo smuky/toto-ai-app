@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "627984182710",
+    "project_id": "x2-ai-481707",
+    "storage_bucket": "x2-ai-481707.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:627984182710:android:ee3c013236146d7d43e517",
+        "android_client_info": {
+          "package_name": "com.muky.toto_ai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxNLR4X19ErjQYwEV-i3lVXxTL9_ZIPms"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

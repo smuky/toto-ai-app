@@ -9,6 +9,7 @@ import '../models/predictor.dart';
 import '../pages/results_page.dart';
 import '../services/admob_service.dart';
 import '../services/review_service.dart';
+import '../services/auth_service.dart';
 
 class PredictionService {
   /// Unified prediction method that uses the selected predictor
@@ -82,10 +83,12 @@ class PredictionService {
               },
             );
 
+      final authHeaders = await AuthService().getAuthHeaders();
       final response = await http.get(
         uri,
         headers: {
           'Accept-Language': language.toUpperCase(),
+          ...authHeaders,
         },
       );
 

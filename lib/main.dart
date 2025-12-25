@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'config/environment.dart';
 import 'services/admob_service.dart';
 import 'services/revenue_cat_service.dart';
+import 'services/auth_service.dart';
 import 'pages/home_page.dart';
 import 'pages/terms_screen.dart';
 import 'providers/predictor_provider.dart';
@@ -16,6 +17,13 @@ void main() async {
   final environment = envString == 'prod' ? Environment.prod : Environment.local;
   
   await AppConfig.initialize(environment);
+  
+  // Initialize Firebase and sign in anonymously
+  try {
+    await AuthService().initialize();
+  } catch (e) {
+    print('Failed to initialize Firebase Auth: $e');
+  }
   
   AdMobService.initialize();
   AdMobService.loadInterstitialAd();
