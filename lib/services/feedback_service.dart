@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../config/environment.dart';
+import 'api_client.dart';
 
 class FeedbackService {
   /// Submits user feedback to the server
@@ -48,14 +48,7 @@ class FeedbackService {
         'timezone': timezone,
       };
 
-      // Send POST request
-      final response = await http.post(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(body),
-      );
+      final response = await ApiClient.post(uri, body: jsonEncode(body));
 
       // Check response status
       if (response.statusCode != 200 && response.statusCode != 201) {
