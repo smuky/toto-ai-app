@@ -11,41 +11,61 @@ import 'providers/predictor_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Automatically determine environment from build-time constant
   // Use --dart-define=ENV=prod when building for production
   const envString = String.fromEnvironment('ENV', defaultValue: 'local');
-  final environment = envString == 'prod' ? Environment.prod : Environment.local;
-  
+  final environment = envString == 'prod'
+      ? Environment.prod
+      : Environment.local;
+
   await AppConfig.initialize(environment);
-  
+
+  // Check if user has accepted terms (this is fast, no network calls)
+  final hasAcceptedTerms = await TermsScreen.hasAcceptedTerms();
+
+  // Start the app immediately - don't wait for services
+  runApp(TotoAIApp(hasAcceptedTerms: hasAcceptedTerms));
+
+  // Initialize services in the background (non-blocking)
+  _initializeServicesInBackground();
+}
+
+// Initialize all services in the background so they don't block app startup
+void _initializeServicesInBackground() {
   // Initialize Firebase and sign in anonymously
-  try {
-    await AuthService().initialize();
-  } catch (e) {
+  AuthService().initialize().timeout(
+    const Duration(seconds: 5),
+    onTimeout: () {
+      print('Firebase initialization timeout - continuing anyway');
+    },
+  ).catchError((e) {
     print('Failed to initialize Firebase Auth: $e');
-  }
-  
+  });
+
+  // Initialize AdMob (non-blocking)
   AdMobService.initialize();
   AdMobService.loadInterstitialAd();
-  
-  // Initialize RevenueCat
-  try {
-    await RevenueCatService.initialize();
-  } catch (e) {
-    print('Failed to initialize RevenueCat: $e');
-  }
 
-  try {
-    await UserPermissionService.initialize();
-  } catch (e) {
+  // Initialize RevenueCat
+  RevenueCatService.initialize().timeout(
+    const Duration(seconds: 5),
+    onTimeout: () {
+      print('RevenueCat initialization timeout - continuing anyway');
+    },
+  ).catchError((e) {
+    print('Failed to initialize RevenueCat: $e');
+  });
+
+  // Initialize UserPermissionService with aggressive timeout
+  UserPermissionService.initialize().timeout(
+    const Duration(seconds: 5),
+    onTimeout: () {
+      print('UserPermissionService initialization timeout - continuing anyway');
+    },
+  ).catchError((e) {
     print('Failed to initialize UserPermissionService: $e');
-  }
-  
-  // Check if user has accepted terms
-  final hasAcceptedTerms = await TermsScreen.hasAcceptedTerms();
-  
-  runApp(TotoAIApp(hasAcceptedTerms: hasAcceptedTerms));
+  });
 }
 
 class TotoAIApp extends StatelessWidget {

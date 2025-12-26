@@ -38,15 +38,24 @@ class _TermsScreenState extends State<TermsScreen> {
   Future<void> _loadTranslations() async {
     try {
       final languageCode = await LanguagePreferenceService.getLanguage();
-      final translations = await TeamService.fetchTranslations(languageCode);
+      final translations = await TeamService.fetchTranslations(languageCode)
+          .timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          print('TermsScreen: Translation fetch timeout');
+          throw Exception('Translation fetch timeout');
+        },
+      );
       setState(() {
         _translations = translations;
         _currentLanguage = languageCode;
         _isLoading = false;
       });
     } catch (e) {
+      print('TermsScreen: Error loading translations: $e');
       setState(() {
         _isLoading = false;
+        // Continue without translations - UI will show fallback text
       });
     }
   }

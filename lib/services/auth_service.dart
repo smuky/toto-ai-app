@@ -13,19 +13,42 @@ class AuthService {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    if (Firebase.apps.isEmpty) {
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
+    try {
+      if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        ).timeout(
+          const Duration(seconds: 5),
+          onTimeout: () {
+            print('Firebase.initializeApp timeout');
+            throw Exception('Firebase initialization timeout');
+          },
+        );
+      } else {
+        // If it already exists, just use the existing one
+        Firebase.app();
+      }
+
+      await signInAnonymously();
+      _isInitialized = true;
+    } catch (e) {
+      print("Firebase init error caught: $e");
+      // Even if it fails, we set this to true so the UI can at least show
+      // an error message instead of a white screen
+      _isInitialized = true;
     }
-    await signInAnonymously();
-    _isInitialized = true;
   }
 
   Future<void> signInAnonymously() async {
     try {
       if (_auth.currentUser == null) {
-        await _auth.signInAnonymously();
+        await _auth.signInAnonymously().timeout(
+          const Duration(seconds: 5),
+          onTimeout: () {
+            print('Firebase signInAnonymously timeout');
+            throw Exception('Firebase sign in timeout');
+          },
+        );
       }
     } catch (e) {
       throw Exception('Failed to sign in anonymously: $e');
@@ -38,18 +61,30 @@ class AuthService {
     }
 
     final user = _auth.currentUser;
-    
+
     if (user == null) {
       await signInAnonymously();
       final newUser = _auth.currentUser;
       if (newUser == null) {
         throw Exception('No authenticated user available');
       }
-      final token = await newUser.getIdToken(true);
+      final token = await newUser.getIdToken(true).timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          print('getIdToken timeout');
+          throw Exception('Failed to get ID token: timeout');
+        },
+      );
       return {'Authorization': 'Bearer $token'};
     }
 
-    final token = await user.getIdToken(true);
+    final token = await user.getIdToken(true).timeout(
+      const Duration(seconds: 5),
+      onTimeout: () {
+        print('getIdToken timeout');
+        throw Exception('Failed to get ID token: timeout');
+      },
+    );
     if (token == null) {
       throw Exception('Failed to get ID token');
     }

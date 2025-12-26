@@ -8,8 +8,8 @@ class UserPermissionService {
   static bool _isInitialized = false;
 
   static String? get currentPermission => _cachedPermission;
-  static bool get isPro => _cachedPermission != null && _cachedPermission !=
-      'FREE';
+  static bool get isPro =>
+      _cachedPermission != null && _cachedPermission != 'FREE';
 
   static Future<void> initialize() async {
     if (_isInitialized) {

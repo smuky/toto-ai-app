@@ -6,7 +6,6 @@ import '../config/environment.dart';
 import '../models/team.dart';
 import '../models/fixture.dart';
 import '../models/translation_response.dart';
-import '../models/predictor.dart';
 import '../services/team_service.dart';
 import '../widgets/custom_match_widget.dart';
 import '../widgets/upcoming_games_widget.dart';
@@ -69,19 +68,40 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _initializeApp() async {
+    // Load non-blocking preferences first
     await _loadLanguagePreference();
     await _loadLeaguePreference();
     await _loadAppVersion();
-    await _loadTranslations();
-    await _checkAppVersion(); // Check version AFTER translations are loaded
-    await _checkProStatus();
     
-    // Load initial data based on default state
+    // Load translations with timeout
+    try {
+      await _loadTranslations().timeout(const Duration(seconds: 5));
+      await _checkAppVersion(); // Check version AFTER translations are loaded
+    } catch (e) {
+      print('HomePage: Error in translation/version check: $e');
+      // Continue without translations - UI will show error or fallback
+    }
+    
+    // Check pro status (non-blocking)
+    _checkProStatus().timeout(
+      const Duration(seconds: 5),
+      onTimeout: () {
+        print('HomePage: _checkProStatus timeout');
+      },
+    ).catchError((e) {
+      print('HomePage: _checkProStatus error: $e');
+    });
+    
+    // Load initial data based on default state (non-blocking)
     if (_selectedLeague != null) {
       if (_matchMode == 'upcoming') {
-        await _loadUpcomingFixtures(_selectedLeague!);
+        _loadUpcomingFixtures(_selectedLeague!).catchError((e) {
+          print('HomePage: Error loading fixtures: $e');
+        });
       } else {
-        await _loadTeamsForLeague(_selectedLeague!);
+        _loadTeamsForLeague(_selectedLeague!).catchError((e) {
+          print('HomePage: Error loading teams: $e');
+        });
       }
     }
   }
@@ -180,7 +200,14 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadTranslations() async {
     try {
-      final translations = await TeamService.fetchTranslations(_selectedLanguage);
+      final translations = await TeamService.fetchTranslations(_selectedLanguage)
+          .timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          print('HomePage: Translation fetch timeout');
+          throw Exception('Translation fetch timeout');
+        },
+      );
       setState(() {
         _translations = translations;
         _leagueTranslations = translations.leagueTranslations;
@@ -190,8 +217,10 @@ class _HomePageState extends State<HomePage> {
         _upcomingGamesText = translations.upcomingGames;
       });
     } catch (e) {
+      print('HomePage: Error loading translations: $e');
       setState(() {
         _loadError = e.toString();
+        // Continue without translations - UI will show error or fallback
       });
     }
   }
