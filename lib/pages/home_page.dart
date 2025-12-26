@@ -6,12 +6,13 @@ import '../config/environment.dart';
 import '../models/team.dart';
 import '../models/fixture.dart';
 import '../models/translation_response.dart';
+import '../models/league.dart';
 import '../services/team_service.dart';
 import '../widgets/custom_match_widget.dart';
 import '../widgets/upcoming_games_widget.dart';
 import '../widgets/predictor_card_modal.dart';
 import '../widgets/selection_mode_toggle_widget.dart';
-import '../widgets/league_selector_widget.dart';
+import '../widgets/league_autocomplete_field.dart';
 import '../widgets/recommended_list_selector_widget.dart';
 import '../widgets/match_mode_toggle_widget.dart';
 import '../widgets/pro_upgrade_overlay_widget.dart';
@@ -38,7 +39,7 @@ class _HomePageState extends State<HomePage> {
   String _selectedLanguage = 'en';
   String? _selectedLeague = 'ISRAEL_WINNER';
   TranslationResponse? _translations;
-  Map<String, String> _leagueTranslations = {};
+  Map<String, LeagueTranslation> _leagueTranslations = {};
   String _aboutText = '';
   String _selectLeagueText = 'Select League';
   String _customMatchText = 'Custom Match';
@@ -291,10 +292,29 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  List<String> get _availableLeagues {
-    final leagues = _leagueTranslations.keys.toList();
-    leagues.sort();
-    return leagues;
+  // Convert league enum strings to League objects for autocomplete
+  List<League> get _availableLeaguesAsObjects {
+    return _leagueTranslations.entries.map((entry) {
+      final enumValue = entry.key;
+      final leagueTranslation = entry.value;
+      return League(
+        enumValue: enumValue,
+        name: leagueTranslation.name,
+        country: leagueTranslation.country,
+      );
+    }).toList()..sort((a, b) => a.name.compareTo(b.name));
+  }
+
+  // Get the selected League object from the enum string
+  League? get _selectedLeagueObject {
+    if (_selectedLeague == null) return null;
+    final leagueTranslation = _leagueTranslations[_selectedLeague!];
+    if (leagueTranslation == null) return null;
+    return League(
+      enumValue: _selectedLeague!,
+      name: leagueTranslation.name,
+      country: leagueTranslation.country,
+    );
   }
 
   void _handleSelectionModeChanged(String mode) {
@@ -318,17 +338,19 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _handleLeagueChanged(String? newValue) async {
+  // Handler for League objects (from autocomplete)
+  void _handleLeagueObjectChanged(League? league) async {
+    final enumValue = league?.enumValue;
     setState(() {
-      _selectedLeague = newValue;
+      _selectedLeague = enumValue;
       _leagueTeams = [];
       _upcomingFixtures = [];
     });
-    if (newValue != null) {
-      await LeaguePreferenceService.setLeague(newValue);
-      _loadTeamsForLeague(newValue);
+    if (enumValue != null) {
+      await LeaguePreferenceService.setLeague(enumValue);
+      _loadTeamsForLeague(enumValue);
       if (_matchMode == 'upcoming') {
-        _loadUpcomingFixtures(newValue);
+        _loadUpcomingFixtures(enumValue);
       }
     }
   }
@@ -365,16 +387,23 @@ class _HomePageState extends State<HomePage> {
           appVersion: _appVersion,
           buildNumber: _buildNumber,
           onLanguageChanged: (language) async {
+            // Language is already saved by SettingsPage before this callback
             setState(() {
               _selectedLanguage = language;
             });
+            // Reload translations to get league names and countries in new language
             await _loadTranslations();
+            // Reload teams and fixtures to get translated team names in new language
             if (_selectedLeague != null) {
               if (_matchMode == 'upcoming') {
                 _loadUpcomingFixtures(_selectedLeague!);
               } else {
                 _loadTeamsForLeague(_selectedLeague!);
               }
+            }
+            // Also reload recommended list if in recommended mode
+            if (_selectedRecommendedList != null) {
+              _loadRecommendedList(_selectedRecommendedList!);
             }
           },
         ),
@@ -567,13 +596,13 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 24),
               // Conditional selector based on mode
               if (_selectionMode == 'league')
-                LeagueSelectorWidget(
-                  selectedLeague: _selectedLeague,
-                  availableLeagues: _availableLeagues,
-                  leagueTranslations: _leagueTranslations,
+                LeagueAutocompleteField(
+                  key: ValueKey('league_autocomplete_$_selectedLanguage'),
+                  label: _selectLeagueText,
+                  availableLeagues: _availableLeaguesAsObjects,
+                  selectedLeague: _selectedLeagueObject,
                   selectedLanguage: _selectedLanguage,
-                  selectLeagueText: _selectLeagueText,
-                  onLeagueChanged: _handleLeagueChanged,
+                  onLeagueSelected: _handleLeagueObjectChanged,
                 )
               else
                 RecommendedListSelectorWidget(

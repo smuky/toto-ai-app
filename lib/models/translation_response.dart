@@ -1,3 +1,20 @@
+class LeagueTranslation {
+  final String name;
+  final String country;
+
+  const LeagueTranslation({
+    required this.name,
+    required this.country,
+  });
+
+  factory LeagueTranslation.fromJson(Map<String, dynamic> json) {
+    return LeagueTranslation(
+      name: json['name'] as String? ?? '',
+      country: json['country'] as String? ?? '',
+    );
+  }
+}
+
 class PredefinedEvent {
   final String key;
   final String displayName;
@@ -65,7 +82,7 @@ class PremiumBadgeMessages {
 }
 
 class TranslationResponse {
-  final Map<String, String> leagueTranslations;
+  final Map<String, LeagueTranslation> leagueTranslations;
   final Map<String, String> languageTranslations;
   final Map<String, String> days;
   final List<PredefinedEvent> predefinedEvents;
@@ -143,7 +160,10 @@ class TranslationResponse {
     
     return TranslationResponse(
       leagueTranslations: leagueTransMap.map(
-        (key, value) => MapEntry(key, value.toString()),
+        (key, value) => MapEntry(
+          key,
+          LeagueTranslation.fromJson(value as Map<String, dynamic>),
+        ),
       ),
       languageTranslations: langTransMap.map(
         (key, value) => MapEntry(key, value.toString()),
