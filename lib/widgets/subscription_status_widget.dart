@@ -2,17 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import '../services/revenue_cat_service.dart';
 import '../pages/paywall_page.dart';
+import '../models/translation_response.dart';
 
 class SubscriptionStatusWidget extends StatefulWidget {
   final VoidCallback? onStatusChanged;
+  final SettingsTranslation? settingsTranslation;
 
   const SubscriptionStatusWidget({
     super.key,
     this.onStatusChanged,
+    this.settingsTranslation,
   });
 
   @override
-  State<SubscriptionStatusWidget> createState() => _SubscriptionStatusWidgetState();
+  State<SubscriptionStatusWidget> createState() =>
+      _SubscriptionStatusWidgetState();
 }
 
 class _SubscriptionStatusWidgetState extends State<SubscriptionStatusWidget> {
@@ -53,13 +57,16 @@ class _SubscriptionStatusWidgetState extends State<SubscriptionStatusWidget> {
 
   String _getSubscriptionStatusText() {
     if (_isPro && _customerInfo != null) {
-      final entitlement = _customerInfo!.entitlements.active[RevenueCatService.entitlementId];
+      final entitlement =
+          _customerInfo!.entitlements.active[RevenueCatService.entitlementId];
       if (entitlement != null) {
         final expirationDate = entitlement.expirationDate;
         if (expirationDate != null) {
           final expiration = DateTime.parse(expirationDate);
-          final daysUntilExpiration = expiration.difference(DateTime.now()).inDays;
-          
+          final daysUntilExpiration = expiration
+              .difference(DateTime.now())
+              .inDays;
+
           if (entitlement.willRenew) {
             return 'Renews in $daysUntilExpiration days';
           } else {
@@ -69,7 +76,7 @@ class _SubscriptionStatusWidgetState extends State<SubscriptionStatusWidget> {
         return 'Active';
       }
     }
-    return 'Free Plan';
+    return widget.settingsTranslation?.freePlan ?? 'Free Plan';
   }
 
   @override
@@ -78,18 +85,14 @@ class _SubscriptionStatusWidgetState extends State<SubscriptionStatusWidget> {
       return const Card(
         child: Padding(
           padding: EdgeInsets.all(16.0),
-          child: Center(
-            child: CircularProgressIndicator(),
-          ),
+          child: Center(child: CircularProgressIndicator()),
         ),
       );
     }
 
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -108,20 +111,25 @@ class _SubscriptionStatusWidgetState extends State<SubscriptionStatusWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _isPro ? '1X2-AI Pro' : 'Free Plan',
+                        _isPro
+                            ? '1X2-AI Pro'
+                            : (widget.settingsTranslation?.freePlan ??
+                                  'Free Plan'),
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _getSubscriptionStatusText(),
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey.shade600,
+                      if (_isPro) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          _getSubscriptionStatusText(),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade600,
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),
@@ -131,23 +139,38 @@ class _SubscriptionStatusWidgetState extends State<SubscriptionStatusWidget> {
               const SizedBox(height: 16),
               const Divider(),
               const SizedBox(height: 12),
-              const Text(
-                'Upgrade to Pro for:',
-                style: TextStyle(
+              Text(
+                widget.settingsTranslation?.upgradeToProFor ??
+                    'Upgrade to Pro for:',
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 8),
-              _buildFeatureItem('Unlimited predictions'),
-              _buildFeatureItem('Advanced analytics'),
-              _buildFeatureItem('Ad-free experience'),
-              _buildFeatureItem('Priority support'),
+              _buildFeatureItem(
+                widget.settingsTranslation?.unlockAllAIModels ??
+                    'Unlock All AI Models',
+              ),
+              _buildFeatureItem(
+                widget.settingsTranslation?.exclusiveSmartLists ??
+                    'Exclusive Smart Lists',
+              ),
+              _buildFeatureItem(
+                widget.settingsTranslation?.adFreeExperience ??
+                    'Ad-free experience',
+              ),
+              _buildFeatureItem(
+                widget.settingsTranslation?.vipPrioritySupport ??
+                    'VIP Priority Support',
+              ),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: PaywallButton(
-                  text: 'Upgrade to Pro',
+                  text:
+                      widget.settingsTranslation?.upgradeToPro ??
+                      'Upgrade to Pro',
                   onPurchaseCompleted: () {
                     _loadSubscriptionStatus();
                     widget.onStatusChanged?.call();
@@ -158,10 +181,22 @@ class _SubscriptionStatusWidgetState extends State<SubscriptionStatusWidget> {
               const SizedBox(height: 16),
               const Divider(),
               const SizedBox(height: 12),
-              _buildFeatureItem('✓ Unlimited predictions', isActive: true),
-              _buildFeatureItem('✓ Advanced analytics', isActive: true),
-              _buildFeatureItem('✓ Ad-free experience', isActive: true),
-              _buildFeatureItem('✓ Priority support', isActive: true),
+              _buildFeatureItem(
+                '✓ ${widget.settingsTranslation?.unlockAllAIModels ?? 'Unlock All AI Models'}',
+                isActive: true,
+              ),
+              _buildFeatureItem(
+                '✓ ${widget.settingsTranslation?.exclusiveSmartLists ?? 'Exclusive Smart Lists'}',
+                isActive: true,
+              ),
+              _buildFeatureItem(
+                '✓ ${widget.settingsTranslation?.adFreeExperience ?? 'Ad-free experience'}',
+                isActive: true,
+              ),
+              _buildFeatureItem(
+                '✓ ${widget.settingsTranslation?.vipPrioritySupport ?? 'VIP Priority Support'}',
+                isActive: true,
+              ),
             ],
           ],
         ),
@@ -236,10 +271,7 @@ class ProFeatureGate extends StatelessWidget {
           },
           child: Stack(
             children: [
-              Opacity(
-                opacity: 0.3,
-                child: IgnorePointer(child: child),
-              ),
+              Opacity(opacity: 0.3, child: IgnorePointer(child: child)),
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
@@ -250,11 +282,7 @@ class ProFeatureGate extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
-                          Icons.lock,
-                          color: Colors.white,
-                          size: 48,
-                        ),
+                        const Icon(Icons.lock, color: Colors.white, size: 48),
                         const SizedBox(height: 8),
                         Text(
                           message ?? 'Pro Feature',

@@ -6,12 +6,12 @@ import 'package:toto_ai/services/user_permission_service.dart';
 class RevenueCatService {
   static const String _apiKey = 'goog_AkVuvoDljodKjgbYiqBSGNCbhyW';
   static const String _entitlementId = '1X2-AI Pro';
-  
+
   static bool _isInitialized = false;
-  
+
   // DEBUG: Set this to true to simulate premium status in development
   // Set to false to test free plan restrictions
-  static const bool _debugSimulatePremium = true;
+  static const bool _debugSimulatePremium = false;
 
   static Future<void> initialize() async {
     if (_isInitialized) {
@@ -20,24 +20,25 @@ class RevenueCatService {
 
     try {
       await Purchases.setLogLevel(kDebugMode ? LogLevel.debug : LogLevel.info);
-      
+
       final configuration = PurchasesConfiguration(_apiKey);
-      
+
       await Purchases.configure(configuration);
-      
+
       _isInitialized = true;
-      
+
       if (kDebugMode) {
         print('RevenueCat: SDK initialized successfully');
       }
-      
+
       Purchases.addCustomerInfoUpdateListener((customerInfo) {
         if (kDebugMode) {
           print('RevenueCat: Customer info updated');
-          print('Active entitlements: ${customerInfo.entitlements.active.keys}');
+          print(
+            'Active entitlements: ${customerInfo.entitlements.active.keys}',
+          );
         }
       });
-      
     } catch (e) {
       if (kDebugMode) {
         print('RevenueCat: Failed to initialize - $e');
@@ -62,15 +63,17 @@ class RevenueCatService {
       print('RevenueCat: DEBUG MODE - Simulating premium status: true');
       return true;
     }
-    
+
     try {
       final customerInfo = await Purchases.getCustomerInfo();
-      final hasEntitlement = customerInfo.entitlements.active.containsKey(_entitlementId);
-      
+      final hasEntitlement = customerInfo.entitlements.active.containsKey(
+        _entitlementId,
+      );
+
       if (kDebugMode) {
         print('RevenueCat: Pro status check - $hasEntitlement');
       }
-      
+
       return hasEntitlement;
     } catch (e) {
       if (kDebugMode) {
@@ -94,15 +97,17 @@ class RevenueCatService {
   static Future<Offerings> getOfferings() async {
     try {
       final offerings = await Purchases.getOfferings();
-      
+
       if (kDebugMode) {
         print('RevenueCat: Fetched offerings');
         if (offerings.current != null) {
           print('Current offering: ${offerings.current!.identifier}');
-          print('Available packages: ${offerings.current!.availablePackages.map((p) => p.identifier).join(", ")}');
+          print(
+            'Available packages: ${offerings.current!.availablePackages.map((p) => p.identifier).join(", ")}',
+          );
         }
       }
-      
+
       return offerings;
     } catch (e) {
       if (kDebugMode) {
@@ -117,22 +122,24 @@ class RevenueCatService {
       if (kDebugMode) {
         print('RevenueCat: Attempting to purchase ${package.identifier}');
       }
-      
+
       final purchaseResult = await Purchases.purchasePackage(package);
-      
+
       if (kDebugMode) {
         print('RevenueCat: Purchase successful');
-        print('Active entitlements: ${purchaseResult.customerInfo.entitlements.active.keys}');
+        print(
+          'Active entitlements: ${purchaseResult.customerInfo.entitlements.active.keys}',
+        );
       }
-      
+
       return purchaseResult.customerInfo;
     } on PlatformException catch (e) {
       final errorCode = PurchasesErrorHelper.getErrorCode(e);
-      
+
       if (kDebugMode) {
         print('RevenueCat: Purchase error - ${errorCode.name}');
       }
-      
+
       if (errorCode == PurchasesErrorCode.purchaseCancelledError) {
         throw Exception('Purchase was cancelled');
       } else if (errorCode == PurchasesErrorCode.purchaseNotAllowedError) {
@@ -155,14 +162,14 @@ class RevenueCatService {
       if (kDebugMode) {
         print('RevenueCat: Restoring purchases');
       }
-      
+
       final customerInfo = await Purchases.restorePurchases();
-      
+
       if (kDebugMode) {
         print('RevenueCat: Purchases restored');
         print('Active entitlements: ${customerInfo.entitlements.active.keys}');
       }
-      
+
       return customerInfo;
     } catch (e) {
       if (kDebugMode) {
@@ -177,9 +184,9 @@ class RevenueCatService {
       if (kDebugMode) {
         print('RevenueCat: Logging in user $userId');
       }
-      
+
       await Purchases.logIn(userId);
-      
+
       if (kDebugMode) {
         print('RevenueCat: User logged in successfully');
       }
@@ -196,9 +203,9 @@ class RevenueCatService {
       if (kDebugMode) {
         print('RevenueCat: Logging out user');
       }
-      
+
       await Purchases.logOut();
-      
+
       if (kDebugMode) {
         print('RevenueCat: User logged out successfully');
       }

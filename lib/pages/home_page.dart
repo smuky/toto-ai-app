@@ -403,6 +403,14 @@ class _HomePageState extends State<HomePage> {
                 information: 'Information',
                 about: 'About',
                 termsOfUsePrivacyPolicy: 'Terms Of Use & Privacy Policy',
+                upgradeToProFor: 'Upgrade to Pro for:',
+                upgradeToPro: 'Upgrade to Pro',
+                freePlan: 'Free Plan',
+                unlockAllAIModels: 'Unlock All AI Models',
+                exclusiveSmartLists: 'Exclusive Smart Lists',
+                adFreeExperience: 'Ad-free experience',
+                vipPrioritySupport: 'VIP Priority Support',
+                restorePurchases: 'Restore Purchases',
               ),
           sendFeedbackTranslation:
               _translations?.sendFeedbackTranslation ??

@@ -128,11 +128,13 @@ class ManageSubscriptionButton extends StatelessWidget {
 class RestorePurchasesButton extends StatelessWidget {
   final VoidCallback? onRestoreCompleted;
   final String? language;
+  final String? restorePurchasesText;
 
   const RestorePurchasesButton({
     super.key,
     this.onRestoreCompleted,
     this.language,
+    this.restorePurchasesText,
   });
 
   Future<void> _restorePurchases(BuildContext context) async {
@@ -188,7 +190,7 @@ class RestorePurchasesButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: Icon(Icons.restore, color: Colors.blue.shade700),
-      title: const Text('Restore Purchases'),
+      title: Text(restorePurchasesText ?? 'Restore Purchases'),
       trailing: (language != null && TextDirectionHelper.isRTL(language!))
           ? const Icon(Icons.arrow_back_ios, size: 16)
           : const Icon(Icons.arrow_forward_ios, size: 16),

@@ -29,6 +29,14 @@ class SettingsTranslation {
   final String information;
   final String about;
   final String termsOfUsePrivacyPolicy;
+  final String upgradeToProFor;
+  final String upgradeToPro;
+  final String freePlan;
+  final String unlockAllAIModels;
+  final String exclusiveSmartLists;
+  final String adFreeExperience;
+  final String vipPrioritySupport;
+  final String restorePurchases;
 
   const SettingsTranslation({
     required this.settings,
@@ -41,6 +49,14 @@ class SettingsTranslation {
     required this.information,
     required this.about,
     required this.termsOfUsePrivacyPolicy,
+    required this.upgradeToProFor,
+    required this.upgradeToPro,
+    required this.freePlan,
+    required this.unlockAllAIModels,
+    required this.exclusiveSmartLists,
+    required this.adFreeExperience,
+    required this.vipPrioritySupport,
+    required this.restorePurchases,
   });
 
   factory SettingsTranslation.fromJson(Map<String, dynamic> json) {
@@ -60,6 +76,20 @@ class SettingsTranslation {
       termsOfUsePrivacyPolicy:
           json['termsOfUsePrivacyPolicy'] as String? ??
           'Terms Of Use & Privacy Policy',
+      upgradeToProFor:
+          json['upgradeToProFor'] as String? ?? 'Upgrade to Pro for:',
+      upgradeToPro: json['upgradeToPro'] as String? ?? 'Upgrade to Pro',
+      freePlan: json['freePlan'] as String? ?? 'Free Plan',
+      unlockAllAIModels:
+          json['unlockAllAIModels'] as String? ?? 'Unlock All AI Models',
+      exclusiveSmartLists:
+          json['exclusiveSmartLists'] as String? ?? 'Exclusive Smart Lists',
+      adFreeExperience:
+          json['adFreeExperience'] as String? ?? 'Ad-free experience',
+      vipPrioritySupport:
+          json['vipPrioritySupport'] as String? ?? 'VIP Priority Support',
+      restorePurchases:
+          json['restorePurchases'] as String? ?? 'Restore Purchases',
     );
   }
 }
@@ -284,6 +314,14 @@ class TranslationResponse {
               information: 'Information',
               about: 'About',
               termsOfUsePrivacyPolicy: 'Terms Of Use & Privacy Policy',
+              upgradeToProFor: 'Upgrade to Pro for:',
+              upgradeToPro: 'Upgrade to Pro',
+              freePlan: 'Free Plan',
+              unlockAllAIModels: 'Unlock All AI Models',
+              exclusiveSmartLists: 'Exclusive Smart Lists',
+              adFreeExperience: 'Ad-free experience',
+              vipPrioritySupport: 'VIP Priority Support',
+              restorePurchases: 'Restore Purchases',
             ),
       sendFeedbackTranslation: json['sendFeedbackTranslation'] != null
           ? SendFeedbackTranslation.fromJson(

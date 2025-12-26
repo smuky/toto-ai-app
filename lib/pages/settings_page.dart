@@ -111,6 +111,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       onStatusChanged: () {
                         _checkProStatus();
                       },
+                      settingsTranslation: widget.settingsTranslation,
                     ),
                   ),
                   const Divider(height: 1),
@@ -121,7 +122,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     context: context,
                     title: widget.settingsTranslation.manageSubscription,
                     items: [
-                      RestorePurchasesButton(language: widget.selectedLanguage),
+                      RestorePurchasesButton(
+                        language: widget.selectedLanguage,
+                        restorePurchasesText:
+                            widget.settingsTranslation.restorePurchases,
+                      ),
                     ],
                   ),
                   const Divider(height: 1),
