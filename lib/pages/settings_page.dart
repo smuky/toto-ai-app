@@ -114,9 +114,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   _buildSettingsSection(
                     context: context,
                     title: 'Subscription',
-                    items: [
-                      const RestorePurchasesButton(),
-                    ],
+                    items: [const RestorePurchasesButton()],
                   ),
                   const Divider(height: 1),
                 ],
@@ -149,30 +147,30 @@ class _SettingsPageState extends State<SettingsPage> {
                     if (_isPro) const ManageSubscriptionButton(),
                   ],
                 ),
-          const Divider(height: 1),
-          _buildSettingsSection(
-            context: context,
-            title: 'Information',
-            items: [
-              _buildSettingsTile(
-                context: context,
-                icon: Icons.info_outline,
-                title: 'About',
-                subtitle: 'App information and version',
-                onTap: () => _showAbout(context),
-              ),
-              _buildSettingsTile(
-                context: context,
-                icon: Icons.privacy_tip_outlined,
-                title: 'Terms of Use & Privacy Policy',
-                subtitle: 'View our terms and privacy policy',
-                onTap: () => _launchPrivacyPolicy(context),
-              ),
-            ],
-          ),
-          const Divider(height: 1),
-        ],
-      ),
+                const Divider(height: 1),
+                _buildSettingsSection(
+                  context: context,
+                  title: 'Information',
+                  items: [
+                    _buildSettingsTile(
+                      context: context,
+                      icon: Icons.info_outline,
+                      title: 'About',
+                      subtitle: '',
+                      onTap: () => _showAbout(context),
+                    ),
+                    _buildSettingsTile(
+                      context: context,
+                      icon: Icons.privacy_tip_outlined,
+                      title: 'Terms of Use & Privacy Policy',
+                      subtitle: '',
+                      onTap: () => _launchPrivacyPolicy(context),
+                    ),
+                  ],
+                ),
+                const Divider(height: 1),
+              ],
+            ),
     );
   }
 
@@ -211,18 +209,14 @@ class _SettingsPageState extends State<SettingsPage> {
       leading: Icon(icon, color: Colors.blue.shade700),
       title: Text(
         title,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
       ),
-      subtitle: Text(
-        subtitle,
-        style: TextStyle(
-          fontSize: 14,
-          color: Colors.grey.shade600,
-        ),
-      ),
+      subtitle: subtitle.isNotEmpty
+          ? Text(
+              subtitle,
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+            )
+          : null,
       trailing: const Icon(Icons.chevron_right, color: Colors.grey),
       onTap: onTap,
     );
@@ -258,9 +252,12 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _launchPrivacyPolicy(BuildContext context) async {
     final languageCode = await LanguagePreferenceService.getLanguage();
-    final languageName = _getLanguageDisplayName(languageCode).split(' ').first.toLowerCase();
-    final url = 'https://smuky.github.io/ai-football-predictor-privacy.html#$languageName';
-    
+    final languageName = _getLanguageDisplayName(
+      languageCode,
+    ).split(' ').first.toLowerCase();
+    final url =
+        'https://smuky.github.io/ai-football-predictor-privacy.html#$languageName';
+
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
