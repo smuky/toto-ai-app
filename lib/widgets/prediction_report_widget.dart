@@ -3,18 +3,21 @@ import 'package:intl/intl.dart';
 import 'dart:ui' as ui;
 import '../models/prediction_response.dart';
 import '../models/translation_response.dart';
+import '../models/predictor.dart';
 import '../utils/text_direction_helper.dart';
 
 class PredictionReportWidget extends StatelessWidget {
   final PredictionResponse prediction;
   final String language;
   final TranslationResponse translations;
+  final Predictor? predictor;
 
   const PredictionReportWidget({
     super.key,
     required this.prediction,
     this.language = 'en',
     required this.translations,
+    this.predictor,
   });
 
   @override
@@ -51,12 +54,16 @@ class PredictionReportWidget extends StatelessWidget {
       formattedDate = '';
     }
 
+    // Use predictor color if available, otherwise default to blue
+    final primaryColor = predictor?.primaryColor ?? Colors.blue.shade700;
+    final secondaryColor = predictor?.primaryColor.withOpacity(0.8) ?? Colors.blue.shade500;
+
     return Card(
       elevation: 4,
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue.shade700, Colors.blue.shade500],
+            colors: [primaryColor, secondaryColor],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -186,7 +193,11 @@ class PredictionReportWidget extends StatelessWidget {
             Row(
               textDirection: TextDirectionHelper.getTextDirection(language),
               children: [
-                Icon(Icons.analytics, color: Colors.blue.shade700, size: 24),
+                Icon(
+                  Icons.analytics,
+                  color: predictor?.primaryColor ?? Colors.blue.shade700,
+                  size: 24,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -302,7 +313,7 @@ class PredictionReportWidget extends StatelessWidget {
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.blue.shade700,
+            color: predictor?.primaryColor ?? Colors.blue.shade700,
           ),
           textAlign: TextDirectionHelper.getTextAlign(language),
           textDirection: TextDirectionHelper.getTextDirection(language),
@@ -312,7 +323,7 @@ class PredictionReportWidget extends StatelessWidget {
           translations.recentFormAnalysis,
           prediction.analysis.recentFormAnalysis,
           Icons.trending_up,
-          Colors.blue,
+          predictor?.primaryColor ?? Colors.blue,
           isRtl,
           false,
         ),

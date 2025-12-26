@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../config/environment.dart';
 import '../models/prediction_response.dart';
 import '../models/translation_response.dart';
+import '../models/predictor.dart';
 import '../widgets/prediction_report_widget.dart';
 
 class ResultsPage extends StatelessWidget {
@@ -12,6 +13,7 @@ class ResultsPage extends StatelessWidget {
   final bool isError;
   final String language;
   final TranslationResponse translations;
+  final Predictor? predictor;
 
   const ResultsPage({
     super.key,
@@ -21,6 +23,7 @@ class ResultsPage extends StatelessWidget {
     required this.isError,
     required this.language,
     required this.translations,
+    this.predictor,
   });
 
   Widget _buildResponseContent(BuildContext context) {
@@ -48,6 +51,7 @@ class ResultsPage extends StatelessWidget {
         prediction: prediction,
         language: language,
         translations: translations,
+        predictor: predictor,
       );
     } catch (e, stackTrace) {
       // Log detailed error information for debugging
@@ -202,9 +206,12 @@ class ResultsPage extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.blue.shade50,
+              color: predictor?.primaryColor.withOpacity(0.1) ?? Colors.blue.shade50,
               border: Border(
-                bottom: BorderSide(color: Colors.blue.shade200, width: 2),
+                bottom: BorderSide(
+                  color: predictor?.primaryColor.withOpacity(0.3) ?? Colors.blue.shade200,
+                  width: 2,
+                ),
               ),
             ),
             child: Row(

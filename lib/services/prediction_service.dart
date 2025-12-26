@@ -117,6 +117,9 @@ class PredictionService {
       AdMobService.showInterstitialAd();
     }
 
+    // Get the predictor to pass to ResultsPage
+    final predictor = Predictor.getById(predictorId);
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -127,6 +130,7 @@ class PredictionService {
           isError: isError,
           language: language,
           translations: translations,
+          predictor: predictor,
         ),
       ),
     );
