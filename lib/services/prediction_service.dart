@@ -60,43 +60,33 @@ class PredictionService {
 
     try {
       final uri = AppConfig.isHttps
-          ? Uri.https(
-              AppConfig.apiBaseUrl,
-              AppConfig.apiPath,
-              {
-                'predictorId': predictorId,
-                'fixtureId': fixtureId.toString(),
-                'home-team': homeTeam,
-                'away-team': awayTeam,
-                'league': league,
-              },
-            )
-          : Uri.http(
-              AppConfig.apiBaseUrl,
-              AppConfig.apiPath,
-              {
-                'predictorId': predictorId,
-                'fixtureId': fixtureId.toString(),
-                'home-team': homeTeam,
-                'away-team': awayTeam,
-                'league': league,
-              },
-            );
+          ? Uri.https(AppConfig.apiBaseUrl, AppConfig.apiPath, {
+              'predictorId': predictorId,
+              'fixtureId': fixtureId.toString(),
+              'home-team': homeTeam,
+              'away-team': awayTeam,
+              'league': league,
+            })
+          : Uri.http(AppConfig.apiBaseUrl, AppConfig.apiPath, {
+              'predictorId': predictorId,
+              'fixtureId': fixtureId.toString(),
+              'home-team': homeTeam,
+              'away-team': awayTeam,
+              'league': league,
+            });
 
       final authHeaders = await AuthService().getAuthHeaders();
       final response = await http.get(
         uri,
-        headers: {
-          'Accept-Language': language.toUpperCase(),
-          ...authHeaders,
-        },
+        headers: {'Accept-Language': language.toUpperCase(), ...authHeaders},
       );
 
       if (response.statusCode == 200) {
         responseText = response.body;
         isError = false;
       } else {
-        responseText = 'Server returned status ${response.statusCode}.\n\nBody:\n${response.body}';
+        responseText =
+            'Server returned status ${response.statusCode}.\n\nBody:\n${response.body}';
         isError = true;
       }
     } catch (e) {

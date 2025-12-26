@@ -24,7 +24,7 @@ class PredictionReportWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final isRtl = language == 'he';
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    
+
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0 + bottomPadding),
@@ -56,7 +56,8 @@ class PredictionReportWidget extends StatelessWidget {
 
     // Use predictor color if available, otherwise default to blue
     final primaryColor = predictor?.primaryColor ?? Colors.blue.shade700;
-    final secondaryColor = predictor?.primaryColor.withOpacity(0.8) ?? Colors.blue.shade500;
+    final secondaryColor =
+        predictor?.primaryColor.withOpacity(0.8) ?? Colors.blue.shade500;
 
     return Card(
       elevation: 4,
@@ -71,7 +72,9 @@ class PredictionReportWidget extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: isRtl ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: isRtl
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           children: [
             Text(
               prediction.matchDetails.competition,
@@ -80,12 +83,16 @@ class PredictionReportWidget extends StatelessWidget {
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
-              textDirection: isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+              textDirection: isRtl
+                  ? ui.TextDirection.rtl
+                  : ui.TextDirection.ltr,
             ),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              textDirection: isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+              textDirection: isRtl
+                  ? ui.TextDirection.rtl
+                  : ui.TextDirection.ltr,
               children: [
                 Expanded(
                   child: Text(
@@ -96,7 +103,9 @@ class PredictionReportWidget extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
-                    textDirection: isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+                    textDirection: isRtl
+                        ? ui.TextDirection.rtl
+                        : ui.TextDirection.ltr,
                   ),
                 ),
                 Padding(
@@ -119,7 +128,9 @@ class PredictionReportWidget extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
-                    textDirection: isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+                    textDirection: isRtl
+                        ? ui.TextDirection.rtl
+                        : ui.TextDirection.ltr,
                   ),
                 ),
               ],
@@ -127,10 +138,18 @@ class PredictionReportWidget extends StatelessWidget {
             if (formattedDate.isNotEmpty) ...[
               const SizedBox(height: 12),
               Row(
-                mainAxisAlignment: isRtl ? MainAxisAlignment.end : MainAxisAlignment.start,
-                textDirection: isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+                mainAxisAlignment: isRtl
+                    ? MainAxisAlignment.end
+                    : MainAxisAlignment.start,
+                textDirection: isRtl
+                    ? ui.TextDirection.rtl
+                    : ui.TextDirection.ltr,
                 children: [
-                  const Icon(Icons.calendar_today, color: Colors.white70, size: 16),
+                  const Icon(
+                    Icons.calendar_today,
+                    color: Colors.white70,
+                    size: 16,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     formattedDate,
@@ -141,7 +160,9 @@ class PredictionReportWidget extends StatelessWidget {
               const SizedBox(height: 4),
             ],
             Row(
-              textDirection: isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+              textDirection: isRtl
+                  ? ui.TextDirection.rtl
+                  : ui.TextDirection.ltr,
               children: [
                 const Icon(Icons.location_on, color: Colors.white70, size: 16),
                 const SizedBox(width: 6),
@@ -149,7 +170,9 @@ class PredictionReportWidget extends StatelessWidget {
                   child: Text(
                     prediction.matchDetails.venue,
                     style: const TextStyle(color: Colors.white70, fontSize: 13),
-                    textDirection: isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+                    textDirection: isRtl
+                        ? ui.TextDirection.rtl
+                        : ui.TextDirection.ltr,
                   ),
                 ),
               ],
@@ -203,11 +226,10 @@ class PredictionReportWidget extends StatelessWidget {
                   child: Text(
                     translations.winProbabilities,
                     textAlign: TextDirectionHelper.getTextAlign(language),
-                    textDirection: TextDirectionHelper.getTextDirection(language),
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                    textDirection: TextDirectionHelper.getTextDirection(
+                      language,
                     ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -233,10 +255,7 @@ class PredictionReportWidget extends StatelessWidget {
           children: [
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
             ),
             Text(
               '$percentage%',
@@ -279,11 +298,10 @@ class PredictionReportWidget extends StatelessWidget {
                   child: Text(
                     translations.predictionJustification,
                     textAlign: TextDirectionHelper.getTextAlign(language),
-                    textDirection: TextDirectionHelper.getTextDirection(language),
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                    textDirection: TextDirectionHelper.getTextDirection(
+                      language,
                     ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -291,12 +309,11 @@ class PredictionReportWidget extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               prediction.justification,
-              style: const TextStyle(
-                fontSize: 14,
-                height: 1.5,
-              ),
+              style: const TextStyle(fontSize: 14, height: 1.5),
               textAlign: isRtl ? TextAlign.right : TextAlign.left,
-              textDirection: isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+              textDirection: isRtl
+                  ? ui.TextDirection.rtl
+                  : ui.TextDirection.ltr,
             ),
           ],
         ),
@@ -428,8 +445,12 @@ class _ExpandableCardWidgetState extends State<_ExpandableCardWidget> {
                   Expanded(
                     child: Text(
                       widget.title,
-                      textAlign: widget.isRtl ? TextAlign.right : TextAlign.left,
-                      textDirection: widget.isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+                      textAlign: widget.isRtl
+                          ? TextAlign.right
+                          : TextAlign.left,
+                      textDirection: widget.isRtl
+                          ? ui.TextDirection.rtl
+                          : ui.TextDirection.ltr,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -456,7 +477,9 @@ class _ExpandableCardWidgetState extends State<_ExpandableCardWidget> {
                   color: Colors.black87,
                 ),
                 textAlign: widget.isRtl ? TextAlign.right : TextAlign.left,
-                textDirection: widget.isRtl ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+                textDirection: widget.isRtl
+                    ? ui.TextDirection.rtl
+                    : ui.TextDirection.ltr,
               ),
             ),
         ],

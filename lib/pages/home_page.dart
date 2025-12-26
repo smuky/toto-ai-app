@@ -72,7 +72,7 @@ class _HomePageState extends State<HomePage> {
     await _loadLanguagePreference();
     await _loadLeaguePreference();
     await _loadAppVersion();
-    
+
     // Load translations with timeout
     try {
       await _loadTranslations().timeout(const Duration(seconds: 5));
@@ -81,17 +81,19 @@ class _HomePageState extends State<HomePage> {
       print('HomePage: Error in translation/version check: $e');
       // Continue without translations - UI will show error or fallback
     }
-    
+
     // Check pro status (non-blocking)
-    _checkProStatus().timeout(
-      const Duration(seconds: 5),
-      onTimeout: () {
-        print('HomePage: _checkProStatus timeout');
-      },
-    ).catchError((e) {
-      print('HomePage: _checkProStatus error: $e');
-    });
-    
+    _checkProStatus()
+        .timeout(
+          const Duration(seconds: 5),
+          onTimeout: () {
+            print('HomePage: _checkProStatus timeout');
+          },
+        )
+        .catchError((e) {
+          print('HomePage: _checkProStatus error: $e');
+        });
+
     // Load initial data based on default state (non-blocking)
     if (_selectedLeague != null) {
       if (_matchMode == 'upcoming') {
@@ -114,7 +116,7 @@ class _HomePageState extends State<HomePage> {
       });
       // Update AdMobService with the latest pro status
       AdMobService.updateProStatus(isPro);
-      
+
       // If user is pro, dispose of any existing banner ad
       if (isPro && _bannerAd != null) {
         _bannerAd?.dispose();
@@ -137,14 +139,18 @@ class _HomePageState extends State<HomePage> {
   Future<void> _checkAppVersion() async {
     try {
       print('HomePage: Checking app version: $_appVersion');
-      final isSupported = await VersionCheckService.isVersionSupported(_appVersion);
+      final isSupported = await VersionCheckService.isVersionSupported(
+        _appVersion,
+      );
       print('HomePage: Version supported: $isSupported');
-      
+
       if (!isSupported && mounted && _translations != null) {
         // Get minimum version for the dialog
         final minVersion = await VersionCheckService.getMinimumVersion();
-        print('HomePage: Showing update dialog - Current: $_appVersion, Min: $minVersion');
-        
+        print(
+          'HomePage: Showing update dialog - Current: $_appVersion, Min: $minVersion',
+        );
+
         // Show update required dialog with translations
         showUpdateRequiredDialog(
           context: context,
@@ -171,7 +177,7 @@ class _HomePageState extends State<HomePage> {
         ad.dispose();
       },
     );
-    
+
     if (bannerAd != null) {
       _bannerAd = bannerAd;
       _bannerAd!.load();
@@ -191,7 +197,7 @@ class _HomePageState extends State<HomePage> {
       // If no saved league, default to ISRAEL_WINNER
       _selectedLeague = savedLeague ?? 'ISRAEL_WINNER';
     });
-    
+
     // Save the default league if this is first time
     if (savedLeague == null && _selectedLeague != null) {
       await LeaguePreferenceService.setLeague(_selectedLeague!);
@@ -200,14 +206,14 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadTranslations() async {
     try {
-      final translations = await TeamService.fetchTranslations(_selectedLanguage)
-          .timeout(
-        const Duration(seconds: 5),
-        onTimeout: () {
-          print('HomePage: Translation fetch timeout');
-          throw Exception('Translation fetch timeout');
-        },
-      );
+      final translations =
+          await TeamService.fetchTranslations(_selectedLanguage).timeout(
+            const Duration(seconds: 5),
+            onTimeout: () {
+              print('HomePage: Translation fetch timeout');
+              throw Exception('Translation fetch timeout');
+            },
+          );
       setState(() {
         _translations = translations;
         _leagueTranslations = translations.leagueTranslations;
@@ -300,7 +306,9 @@ class _HomePageState extends State<HomePage> {
           _loadUpcomingFixtures(_selectedLeague!);
         }
       } else {
-        if (_selectedRecommendedList == null && _translations != null && _translations!.predefinedEvents.isNotEmpty) {
+        if (_selectedRecommendedList == null &&
+            _translations != null &&
+            _translations!.predefinedEvents.isNotEmpty) {
           _selectedRecommendedList = _translations!.predefinedEvents.first.key;
         }
         if (_selectedRecommendedList != null) {
@@ -340,7 +348,9 @@ class _HomePageState extends State<HomePage> {
     });
     if (mode == 'custom' && _selectedLeague != null && _leagueTeams.isEmpty) {
       _loadTeamsForLeague(_selectedLeague!);
-    } else if (mode == 'upcoming' && _selectedLeague != null && _upcomingFixtures.isEmpty) {
+    } else if (mode == 'upcoming' &&
+        _selectedLeague != null &&
+        _upcomingFixtures.isEmpty) {
       _loadUpcomingFixtures(_selectedLeague!);
     }
   }
@@ -447,10 +457,7 @@ class _HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.amber,
-                    width: 2,
-                  ),
+                  border: Border.all(color: Colors.amber, width: 2),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.amber.withOpacity(0.5),
@@ -587,7 +594,9 @@ class _HomePageState extends State<HomePage> {
               ],
               const SizedBox(height: 24),
               // Content area
-              if (_selectionMode == 'league' && _matchMode == 'custom' && _translations != null)
+              if (_selectionMode == 'league' &&
+                  _matchMode == 'custom' &&
+                  _translations != null)
                 CustomMatchWidget(
                   leagueTeams: _leagueTeams,
                   selectedLeague: _selectedLeague,
@@ -600,7 +609,8 @@ class _HomePageState extends State<HomePage> {
                   upcomingFixtures: _upcomingFixtures,
                   isLoadingFixtures: _isLoadingFixtures,
                   selectedLanguage: _selectedLanguage,
-                  selectedLeague: _selectedLeague ?? _selectedRecommendedList ?? '',
+                  selectedLeague:
+                      _selectedLeague ?? _selectedRecommendedList ?? '',
                   translations: _translations!,
                 ),
             ],
@@ -609,7 +619,6 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
 
   Widget? _buildBottomNavigationBar() {
     if (!_isProUser && _isBannerAdLoaded && _bannerAd != null) {

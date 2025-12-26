@@ -34,11 +34,10 @@ class ResultsPage extends StatelessWidget {
           child: Text(
             response,
             textAlign: language == 'he' ? TextAlign.right : TextAlign.left,
-            textDirection: language == 'he' ? TextDirection.rtl : TextDirection.ltr,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.red.shade900,
-            ),
+            textDirection: language == 'he'
+                ? TextDirection.rtl
+                : TextDirection.ltr,
+            style: TextStyle(fontSize: 14, color: Colors.red.shade900),
           ),
         ),
       );
@@ -69,11 +68,7 @@ class ResultsPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.sports_soccer,
-                size: 80,
-                color: Colors.blue.shade300,
-              ),
+              Icon(Icons.sports_soccer, size: 80, color: Colors.blue.shade300),
               const SizedBox(height: 24),
               Text(
                 '⚽ That was a difficult one!',
@@ -181,23 +176,94 @@ class ResultsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: AppConfig.environment == Environment.prod
-                ? Colors.green
-                : Colors.orange,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Text(
-            AppConfig.environment == Environment.prod ? 'LIVE' : 'LOCAL',
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Row(
+          children: [
+            Text(
+              '1X2-AI',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                shadows: [
+                  Shadow(
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                    color: Colors.black.withOpacity(0.8),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppConfig.environment == Environment.prod
+                    ? Colors.green
+                    : Colors.orange,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                AppConfig.environment == Environment.prod ? 'LIVE' : 'LOCAL',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          if (predictor != null)
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.amber, width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.amber.withOpacity(0.5),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: CircleAvatar(
+                radius: 18,
+                backgroundColor: Colors.grey.shade100,
+                child: ClipOval(
+                  child: Image.asset(
+                    predictor!.image,
+                    width: 36,
+                    height: 36,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(
+                        predictor!.icon,
+                        size: 20,
+                        color: predictor!.primaryColor,
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0F172A).withValues(alpha: 0.9),
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+              tooltip: 'Back',
             ),
           ),
-        ),
+        ],
         automaticallyImplyLeading: false,
       ),
       body: Column(
@@ -206,17 +272,23 @@ class ResultsPage extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: predictor?.primaryColor.withOpacity(0.1) ?? Colors.blue.shade50,
+              color:
+                  predictor?.primaryColor.withOpacity(0.1) ??
+                  Colors.blue.shade50,
               border: Border(
                 bottom: BorderSide(
-                  color: predictor?.primaryColor.withOpacity(0.3) ?? Colors.blue.shade200,
+                  color:
+                      predictor?.primaryColor.withOpacity(0.3) ??
+                      Colors.blue.shade200,
                   width: 2,
                 ),
               ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              textDirection: language == 'he' ? TextDirection.rtl : TextDirection.ltr,
+              textDirection: language == 'he'
+                  ? TextDirection.rtl
+                  : TextDirection.ltr,
               children: [
                 Flexible(
                   child: Text(
@@ -226,7 +298,9 @@ class ResultsPage extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
-                    textDirection: language == 'he' ? TextDirection.rtl : TextDirection.ltr,
+                    textDirection: language == 'he'
+                        ? TextDirection.rtl
+                        : TextDirection.ltr,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -249,7 +323,9 @@ class ResultsPage extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
-                    textDirection: language == 'he' ? TextDirection.rtl : TextDirection.ltr,
+                    textDirection: language == 'he'
+                        ? TextDirection.rtl
+                        : TextDirection.ltr,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),

@@ -27,7 +27,8 @@ class _TermsScreenState extends State<TermsScreen> {
   bool _isLoading = true;
   String _currentLanguage = 'en';
 
-  static const String _privacyPolicyBaseUrl = 'https://smuky.github.io/ai-football-predictor-privacy.html';
+  static const String _privacyPolicyBaseUrl =
+      'https://smuky.github.io/ai-football-predictor-privacy.html';
 
   @override
   void initState() {
@@ -40,12 +41,12 @@ class _TermsScreenState extends State<TermsScreen> {
       final languageCode = await LanguagePreferenceService.getLanguage();
       final translations = await TeamService.fetchTranslations(languageCode)
           .timeout(
-        const Duration(seconds: 5),
-        onTimeout: () {
-          print('TermsScreen: Translation fetch timeout');
-          throw Exception('Translation fetch timeout');
-        },
-      );
+            const Duration(seconds: 5),
+            onTimeout: () {
+              print('TermsScreen: Translation fetch timeout');
+              throw Exception('Translation fetch timeout');
+            },
+          );
       setState(() {
         _translations = translations;
         _currentLanguage = languageCode;
@@ -62,9 +63,11 @@ class _TermsScreenState extends State<TermsScreen> {
 
   Future<void> _launchPrivacyPolicy() async {
     final languageCode = await LanguagePreferenceService.getLanguage();
-    final languageName = LanguageConfig.getLanguageName(languageCode).toLowerCase();
+    final languageName = LanguageConfig.getLanguageName(
+      languageCode,
+    ).toLowerCase();
     final url = '$_privacyPolicyBaseUrl#$languageName';
-    
+
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -74,7 +77,7 @@ class _TermsScreenState extends State<TermsScreen> {
   Future<void> _acceptTerms(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(TermsScreen._termsAcceptedKey, true);
-    
+
     if (context.mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const HomePage()),
@@ -82,7 +85,10 @@ class _TermsScreenState extends State<TermsScreen> {
     }
   }
 
-  String _getTranslatedText(String Function(TranslationResponse) getter, String fallback) {
+  String _getTranslatedText(
+    String Function(TranslationResponse) getter,
+    String fallback,
+  ) {
     if (_translations != null) {
       return getter(_translations!);
     }
@@ -110,11 +116,7 @@ class _TermsScreenState extends State<TermsScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 40),
-                const Icon(
-                  Icons.sports_soccer,
-                  size: 80,
-                  color: Colors.white,
-                ),
+                const Icon(Icons.sports_soccer, size: 80, color: Colors.white),
                 const SizedBox(height: 24),
                 if (_isLoading)
                   const CircularProgressIndicator(color: Colors.white)
@@ -140,10 +142,7 @@ class _TermsScreenState extends State<TermsScreen> {
                       (t) => t.termsOfUseHeader,
                       'Before we start, please read and accept the following:',
                     ),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.white70,
-                    ),
+                    style: const TextStyle(fontSize: 16, color: Colors.white70),
                     textAlign: TextAlign.center,
                   ),
                 const SizedBox(height: 40),
@@ -191,8 +190,8 @@ class _TermsScreenState extends State<TermsScreen> {
                                     (t) => t.termsOfUseAgeRequirement,
                                     'You must be 18+ years old to use this app.',
                                   ),
-                            iconColor: Colors.orange,
-                          ),
+                                  iconColor: Colors.orange,
+                                ),
                                 const SizedBox(height: 20),
                                 _buildTermItem(
                                   icon: Icons.warning_amber_outlined,
@@ -213,18 +212,18 @@ class _TermsScreenState extends State<TermsScreen> {
                                         'Read full Privacy Policy & Terms',
                                       ),
                                     ),
-                              style: TextButton.styleFrom(
-                                foregroundColor: Colors.blue.shade700,
-                                textStyle: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: Colors.blue.shade700,
+                                      textStyle: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -268,20 +267,16 @@ class _TermsScreenState extends State<TermsScreen> {
     required Color iconColor,
   }) {
     final isRTL = TextDirectionHelper.isRTL(_currentLanguage);
-    
+
     final iconWidget = Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: iconColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Icon(
-        icon,
-        color: iconColor,
-        size: 24,
-      ),
+      child: Icon(icon, color: iconColor, size: 24),
     );
-    
+
     final textWidget = Expanded(
       child: Text(
         text,
@@ -294,20 +289,12 @@ class _TermsScreenState extends State<TermsScreen> {
         textDirection: TextDirectionHelper.getTextDirection(_currentLanguage),
       ),
     );
-    
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: isRTL
-          ? [
-              textWidget,
-              const SizedBox(width: 16),
-              iconWidget,
-            ]
-          : [
-              iconWidget,
-              const SizedBox(width: 16),
-              textWidget,
-            ],
+          ? [textWidget, const SizedBox(width: 16), iconWidget]
+          : [iconWidget, const SizedBox(width: 16), textWidget],
     );
   }
 }
