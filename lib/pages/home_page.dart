@@ -386,6 +386,18 @@ class _HomePageState extends State<HomePage> {
           aboutText: _aboutText,
           appVersion: _appVersion,
           buildNumber: _buildNumber,
+          settingsTranslation: _translations?.settingsTranslation ?? const SettingsTranslation(
+            settings: 'Settings',
+            general: 'General',
+            language: 'Language',
+            support: 'Support',
+            sendFeedback: 'Send Feedback',
+            sendFeedbackSubtitle: 'Share your ideas or report issues',
+            manageSubscription: 'Manage Subscription',
+            information: 'Information',
+            about: 'About',
+            termsOfUsePrivacyPolicy: 'Terms Of Use & Privacy Policy',
+          ),
           onLanguageChanged: (language) async {
             // Language is already saved by SettingsPage before this callback
             setState(() {
