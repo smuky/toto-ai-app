@@ -290,8 +290,6 @@ class _TermsScreenState extends State<TermsScreen> {
           height: 1.5,
           color: Colors.black87,
         ),
-        textAlign: TextDirectionHelper.getTextAlign(_currentLanguage),
-        textDirection: TextDirectionHelper.getTextDirection(_currentLanguage),
       ),
     );
 

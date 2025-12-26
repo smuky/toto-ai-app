@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../utils/text_direction_helper.dart';
 
 void showAboutAppDialog({
   required BuildContext context,
@@ -22,8 +21,6 @@ void showAboutAppDialog({
         ),
         content: Text(
           '$aboutText\n\nVersion: $appVersion',
-          textAlign: TextDirectionHelper.getTextAlign(language),
-          textDirection: TextDirectionHelper.getTextDirection(language),
           style: const TextStyle(fontSize: 15, height: 1.5, color: Colors.white),
         ),
         actions: [

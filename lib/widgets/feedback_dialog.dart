@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../services/feedback_service.dart';
 import '../models/translation_response.dart';
-import '../utils/text_direction_helper.dart';
 
 class FeedbackDialog extends StatefulWidget {
   final SendFeedbackTranslation translations;
@@ -121,9 +120,6 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                     Expanded(
                       child: Text(
                         widget.translations.title,
-                        textAlign: TextDirectionHelper.getTextAlign(
-                          widget.language,
-                        ),
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -139,7 +135,6 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                 const SizedBox(height: 16),
                 Text(
                   widget.translations.description,
-                  textAlign: TextDirectionHelper.getTextAlign(widget.language),
                   style: const TextStyle(
                     fontSize: 14,
                     color: Colors.black87,
@@ -149,7 +144,6 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: _messageController,
-                  textAlign: TextDirectionHelper.getTextAlign(widget.language),
                   decoration: InputDecoration(
                     labelText: widget.translations.messageLabel,
                     hintText: widget.translations.messagePlaceholder,
@@ -173,7 +167,6 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _emailController,
-                  textAlign: TextDirectionHelper.getTextAlign(widget.language),
                   decoration: InputDecoration(
                     labelText: widget.translations.emailLabel,
                     hintText: widget.translations.emailPlaceholder,

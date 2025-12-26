@@ -118,7 +118,6 @@ class LeagueAutocompleteField extends StatelessWidget {
                         )
                       : const Icon(Icons.arrow_drop_down, color: Colors.grey),
                 ),
-                textAlign: TextDirectionHelper.getTextAlign(selectedLanguage),
                 onTap: () {
                   if (textEditingController.selection ==
                       TextSelection.fromPosition(
@@ -190,9 +189,6 @@ class LeagueAutocompleteField extends StatelessWidget {
                                   ),
                             title: Text(
                               league.displayName,
-                              textAlign: TextDirectionHelper.getTextAlign(
-                                selectedLanguage,
-                              ),
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
@@ -200,9 +196,6 @@ class LeagueAutocompleteField extends StatelessWidget {
                             ),
                             subtitle: Text(
                               league.country,
-                              textAlign: TextDirectionHelper.getTextAlign(
-                                selectedLanguage,
-                              ),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey.shade600,

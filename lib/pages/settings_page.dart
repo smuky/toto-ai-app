@@ -65,14 +65,7 @@ class _SettingsPageState extends State<SettingsPage> {
         actions: [
           if (_isPro && !_isLoadingProStatus)
             Container(
-              margin: EdgeInsets.only(
-                right: TextDirectionHelper.isRTL(widget.selectedLanguage)
-                    ? 0
-                    : 16,
-                left: TextDirectionHelper.isRTL(widget.selectedLanguage)
-                    ? 16
-                    : 0,
-              ),
+              margin: const EdgeInsetsDirectional.only(end: 16),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 gradient: LinearGradient(

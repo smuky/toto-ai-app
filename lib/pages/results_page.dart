@@ -33,10 +33,6 @@ class ResultsPage extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Text(
             response,
-            textAlign: language == 'he' ? TextAlign.right : TextAlign.left,
-            textDirection: language == 'he'
-                ? TextDirection.rtl
-                : TextDirection.ltr,
             style: TextStyle(fontSize: 14, color: Colors.red.shade900),
           ),
         ),
@@ -286,9 +282,6 @@ class ResultsPage extends StatelessWidget {
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              textDirection: language == 'he'
-                  ? TextDirection.rtl
-                  : TextDirection.ltr,
               children: [
                 Flexible(
                   child: Text(
@@ -298,9 +291,6 @@ class ResultsPage extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
-                    textDirection: language == 'he'
-                        ? TextDirection.rtl
-                        : TextDirection.ltr,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -323,9 +313,6 @@ class ResultsPage extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
-                    textDirection: language == 'he'
-                        ? TextDirection.rtl
-                        : TextDirection.ltr,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),

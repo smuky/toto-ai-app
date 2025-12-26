@@ -50,8 +50,8 @@ class RecommendedListSelectorWidget extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Padding(
-            padding: EdgeInsets.only(right: 12.0),
+          Padding(
+            padding: const EdgeInsetsDirectional.only(end: 12.0),
             child: Icon(Icons.star, color: Colors.amber, size: 28),
           ),
           Expanded(
