@@ -8,6 +8,8 @@ import 'services/auth_service.dart';
 import 'pages/home_page.dart';
 import 'pages/terms_screen.dart';
 import 'providers/predictor_provider.dart';
+import 'services/language_preference_service.dart';
+import 'utils/text_direction_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,44 +36,81 @@ void main() async {
 // Initialize all services in the background so they don't block app startup
 void _initializeServicesInBackground() {
   // Initialize Firebase and sign in anonymously
-  AuthService().initialize().timeout(
-    const Duration(seconds: 5),
-    onTimeout: () {
-      print('Firebase initialization timeout - continuing anyway');
-    },
-  ).catchError((e) {
-    print('Failed to initialize Firebase Auth: $e');
-  });
+  AuthService()
+      .initialize()
+      .timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          print('Firebase initialization timeout - continuing anyway');
+        },
+      )
+      .catchError((e) {
+        print('Failed to initialize Firebase Auth: $e');
+      });
 
   // Initialize AdMob (non-blocking)
   AdMobService.initialize();
   AdMobService.loadInterstitialAd();
 
   // Initialize RevenueCat
-  RevenueCatService.initialize().timeout(
-    const Duration(seconds: 5),
-    onTimeout: () {
-      print('RevenueCat initialization timeout - continuing anyway');
-    },
-  ).catchError((e) {
-    print('Failed to initialize RevenueCat: $e');
-  });
+  RevenueCatService.initialize()
+      .timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          print('RevenueCat initialization timeout - continuing anyway');
+        },
+      )
+      .catchError((e) {
+        print('Failed to initialize RevenueCat: $e');
+      });
 
   // Initialize UserPermissionService with aggressive timeout
-  UserPermissionService.initialize().timeout(
-    const Duration(seconds: 5),
-    onTimeout: () {
-      print('UserPermissionService initialization timeout - continuing anyway');
-    },
-  ).catchError((e) {
-    print('Failed to initialize UserPermissionService: $e');
-  });
+  UserPermissionService.initialize()
+      .timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          print(
+            'UserPermissionService initialization timeout - continuing anyway',
+          );
+        },
+      )
+      .catchError((e) {
+        print('Failed to initialize UserPermissionService: $e');
+      });
 }
 
-class TotoAIApp extends StatelessWidget {
+class TotoAIApp extends StatefulWidget {
   final bool hasAcceptedTerms;
 
   const TotoAIApp({super.key, required this.hasAcceptedTerms});
+
+  @override
+  State<TotoAIApp> createState() => _TotoAIAppState();
+}
+
+class _TotoAIAppState extends State<TotoAIApp> {
+  String _currentLanguage = 'en';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    final language = await LanguagePreferenceService.getLanguage();
+    if (mounted) {
+      setState(() {
+        _currentLanguage = language;
+      });
+    }
+  }
+
+  void _onLanguageChanged(String language) {
+    setState(() {
+      _currentLanguage = language;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +119,18 @@ class TotoAIApp extends StatelessWidget {
       child: MaterialApp(
         title: '1X2-AI',
         theme: ThemeData(primarySwatch: Colors.blue),
-        home: hasAcceptedTerms ? const HomePage() : const TermsScreen(),
+        builder: (context, child) {
+          // Apply Directionality to all routes based on current language
+          return Directionality(
+            textDirection: TextDirectionHelper.getTextDirection(
+              _currentLanguage,
+            ),
+            child: child!,
+          );
+        },
+        home: widget.hasAcceptedTerms
+            ? HomePage(onLanguageChanged: _onLanguageChanged)
+            : TermsScreen(onLanguageChanged: _onLanguageChanged),
       ),
     );
   }

@@ -16,6 +16,7 @@ class SettingsPage extends StatefulWidget {
   final String appVersion;
   final String buildNumber;
   final SettingsTranslation settingsTranslation;
+  final SendFeedbackTranslation sendFeedbackTranslation;
   final Function(String) onLanguageChanged;
 
   const SettingsPage({
@@ -25,6 +26,7 @@ class SettingsPage extends StatefulWidget {
     required this.appVersion,
     required this.buildNumber,
     required this.settingsTranslation,
+    required this.sendFeedbackTranslation,
     required this.onLanguageChanged,
   });
 
@@ -56,150 +58,138 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirectionHelper.getTextDirection(
-        widget.selectedLanguage,
-      ),
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.settingsTranslation.settings),
-          backgroundColor: Colors.blue.shade700,
-          actions: [
-            if (_isPro && !_isLoadingProStatus)
-              Container(
-                margin: EdgeInsets.only(
-                  right: TextDirectionHelper.isRTL(widget.selectedLanguage)
-                      ? 0
-                      : 16,
-                  left: TextDirectionHelper.isRTL(widget.selectedLanguage)
-                      ? 16
-                      : 0,
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.amber.shade400, Colors.amber.shade600],
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.amber.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.star, color: Colors.white, size: 16),
-                    SizedBox(width: 4),
-                    Text(
-                      'PRO',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.settingsTranslation.settings),
+        backgroundColor: Colors.blue.shade700,
+        actions: [
+          if (_isPro && !_isLoadingProStatus)
+            Container(
+              margin: EdgeInsets.only(
+                right: TextDirectionHelper.isRTL(widget.selectedLanguage)
+                    ? 0
+                    : 16,
+                left: TextDirectionHelper.isRTL(widget.selectedLanguage)
+                    ? 16
+                    : 0,
               ),
-          ],
-        ),
-        body: _isLoadingProStatus
-            ? const Center(child: CircularProgressIndicator())
-            : ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.amber.shade400, Colors.amber.shade600],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.amber.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Show large subscription card only for free users
-                  if (!_isPro) ...[
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: SubscriptionStatusWidget(
-                        onStatusChanged: () {
-                          _checkProStatus();
-                        },
-                      ),
+                  Icon(Icons.star, color: Colors.white, size: 16),
+                  SizedBox(width: 4),
+                  Text(
+                    'PRO',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
                     ),
-                    const Divider(height: 1),
-                  ],
-                  // Show Restore Purchases section only for free users
-                  if (!_isPro) ...[
-                    _buildSettingsSection(
-                      context: context,
-                      title: widget.settingsTranslation.manageSubscription,
-                      items: [
-                        RestorePurchasesButton(
-                          language: widget.selectedLanguage,
-                        ),
-                      ],
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+      body: _isLoadingProStatus
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              children: [
+                // Show large subscription card only for free users
+                if (!_isPro) ...[
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: SubscriptionStatusWidget(
+                      onStatusChanged: () {
+                        _checkProStatus();
+                      },
                     ),
-                    const Divider(height: 1),
-                  ],
-                  _buildSettingsSection(
-                    context: context,
-                    title: widget.settingsTranslation.general,
-                    items: [
-                      _buildSettingsTile(
-                        context: context,
-                        icon: Icons.language,
-                        title: widget.settingsTranslation.language,
-                        subtitle: _getLanguageDisplayName(_currentLanguage),
-                        onTap: () => _showLanguageSelector(context),
-                      ),
-                    ],
                   ),
                   const Divider(height: 1),
+                ],
+                // Show Restore Purchases section only for free users
+                if (!_isPro) ...[
                   _buildSettingsSection(
                     context: context,
-                    title: widget.settingsTranslation.support,
+                    title: widget.settingsTranslation.manageSubscription,
                     items: [
-                      _buildSettingsTile(
-                        context: context,
-                        icon: Icons.feedback_outlined,
-                        title: widget.settingsTranslation.sendFeedback,
-                        subtitle:
-                            widget.settingsTranslation.sendFeedbackSubtitle,
-                        onTap: () => _showFeedback(context),
-                      ),
-                      // Add Manage Subscription for Pro users in Support section
-                      if (_isPro)
-                        ManageSubscriptionButton(
-                          text: widget.settingsTranslation.manageSubscription,
-                          language: widget.selectedLanguage,
-                        ),
-                    ],
-                  ),
-                  const Divider(height: 1),
-                  _buildSettingsSection(
-                    context: context,
-                    title: widget.settingsTranslation.information,
-                    items: [
-                      _buildSettingsTile(
-                        context: context,
-                        icon: Icons.info_outline,
-                        title: widget.settingsTranslation.about,
-                        subtitle: '',
-                        onTap: () => _showAbout(context),
-                      ),
-                      _buildSettingsTile(
-                        context: context,
-                        icon: Icons.privacy_tip_outlined,
-                        title:
-                            widget.settingsTranslation.termsOfUsePrivacyPolicy,
-                        subtitle: '',
-                        onTap: () => _launchPrivacyPolicy(context),
-                      ),
+                      RestorePurchasesButton(language: widget.selectedLanguage),
                     ],
                   ),
                   const Divider(height: 1),
                 ],
-              ),
-      ),
+                _buildSettingsSection(
+                  context: context,
+                  title: widget.settingsTranslation.general,
+                  items: [
+                    _buildSettingsTile(
+                      context: context,
+                      icon: Icons.language,
+                      title: widget.settingsTranslation.language,
+                      subtitle: _getLanguageDisplayName(_currentLanguage),
+                      onTap: () => _showLanguageSelector(context),
+                    ),
+                  ],
+                ),
+                const Divider(height: 1),
+                _buildSettingsSection(
+                  context: context,
+                  title: widget.settingsTranslation.support,
+                  items: [
+                    _buildSettingsTile(
+                      context: context,
+                      icon: Icons.feedback_outlined,
+                      title: widget.settingsTranslation.sendFeedback,
+                      subtitle: widget.settingsTranslation.sendFeedbackSubtitle,
+                      onTap: () => _showFeedback(context),
+                    ),
+                    // Add Manage Subscription for Pro users in Support section
+                    if (_isPro)
+                      ManageSubscriptionButton(
+                        text: widget.settingsTranslation.manageSubscription,
+                        language: widget.selectedLanguage,
+                      ),
+                  ],
+                ),
+                const Divider(height: 1),
+                _buildSettingsSection(
+                  context: context,
+                  title: widget.settingsTranslation.information,
+                  items: [
+                    _buildSettingsTile(
+                      context: context,
+                      icon: Icons.info_outline,
+                      title: widget.settingsTranslation.about,
+                      subtitle: '',
+                      onTap: () => _showAbout(context),
+                    ),
+                    _buildSettingsTile(
+                      context: context,
+                      icon: Icons.privacy_tip_outlined,
+                      title: widget.settingsTranslation.termsOfUsePrivacyPolicy,
+                      subtitle: '',
+                      onTap: () => _launchPrivacyPolicy(context),
+                    ),
+                  ],
+                ),
+                const Divider(height: 1),
+              ],
+            ),
     );
   }
 
@@ -276,7 +266,11 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _showFeedback(BuildContext context) {
-    showFeedbackDialog(context);
+    showFeedbackDialog(
+      context,
+      widget.sendFeedbackTranslation,
+      widget.selectedLanguage,
+    );
   }
 
   void _showAbout(BuildContext context) {

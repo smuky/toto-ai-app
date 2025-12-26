@@ -26,7 +26,9 @@ import '../widgets/update_required_dialog.dart';
 import '../providers/predictor_provider.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final Function(String)? onLanguageChanged;
+
+  const HomePage({super.key, this.onLanguageChanged});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -301,6 +303,7 @@ class _HomePageState extends State<HomePage> {
         enumValue: enumValue,
         name: leagueTranslation.name,
         country: leagueTranslation.country,
+        logo: leagueTranslation.logo.isNotEmpty ? leagueTranslation.logo : null,
       );
     }).toList()..sort((a, b) => a.name.compareTo(b.name));
   }
@@ -314,6 +317,7 @@ class _HomePageState extends State<HomePage> {
       enumValue: _selectedLeague!,
       name: leagueTranslation.name,
       country: leagueTranslation.country,
+      logo: leagueTranslation.logo.isNotEmpty ? leagueTranslation.logo : null,
     );
   }
 
@@ -386,23 +390,39 @@ class _HomePageState extends State<HomePage> {
           aboutText: _aboutText,
           appVersion: _appVersion,
           buildNumber: _buildNumber,
-          settingsTranslation: _translations?.settingsTranslation ?? const SettingsTranslation(
-            settings: 'Settings',
-            general: 'General',
-            language: 'Language',
-            support: 'Support',
-            sendFeedback: 'Send Feedback',
-            sendFeedbackSubtitle: 'Share your ideas or report issues',
-            manageSubscription: 'Manage Subscription',
-            information: 'Information',
-            about: 'About',
-            termsOfUsePrivacyPolicy: 'Terms Of Use & Privacy Policy',
-          ),
+          settingsTranslation:
+              _translations?.settingsTranslation ??
+              const SettingsTranslation(
+                settings: 'Settings',
+                general: 'General',
+                language: 'Language',
+                support: 'Support',
+                sendFeedback: 'Send Feedback',
+                sendFeedbackSubtitle: 'Share your ideas or report issues',
+                manageSubscription: 'Manage Subscription',
+                information: 'Information',
+                about: 'About',
+                termsOfUsePrivacyPolicy: 'Terms Of Use & Privacy Policy',
+              ),
+          sendFeedbackTranslation:
+              _translations?.sendFeedbackTranslation ??
+              const SendFeedbackTranslation(
+                title: 'Help us grow',
+                description:
+                    'We are constantly working to make this app better for you. Did you find a bug, or do you have a cool idea for a new feature? Let us know below. We read every message',
+                messageLabel: 'Your Message *',
+                messagePlaceholder: 'Tell us what you think...',
+                emailLabel: 'Your Email (Optional)',
+                emailPlaceholder: 'email@example.com',
+                sendButton: 'Send',
+              ),
           onLanguageChanged: (language) async {
             // Language is already saved by SettingsPage before this callback
             setState(() {
               _selectedLanguage = language;
             });
+            // Notify parent (TotoAIApp) about language change to update Directionality
+            widget.onLanguageChanged?.call(language);
             // Reload translations to get league names and countries in new language
             await _loadTranslations();
             // Reload teams and fixtures to get translated team names in new language

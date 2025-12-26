@@ -9,7 +9,9 @@ import '../models/translation_response.dart';
 import '../utils/text_direction_helper.dart';
 
 class TermsScreen extends StatefulWidget {
-  const TermsScreen({super.key});
+  final Function(String)? onLanguageChanged;
+
+  const TermsScreen({super.key, this.onLanguageChanged});
 
   static const String _termsAcceptedKey = 'is_terms_accepted';
 
@@ -80,7 +82,10 @@ class _TermsScreenState extends State<TermsScreen> {
 
     if (context.mounted) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomePage()),
+        MaterialPageRoute(
+          builder: (context) =>
+              HomePage(onLanguageChanged: widget.onLanguageChanged),
+        ),
       );
     }
   }

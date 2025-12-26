@@ -3,9 +3,18 @@ import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../services/feedback_service.dart';
+import '../models/translation_response.dart';
+import '../utils/text_direction_helper.dart';
 
 class FeedbackDialog extends StatefulWidget {
-  const FeedbackDialog({super.key});
+  final SendFeedbackTranslation translations;
+  final String language;
+
+  const FeedbackDialog({
+    super.key,
+    required this.translations,
+    required this.language,
+  });
 
   @override
   State<FeedbackDialog> createState() => _FeedbackDialogState();
@@ -36,9 +45,11 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
     try {
       // Get app info
       final packageInfo = await PackageInfo.fromPlatform();
-      
+
       // Get device info
-      final deviceModel = kIsWeb ? 'Web' : (Platform.isAndroid ? 'Android Device' : 'iOS Device');
+      final deviceModel = kIsWeb
+          ? 'Web'
+          : (Platform.isAndroid ? 'Android Device' : 'iOS Device');
       final operatingSystem = kIsWeb ? 'Web' : Platform.operatingSystem;
       final locale = Platform.localeName;
       final timezone = DateTime.now().timeZoneName;
@@ -46,7 +57,9 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
       // Submit feedback
       await FeedbackService.submitFeedback(
         message: _messageController.text.trim(),
-        userEmail: _emailController.text.trim().isEmpty ? null : _emailController.text.trim(),
+        userEmail: _emailController.text.trim().isEmpty
+            ? null
+            : _emailController.text.trim(),
         appVersion: packageInfo.version,
         buildNumber: packageInfo.buildNumber,
         deviceModel: deviceModel,
@@ -87,9 +100,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -107,10 +118,13 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                       size: 28,
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Help us grow',
-                        style: TextStyle(
+                        widget.translations.title,
+                        textAlign: TextDirectionHelper.getTextAlign(
+                          widget.language,
+                        ),
+                        style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
@@ -123,9 +137,10 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'We are constantly working to make this app better for you. Did you find a bug, or do you have a cool idea for a new feature? Let us know below—we read every message',
-                  style: TextStyle(
+                Text(
+                  widget.translations.description,
+                  textAlign: TextDirectionHelper.getTextAlign(widget.language),
+                  style: const TextStyle(
                     fontSize: 14,
                     color: Colors.black87,
                     height: 1.5,
@@ -134,9 +149,10 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: _messageController,
+                  textAlign: TextDirectionHelper.getTextAlign(widget.language),
                   decoration: InputDecoration(
-                    labelText: 'Your Message *',
-                    hintText: 'Tell us what you think...',
+                    labelText: widget.translations.messageLabel,
+                    hintText: widget.translations.messagePlaceholder,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -157,9 +173,10 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _emailController,
+                  textAlign: TextDirectionHelper.getTextAlign(widget.language),
                   decoration: InputDecoration(
-                    labelText: 'Your Email (Optional)',
-                    hintText: 'email@example.com',
+                    labelText: widget.translations.emailLabel,
+                    hintText: widget.translations.emailPlaceholder,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -168,7 +185,9 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value != null && value.trim().isNotEmpty) {
-                      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                      final emailRegex = RegExp(
+                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                      );
                       if (!emailRegex.hasMatch(value.trim())) {
                         return 'Please enter a valid email';
                       }
@@ -198,9 +217,9 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text(
-                            'Send',
-                            style: TextStyle(
+                        : Text(
+                            widget.translations.sendButton,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
@@ -216,9 +235,14 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
   }
 }
 
-void showFeedbackDialog(BuildContext context) {
+void showFeedbackDialog(
+  BuildContext context,
+  SendFeedbackTranslation translations,
+  String language,
+) {
   showDialog(
     context: context,
-    builder: (context) => const FeedbackDialog(),
+    builder: (context) =>
+        FeedbackDialog(translations: translations, language: language),
   );
 }

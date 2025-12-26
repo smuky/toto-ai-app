@@ -1,13 +1,19 @@
 class LeagueTranslation {
   final String name;
   final String country;
+  final String logo;
 
-  const LeagueTranslation({required this.name, required this.country});
+  const LeagueTranslation({
+    required this.name,
+    required this.country,
+    required this.logo,
+  });
 
   factory LeagueTranslation.fromJson(Map<String, dynamic> json) {
     return LeagueTranslation(
       name: json['name'] as String? ?? '',
       country: json['country'] as String? ?? '',
+      logo: json['logo'] as String? ?? '',
     );
   }
 }
@@ -54,6 +60,42 @@ class SettingsTranslation {
       termsOfUsePrivacyPolicy:
           json['termsOfUsePrivacyPolicy'] as String? ??
           'Terms Of Use & Privacy Policy',
+    );
+  }
+}
+
+class SendFeedbackTranslation {
+  final String title;
+  final String description;
+  final String messageLabel;
+  final String messagePlaceholder;
+  final String emailLabel;
+  final String emailPlaceholder;
+  final String sendButton;
+
+  const SendFeedbackTranslation({
+    required this.title,
+    required this.description,
+    required this.messageLabel,
+    required this.messagePlaceholder,
+    required this.emailLabel,
+    required this.emailPlaceholder,
+    required this.sendButton,
+  });
+
+  factory SendFeedbackTranslation.fromJson(Map<String, dynamic> json) {
+    return SendFeedbackTranslation(
+      title: json['title'] as String? ?? 'Help us grow',
+      description:
+          json['description'] as String? ??
+          'We are constantly working to make this app better for you. Did you find a bug, or do you have a cool idea for a new feature? Let us know below. We read every message',
+      messageLabel: json['messageLabel'] as String? ?? 'Your Message *',
+      messagePlaceholder:
+          json['messagePlaceholder'] as String? ?? 'Tell us what you think...',
+      emailLabel: json['emailLabel'] as String? ?? 'Your Email (Optional)',
+      emailPlaceholder:
+          json['emailPlaceholder'] as String? ?? 'email@example.com',
+      sendButton: json['sendButton'] as String? ?? 'Send',
     );
   }
 }
@@ -134,6 +176,7 @@ class TranslationResponse {
   final Map<String, String> days;
   final List<PredefinedEvent> predefinedEvents;
   final SettingsTranslation settingsTranslation;
+  final SendFeedbackTranslation sendFeedbackTranslation;
   final String selectLeague;
   final String settings;
   final String about;
@@ -170,6 +213,7 @@ class TranslationResponse {
     required this.days,
     required this.predefinedEvents,
     required this.settingsTranslation,
+    required this.sendFeedbackTranslation,
     required this.selectLeague,
     required this.settings,
     required this.about,
@@ -240,6 +284,20 @@ class TranslationResponse {
               information: 'Information',
               about: 'About',
               termsOfUsePrivacyPolicy: 'Terms Of Use & Privacy Policy',
+            ),
+      sendFeedbackTranslation: json['sendFeedbackTranslation'] != null
+          ? SendFeedbackTranslation.fromJson(
+              json['sendFeedbackTranslation'] as Map<String, dynamic>,
+            )
+          : const SendFeedbackTranslation(
+              title: 'Help us grow',
+              description:
+                  'We are constantly working to make this app better for you. Did you find a bug, or do you have a cool idea for a new feature? Let us know below. We read every message',
+              messageLabel: 'Your Message *',
+              messagePlaceholder: 'Tell us what you think...',
+              emailLabel: 'Your Email (Optional)',
+              emailPlaceholder: 'email@example.com',
+              sendButton: 'Send',
             ),
       selectLeague: json['selectLeague'] as String? ?? 'Select League',
       settings: json['settings'] as String? ?? 'Settings',

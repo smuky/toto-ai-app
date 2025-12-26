@@ -57,88 +57,79 @@ class LeagueAutocompleteField extends StatelessWidget {
                 textEditingController.clear();
               }
 
-              return Directionality(
-                textDirection: TextDirectionHelper.getTextDirection(
-                  selectedLanguage,
+              return TextField(
+                controller: textEditingController,
+                focusNode: focusNode,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
                 ),
-                child: TextField(
-                  controller: textEditingController,
-                  focusNode: focusNode,
-                  style: const TextStyle(
+                decoration: InputDecoration(
+                  labelText: label,
+                  labelStyle: TextStyle(
+                    color: Colors.grey.shade700,
                     fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
                   ),
-                  decoration: InputDecoration(
-                    labelText: label,
-                    labelStyle: TextStyle(
-                      color: Colors.grey.shade700,
-                      fontSize: 16,
-                    ),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    prefixIcon:
-                        selectedLeague != null &&
-                            selectedLeague!.effectiveLogo != null
-                        ? Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: CachedNetworkImage(
-                              imageUrl: selectedLeague!.effectiveLogo!,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  prefixIcon:
+                      selectedLeague != null &&
+                          selectedLeague!.effectiveLogo != null
+                      ? Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: CachedNetworkImage(
+                            imageUrl: selectedLeague!.effectiveLogo!,
+                            width: 28,
+                            height: 28,
+                            fit: BoxFit.contain,
+                            placeholder: (context, url) => const SizedBox(
                               width: 28,
                               height: 28,
-                              fit: BoxFit.contain,
-                              placeholder: (context, url) => const SizedBox(
-                                width: 28,
-                                height: 28,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                              errorWidget: (context, url, error) => const Icon(
-                                Icons.sports_soccer,
-                                color: Colors.blue,
-                                size: 28,
-                              ),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             ),
-                          )
-                        : const Padding(
-                            padding: EdgeInsets.only(left: 12.0, right: 12.0),
-                            child: Icon(
+                            errorWidget: (context, url, error) => const Icon(
                               Icons.sports_soccer,
                               color: Colors.blue,
                               size: 28,
                             ),
                           ),
-                    suffixIcon: selectedLeague != null
-                        ? IconButton(
-                            icon: const Icon(Icons.clear, color: Colors.grey),
-                            onPressed: () {
-                              textEditingController.clear();
-                              onLeagueSelected(null);
-                            },
-                          )
-                        : const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                  ),
-                  textAlign: TextDirectionHelper.getTextAlign(selectedLanguage),
-                  onTap: () {
-                    if (textEditingController.selection ==
-                        TextSelection.fromPosition(
-                          TextPosition(
-                            offset: textEditingController.text.length,
+                        )
+                      : const Padding(
+                          padding: EdgeInsets.only(left: 12.0, right: 12.0),
+                          child: Icon(
+                            Icons.sports_soccer,
+                            color: Colors.blue,
+                            size: 28,
                           ),
-                        )) {
-                      textEditingController.selection = TextSelection(
-                        baseOffset: 0,
-                        extentOffset: textEditingController.text.length,
-                      );
-                    }
-                  },
+                        ),
+                  suffixIcon: selectedLeague != null
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, color: Colors.grey),
+                          onPressed: () {
+                            textEditingController.clear();
+                            onLeagueSelected(null);
+                          },
+                        )
+                      : const Icon(Icons.arrow_drop_down, color: Colors.grey),
                 ),
+                textAlign: TextDirectionHelper.getTextAlign(selectedLanguage),
+                onTap: () {
+                  if (textEditingController.selection ==
+                      TextSelection.fromPosition(
+                        TextPosition(offset: textEditingController.text.length),
+                      )) {
+                    textEditingController.selection = TextSelection(
+                      baseOffset: 0,
+                      extentOffset: textEditingController.text.length,
+                    );
+                  }
+                },
               );
             },
         optionsViewBuilder:
