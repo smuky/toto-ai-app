@@ -188,23 +188,23 @@ class PredictionReportWidget extends StatelessWidget {
     final draw = prediction.probabilities['X'] ?? 0;
     final awayWin = prediction.probabilities['2'] ?? 0;
 
-    // Determine which team has higher probability for top position
-    final String topTeam;
-    final int topPercentage;
-    final String bottomTeam;
-    final int bottomPercentage;
+    // Create a list of probabilities with their labels and values
+    final List<MapEntry<String, int>> probabilities = [
+      MapEntry(prediction.matchDetails.homeTeam, homeWin),
+      MapEntry(translations.draw, draw),
+      MapEntry(prediction.matchDetails.awayTeam, awayWin),
+    ];
 
-    if (homeWin >= awayWin) {
-      topTeam = prediction.matchDetails.homeTeam;
-      topPercentage = homeWin;
-      bottomTeam = prediction.matchDetails.awayTeam;
-      bottomPercentage = awayWin;
-    } else {
-      topTeam = prediction.matchDetails.awayTeam;
-      topPercentage = awayWin;
-      bottomTeam = prediction.matchDetails.homeTeam;
-      bottomPercentage = homeWin;
-    }
+    // Sort probabilities to determine ranking (highest to lowest)
+    final sortedProbabilities = List<MapEntry<String, int>>.from(probabilities)
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    // Create a map to assign colors based on ranking
+    final Map<String, Color> colorMap = {
+      sortedProbabilities[0].key: Colors.green, // Highest probability
+      sortedProbabilities[1].key: Colors.orange, // Second probability
+      sortedProbabilities[2].key: Colors.red, // Lowest probability
+    };
 
     return Card(
       elevation: 3,
@@ -235,11 +235,24 @@ class PredictionReportWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            _buildProbabilityBar(topTeam, topPercentage, Colors.green),
+            // Always show in order: homeTeam, draw, awayTeam
+            _buildProbabilityBar(
+              prediction.matchDetails.homeTeam,
+              homeWin,
+              colorMap[prediction.matchDetails.homeTeam]!,
+            ),
             const SizedBox(height: 12),
-            _buildProbabilityBar(translations.draw, draw, Colors.orange),
+            _buildProbabilityBar(
+              translations.draw,
+              draw,
+              colorMap[translations.draw]!,
+            ),
             const SizedBox(height: 12),
-            _buildProbabilityBar(bottomTeam, bottomPercentage, Colors.red),
+            _buildProbabilityBar(
+              prediction.matchDetails.awayTeam,
+              awayWin,
+              colorMap[prediction.matchDetails.awayTeam]!,
+            ),
           ],
         ),
       ),
