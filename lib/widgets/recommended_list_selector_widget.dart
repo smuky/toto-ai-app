@@ -16,6 +16,19 @@ class RecommendedListSelectorWidget extends StatelessWidget {
     required this.onListChanged,
   });
 
+  PredefinedEvent? get _selectedEvent {
+    if (selectedRecommendedList == null || translations == null) {
+      return null;
+    }
+    try {
+      return translations!.predefinedEvents.firstWhere(
+        (event) => event.key == selectedRecommendedList,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (translations == null || translations!.predefinedEvents.isEmpty) {
@@ -42,75 +55,130 @@ class RecommendedListSelectorWidget extends StatelessWidget {
     final predefinedEvents = translations!.predefinedEvents;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade300, width: 1),
       ),
-      child: Row(
-        children: [
-          Padding(
-            padding: const EdgeInsetsDirectional.only(end: 12.0),
-            child: Icon(Icons.star, color: Colors.amber, size: 28),
-          ),
-          Expanded(
-            child: Directionality(
-              textDirection: TextDirectionHelper.getTextDirection(selectedLanguage),
-              child: DropdownButton<String>(
-                value: selectedRecommendedList,
-                hint: Align(
-                  alignment: TextDirectionHelper.isRTL(selectedLanguage)
-                      ? Alignment.centerRight
-                      : Alignment.centerLeft,
-                  child: Text(
-                    'Select Recommended List',
-                    textAlign: TextDirectionHelper.getTextAlign(selectedLanguage),
-                    textDirection: TextDirectionHelper.getTextDirection(selectedLanguage),
-                  ),
+      child: Autocomplete<PredefinedEvent>(
+        optionsBuilder: (TextEditingValue textEditingValue) {
+          if (textEditingValue.text.isEmpty) {
+            return predefinedEvents;
+          }
+          final query = textEditingValue.text.toLowerCase();
+          return predefinedEvents.where((event) {
+            return event.displayName.toLowerCase().contains(query);
+          });
+        },
+        displayStringForOption: (PredefinedEvent event) => event.displayName,
+        onSelected: (PredefinedEvent event) {
+          onListChanged(event.key);
+        },
+        fieldViewBuilder:
+            (
+              BuildContext context,
+              TextEditingController textEditingController,
+              FocusNode focusNode,
+              VoidCallback onFieldSubmitted,
+            ) {
+              // Update text controller when selectedRecommendedList changes (e.g., language change)
+              final selectedEvent = _selectedEvent;
+              if (selectedEvent != null) {
+                if (textEditingController.text != selectedEvent.displayName) {
+                  textEditingController.text = selectedEvent.displayName;
+                }
+              } else if (textEditingController.text.isNotEmpty) {
+                textEditingController.clear();
+              }
+
+              return TextField(
+                controller: textEditingController,
+                focusNode: focusNode,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
                 ),
-                selectedItemBuilder: (BuildContext context) {
-                  return predefinedEvents.map((event) {
-                    return Align(
-                      alignment: TextDirectionHelper.isRTL(selectedLanguage)
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      child: Text(
-                        event.displayName,
-                        textAlign: TextDirectionHelper.getTextAlign(selectedLanguage),
-                        textDirection: TextDirectionHelper.getTextDirection(selectedLanguage),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+                decoration: InputDecoration(
+                  labelStyle: TextStyle(
+                    color: Colors.grey.shade700,
+                    fontSize: 16,
+                  ),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  suffixIcon: selectedEvent != null
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, color: Colors.grey),
+                          onPressed: () {
+                            textEditingController.clear();
+                            onListChanged(null);
+                          },
+                        )
+                      : const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                ),
+                onTap: () {
+                  if (textEditingController.selection ==
+                      TextSelection.fromPosition(
+                        TextPosition(offset: textEditingController.text.length),
+                      )) {
+                    textEditingController.selection = TextSelection(
+                      baseOffset: 0,
+                      extentOffset: textEditingController.text.length,
                     );
-                  }).toList();
+                  }
                 },
-                isExpanded: true,
-                underline: const SizedBox(),
-                items: predefinedEvents.map((event) {
-                  return DropdownMenuItem<String>(
-                    value: event.key,
-                    alignment: TextDirectionHelper.isRTL(selectedLanguage)
-                        ? AlignmentDirectional.centerEnd
-                        : AlignmentDirectional.centerStart,
-                    child: Text(
-                      event.displayName,
-                      textAlign: TextDirectionHelper.getTextAlign(selectedLanguage),
-                      textDirection: TextDirectionHelper.getTextDirection(selectedLanguage),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
+              );
+            },
+        optionsViewBuilder:
+            (
+              BuildContext context,
+              AutocompleteOnSelected<PredefinedEvent> onSelected,
+              Iterable<PredefinedEvent> options,
+            ) {
+              final isRtl = TextDirectionHelper.isRTL(selectedLanguage);
+              return Align(
+                alignment: isRtl ? Alignment.topRight : Alignment.topLeft,
+                child: Material(
+                  elevation: 4.0,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Directionality(
+                    textDirection: TextDirectionHelper.getTextDirection(
+                      selectedLanguage,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 300),
+                      child: ListView.builder(
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        itemCount: options.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final PredefinedEvent event = options.elementAt(
+                            index,
+                          );
+                          return ListTile(
+                            title: Text(
+                              event.displayName,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            onTap: () {
+                              onSelected(event);
+                            },
+                          );
+                        },
                       ),
                     ),
-                  );
-                }).toList(),
-                onChanged: onListChanged,
-              ),
-            ),
-          ),
-        ],
+                  ),
+                ),
+              );
+            },
       ),
     );
   }

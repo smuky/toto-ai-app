@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import '../models/fixture.dart';
 import '../models/translation_response.dart';
 import '../services/prediction_service.dart';
-import '../utils/text_direction_helper.dart';
 import '../providers/predictor_provider.dart';
 
 class UpcomingGamesWidget extends StatefulWidget {
@@ -144,291 +143,140 @@ class _UpcomingGamesWidgetState extends State<UpcomingGamesWidget> {
           child: Column(
             children: [
               Row(
-                children: TextDirectionHelper.isRTL(widget.selectedLanguage)
-                    ? [
-                        // RTL: Away team on left
-                        Expanded(
-                          child: Column(
-                            children: [
-                              CachedNetworkImage(
-                                imageUrl: fixture.awayTeamLogo,
-                                width: 40,
-                                height: 40,
-                                fit: BoxFit.contain,
-                                placeholder: (context, url) => const SizedBox(
-                                  width: 40,
-                                  height: 40,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                                errorWidget: (context, url, error) =>
-                                    const Icon(
-                                      Icons.sports_soccer,
-                                      size: 40,
-                                      color: Colors.grey,
-                                    ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                fixture.effectiveAwayTeam,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: predictorColor,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
+                children: [
+                  // Home team
+                  Expanded(
+                    child: Column(
+                      children: [
+                        CachedNetworkImage(
+                          imageUrl: fixture.homeTeamLogo,
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.contain,
+                          placeholder: (context, url) => const SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          errorWidget: (context, url, error) => const Icon(
+                            Icons.sports_soccer,
+                            size: 40,
+                            color: Colors.grey,
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Column(
-                            children: [
-                              Text(
-                                dayName,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey.shade500,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    dateStr,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: predictorColor,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  GestureDetector(
-                                    onTap: () {
-                                      Clipboard.setData(
-                                        ClipboardData(
-                                          text: fixture.fixtureId.toString(),
-                                        ),
-                                      );
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'Fixture ID ${fixture.fixtureId} copied to clipboard',
-                                          ),
-                                          duration: const Duration(seconds: 2),
-                                          behavior: SnackBarBehavior.floating,
-                                        ),
-                                      );
-                                    },
-                                    child: Icon(
-                                      Icons.info_outline,
-                                      size: 14,
-                                      color: Colors.grey.shade400,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                timeStr,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: predictorColor,
-                                ),
-                              ),
-                            ],
+                        const SizedBox(height: 8),
+                        Text(
+                          fixture.effectiveHomeTeam,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: predictorColor,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      children: [
+                        Text(
+                          dayName,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey.shade500,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        // RTL: Home team on right
-                        Expanded(
-                          child: Column(
-                            children: [
-                              CachedNetworkImage(
-                                imageUrl: fixture.homeTeamLogo,
-                                width: 40,
-                                height: 40,
-                                fit: BoxFit.contain,
-                                placeholder: (context, url) => const SizedBox(
-                                  width: 40,
-                                  height: 40,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
+                        const SizedBox(height: 2),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              dateStr,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: predictorColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            GestureDetector(
+                              onTap: () {
+                                Clipboard.setData(
+                                  ClipboardData(
+                                    text: fixture.fixtureId.toString(),
                                   ),
-                                ),
-                                errorWidget: (context, url, error) =>
-                                    const Icon(
-                                      Icons.sports_soccer,
-                                      size: 40,
-                                      color: Colors.grey,
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Fixture ID ${fixture.fixtureId} copied to clipboard',
                                     ),
+                                    duration: const Duration(seconds: 2),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              },
+                              child: Icon(
+                                Icons.info_outline,
+                                size: 14,
+                                color: Colors.grey.shade400,
                               ),
-                              const SizedBox(height: 8),
-                              Text(
-                                fixture.effectiveHomeTeam,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: predictorColor,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ]
-                    : [
-                        // LTR: Home team on left
-                        Expanded(
-                          child: Column(
-                            children: [
-                              CachedNetworkImage(
-                                imageUrl: fixture.homeTeamLogo,
-                                width: 40,
-                                height: 40,
-                                fit: BoxFit.contain,
-                                placeholder: (context, url) => const SizedBox(
-                                  width: 40,
-                                  height: 40,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                                errorWidget: (context, url, error) =>
-                                    const Icon(
-                                      Icons.sports_soccer,
-                                      size: 40,
-                                      color: Colors.grey,
-                                    ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                fixture.effectiveHomeTeam,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: predictorColor,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Column(
-                            children: [
-                              Text(
-                                dayName,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey.shade500,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    dateStr,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: predictorColor,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  GestureDetector(
-                                    onTap: () {
-                                      Clipboard.setData(
-                                        ClipboardData(
-                                          text: fixture.fixtureId.toString(),
-                                        ),
-                                      );
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'Fixture ID ${fixture.fixtureId} copied to clipboard',
-                                          ),
-                                          duration: const Duration(seconds: 2),
-                                          behavior: SnackBarBehavior.floating,
-                                        ),
-                                      );
-                                    },
-                                    child: Icon(
-                                      Icons.info_outline,
-                                      size: 14,
-                                      color: Colors.grey.shade400,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                timeStr,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: predictorColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // LTR: Away team on right
-                        Expanded(
-                          child: Column(
-                            children: [
-                              CachedNetworkImage(
-                                imageUrl: fixture.awayTeamLogo,
-                                width: 40,
-                                height: 40,
-                                fit: BoxFit.contain,
-                                placeholder: (context, url) => const SizedBox(
-                                  width: 40,
-                                  height: 40,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                                errorWidget: (context, url, error) =>
-                                    const Icon(
-                                      Icons.sports_soccer,
-                                      size: 40,
-                                      color: Colors.grey,
-                                    ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                fixture.effectiveAwayTeam,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: predictorColor,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
+                        const SizedBox(height: 4),
+                        Text(
+                          timeStr,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: predictorColor,
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                  // Away team
+                  Expanded(
+                    child: Column(
+                      children: [
+                        CachedNetworkImage(
+                          imageUrl: fixture.awayTeamLogo,
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.contain,
+                          placeholder: (context, url) => const SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          errorWidget: (context, url, error) => const Icon(
+                            Icons.sports_soccer,
+                            size: 40,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          fixture.effectiveAwayTeam,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: predictorColor,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               Builder(
